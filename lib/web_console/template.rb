@@ -22,6 +22,12 @@ module WebConsole
         render(template: template, layout: 'layouts/javascript')
       end
 
+      # Render CoffeeScript inside a script tag and a closure.
+      def render_coffeescript(template)
+        render(template: template, layout: 'layouts/coffeescript',
+          formats: [:coffee, :erb])
+      end
+
       # Render inlined string to be used inside of JavaScript code.
       #
       # The inlined string is returned as an actual JavaScript string. You

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Templates Test</title>
+    <link rel="stylesheet" href="/node_modules/mocha/mocha.css" />
+  </head>
+  <body>
+    <!-- setup for mocha -->
+    <div id="mocha"></div>
+    <script src="/node_modules/mocha/mocha.js"></script>
+    <script src="/node_modules/chai/chai.js"></script>
+    <script>
+      mocha.setup('bdd');
+      mocha.reporter('html');
+    </script>
+
+    <!-- load templates -->
+    <script src="/templates/console.js"></script>
+
+    <!-- find and load test cases -->
+    <% Dir.glob("spec/*_spec.*") do |spec| %>
+    <script src="/<%= spec %>"></script>
+    <% end %>
+
+    <!-- run tests -->
+    <script>
+      if (navigator.userAgent.indexOf('PhantomJS') < 0) {
+        mocha.run();
+      }
+    </script>
+  </body>
+</html>

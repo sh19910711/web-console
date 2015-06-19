@@ -394,12 +394,17 @@ REPLConsole.prototype.switchBindingTo = function(frameId, callback) {
  * Install the console into the element with a specific ID.
  * Example: REPLConsole.installInto("target-id")
  */
-REPLConsole.installInto = function(id) {
+REPLConsole.installInto = function(id, options) {
   var consoleElement = document.getElementById(id);
-  var remotePath = consoleElement.dataset.remotePath;
+  var remotePath;
+  if (consoleElement.dataset.remotePath) {
+    remotePath = consoleElement.dataset.remotePath;
+  } else if (options && options.remotePath) {
+    remotePath = options.remotePath;
+  }
   var replConsole = new REPLConsole({
     promptLabel: consoleElement.dataset.initialPrompt,
-    commandHandle: function(line) {
+    commandHandle: (options && options.commandHandle) || function(line) {
       var _this = this;
       var url = remotePath;
       var params = "input=" + encodeURIComponent(line);

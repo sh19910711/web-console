@@ -396,12 +396,7 @@ REPLConsole.prototype.switchBindingTo = function(frameId, callback) {
  */
 REPLConsole.installInto = function(id, options) {
   var consoleElement = document.getElementById(id);
-  var remotePath;
-  if (consoleElement.dataset.remotePath) {
-    remotePath = consoleElement.dataset.remotePath;
-  } else if (options && options.remotePath) {
-    remotePath = options.remotePath;
-  }
+  var remotePath = consoleElement.dataset.remotePath;
   var replConsole = new REPLConsole({
     promptLabel: consoleElement.dataset.initialPrompt,
     commandHandle: (options && options.commandHandle) || function(line) {

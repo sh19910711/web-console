@@ -80,30 +80,29 @@ module WebConsole
         end
       end
 
-      def update_repl_session(id, params)
+      def json_response(id)
         unless session = Session.find(id)
           return respond_with_unavailable_session(id)
         end
 
         status  = 200
         headers = { 'Content-Type' => 'application/json; charset = utf-8' }
-        body    = { output: session.eval(params[:input]) }.to_json
+        body    = yield(session).to_json
 
         Rack::Response.new(body, status, headers).finish
       end
 
-      def change_stack_trace(id, params)
-        unless session = Session.find(id)
-          return respond_with_unavailable_session(id)
+      def update_repl_session(id, params)
+        json_response(id) do |session|
+          { output: session.eval(params[:input]) }
         end
+      end
 
-        session.switch_binding_to(params[:frame_id])
-
-        status  = 200
-        headers = { 'Content-Type' => 'application/json; charset = utf-8' }
-        body    = { ok: true }.to_json
-
-        Rack::Response.new(body, status, headers).finish
+      def change_stack_trace(id, params)
+        json_response(id) do |session|
+          session.switch_binding_to(params[:frame_id])
+          { ok: true }
+        end
       end
 
       def respond_with_unavailable_session(id)

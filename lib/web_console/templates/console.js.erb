@@ -57,7 +57,7 @@ function REPLConsole(config) {
   this.commandStorage = new CommandStorage();
   this.prompt = config && config.promptLabel ? config.promptLabel : ' >>';
   this.commandHandle = config && config.commandHandle ? config.commandHandle : function() { return this; }
-  this.remotePath = config.remotePath;
+  this.remotePath = config && config.remotePath;
 }
 
 

@@ -10,6 +10,9 @@ module WebConsole
     cattr_accessor :whitelisted_ips
     @@whitelisted_ips = Whitelist.new
 
+    # Define a vendor MIME type. We can call it using Mime::WEB_CONSOLE constant.
+    Mime::Type.register 'application/vnd.web-console.v2', :web_console
+
     # Returns whether a request came from a whitelisted IP.
     #
     # For a request to hit Web Console features, it needs to come from a white
@@ -30,6 +33,11 @@ module WebConsole
     # render it as well.
     def acceptable_content_type?
       content_type.blank? || content_type.in?(acceptable_content_types)
+    end
+
+    # Returns whether the request is acceptable
+    def acceptable?
+      accepts.any? { |mime| Mime::WEB_CONSOLE == mime }
     end
 
     class GetSecureIp < ActionDispatch::RemoteIp::GetIp

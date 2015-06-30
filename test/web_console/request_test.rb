@@ -73,6 +73,24 @@ module WebConsole
       assert_not req.acceptable_content_type?
     end
 
+    test '#acceptable? is truthy for current version' do
+      req = request('http://example.com', 'HTTP_ACCEPT' => Mime::WEB_CONSOLE)
+
+      assert req.acceptable?
+    end
+
+    test '#acceptable? is falsy for older version' do
+      req = request('http://example.com', 'HTTP_ACCEPT' => 'application/vnd.web-console.v0')
+
+      assert_not req.acceptable?
+    end
+
+    test '#acceptable? is falsy for request without vendor mime type' do
+      req = request('http://example.com', 'HTTP_ACCEPT' => 'text/plain; charset=utf-8')
+
+      assert_not req.acceptable?
+    end
+
     private
 
       def request(*args)

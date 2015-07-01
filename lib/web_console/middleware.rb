@@ -5,8 +5,10 @@ module WebConsole
     TEMPLATES_PATH = File.expand_path('../templates', __FILE__)
 
     DEFAULT_OPTIONS = {
+      # TODO: they can be unified?
       update_re: %r{/repl_sessions/(?<id>.+?)\z},
-      binding_change_re: %r{/repl_sessions/(?<id>.+?)/trace\z}
+      binding_change_re: %r{/repl_sessions/(?<id>.+?)/trace\z},
+      context_info_re: %r{/repl_sessions/(?<id>.+?)/context\z},
     }
 
     UNAVAILABLE_SESSION_MESSAGE = <<-END.strip_heredoc
@@ -38,6 +40,8 @@ module WebConsole
         return update_repl_session(id, request.params)
       elsif id = id_for_repl_session_stack_frame_change(request)
         return change_stack_trace(id, request.params)
+      elsif id = id_for_repl_session_context_info(request)
+        return get_context_info(id, request.params)
       end
 
       status, headers, body = @app.call(env)
@@ -75,6 +79,10 @@ module WebConsole
         @options[:binding_change_re]
       end
 
+      def context_info_re
+        @options[:context_info_re]
+      end
+
       def id_for_repl_session_update(request)
         if request.xhr? && request.put?
           update_re.match(request.path_info) { |m| m[:id] }
@@ -84,6 +92,12 @@ module WebConsole
       def id_for_repl_session_stack_frame_change(request)
         if request.xhr? && request.post?
           binding_change_re.match(request.path_info) { |m| m[:id] }
+        end
+      end
+
+      def id_for_repl_session_context_info(request)
+        if request.xhr? && request.get?
+          context_info_re.match(request.path_info) { |m| m[:id] }
         end
       end
 
@@ -109,6 +123,12 @@ module WebConsole
         json_response(id) do |session|
           session.switch_binding_to(params[:frame_id])
           { ok: true }
+        end
+      end
+
+      def get_context_info(id, params)
+        json_response(id) do |session|
+          session.context
         end
       end
 

@@ -100,15 +100,15 @@ REPLConsole.prototype.install = function(container) {
 
   // Make the console resizable.
   function resizeContainer(ev) {
-    var startY                   = ev.clientY;
-    var startHeight              = parseInt(document.defaultView.getComputedStyle(container).height, 10);
+    var startY              = ev.clientY;
+    var startHeight         = parseInt(document.defaultView.getComputedStyle(container).height, 10);
     var scrollTopStart      = consoleOuter.scrollTop;
     var clientHeightStart   = consoleOuter.clientHeight;
 
     var doDrag = function(e) {
       container.style.height = (startHeight + startY - e.clientY) + 'px';
       consoleOuter.scrollTop = scrollTopStart + (clientHeightStart - consoleOuter.clientHeight);
-      shiftConsoleActions();
+      _this.shiftConsoleActions();
     };
 
     var stopDrag = function(e) {
@@ -124,32 +124,36 @@ REPLConsole.prototype.install = function(container) {
     container.parentNode.removeChild(container);
   }
 
-  var shifted = false;
-  function shiftConsoleActions() {
-    if (consoleOuter.scrollHeight > consoleOuter.clientHeight) {
-      var widthDiff = document.documentElement.clientWidth - consoleOuter.clientWidth;
-      if (shifted || ! widthDiff) return;
-      shifted = true;
-      consoleActions.style.marginRight = widthDiff + 'px';
-    } else if (shifted) {
-      shifted = false;
-      consoleActions.style.marginRight = '0px';
-    }
-  }
-
   // Initialize
   this.outer = consoleOuter;
   this.inner = findChild(this.outer, 'console-inner');
+  this.sidebar = findChild(container, 'console-sidebar');
   this.clipboard = findChild(container, 'clipboard');
-  this.newPromptBox();
+  this.consoleActions = consoleActions;
+  this.shiftedActions = false;
   this.insertCss();
+  this.newPromptBox();
+  this.newViewer();
 
   findChild(container, 'resizer').addEventListener('mousedown', resizeContainer);
   findChild(consoleActions, 'close-button').addEventListener('click', closeContainer);
-  consoleOuter.addEventListener('DOMNodeInserted', shiftConsoleActions);
+  consoleOuter.addEventListener('DOMNodeInserted', this.shiftConsoleActions.bind(this));
 
   REPLConsole.currentSession = this;
 };
+
+REPLConsole.prototype.shiftConsoleActions = function() {
+  if (this.outer.scrollHeight > this.outer.clientHeight) {
+    var widthDiff = document.documentElement.clientWidth - this.outer.clientWidth;
+    if (this.shiftedActions || ! widthDiff) return;
+    this.shiftedActions = true;
+    this.consoleActions.style.marginRight = widthDiff + 'px';
+  } else if (this.shiftedActions) {
+    this.shiftedActions = false;
+    var widthDiff = document.documentElement.clientWidth - this.outer.clientWidth;
+    this.consoleActions.style.marginRight = widthDiff + 'px';
+  }
+}
 
 // Add CSS styles dynamically. This probably doesnt work for IE <8.
 REPLConsole.prototype.insertCss = function() {
@@ -197,6 +201,36 @@ REPLConsole.prototype.newPromptBox = function() {
   this.promptLabel.innerHTML = this.prompt;
   this.inner.appendChild(promptBox);
   this.scrollToBottom();
+};
+
+REPLConsole.prototype.newViewer = function() {
+  var viewer = document.createElement('div');
+  viewer.className = 'viewer layer pos-absolute border-box';
+  this.sidebar.appendChild(viewer);
+
+  var localVariables = document.createElement('ul');
+  viewer.appendChild(localVariables);
+
+  var resizer = findChild(this.sidebar, 'resizer');
+  addClass(resizer, 'pos-absolute border-box');
+  viewer.style.marginLeft = resizer.clientWidth + 'px';
+
+  this.outer.style.width = '80%';
+  this.sidebar.style.width = '20%';
+  this.sidebar.style.right = '0';
+  var widthDiff = document.documentElement.clientWidth - this.outer.clientWidth;
+  this.consoleActions.style.marginRight = widthDiff + 'px';
+
+  var url = this.remotePath + "/context";
+  getRequest(url, {}, function(xhr) {
+    var contextInfo = JSON.parse(xhr.responseText);
+    for (var key in contextInfo['local_variables']) {
+      var localVar = contextInfo['local_variables'][key];
+      var listItem = document.createElement('li');
+      listItem.innerHTML = localVar.key + ": " + localVar.value;
+      localVariables.appendChild(listItem);
+    }
+  });
 };
 
 /**
@@ -491,6 +525,10 @@ function request(method, url, params, callback) {
       callback(xhr);
     }
   }
+}
+
+function getRequest(url, params, callback) {
+  request("GET", url, params, callback);
 }
 
 function postRequest(url, params, callback) {

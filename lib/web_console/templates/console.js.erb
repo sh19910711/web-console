@@ -206,6 +206,7 @@ REPLConsole.prototype.newPromptBox = function() {
 REPLConsole.prototype.newViewer = function() {
   var viewer = document.createElement('div');
   viewer.className = 'viewer layer pos-absolute border-box';
+  viewer.innerHTML = 'viewer'; // TODO: remove
   this.sidebar.appendChild(viewer);
 
   var localVariables = document.createElement('ul');

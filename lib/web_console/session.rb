@@ -38,7 +38,8 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = Array(bindings)
-      @evaluator = Evaluator.new(@bindings[0])
+      @last_index = 0
+      @evaluator = Evaluator.new(@bindings[@last_index])
 
       store_into_memory
     end
@@ -54,10 +55,31 @@ module WebConsole
     #
     # Returns nothing.
     def switch_binding_to(index)
-      @evaluator = Evaluator.new(@bindings[index.to_i])
+      @last_index = index.to_i
+      @evaluator = Evaluator.new(@bindings[@last_index])
+    end
+
+    def last_binding
+      @bindings[@last_index]
+    end
+
+    def context
+      {
+        local_variables: local_variables,
+      }
     end
 
     private
+
+      def local_variables
+        last_binding.local_variables.reduce({}) do |hash, key|
+          hash[key] = {
+            key: key,
+            value: last_binding.eval(key.to_s),
+          }
+          hash
+        end
+      end
 
       def store_into_memory
         inmemory_storage[id] = self

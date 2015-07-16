@@ -163,6 +163,10 @@ REPLConsole.prototype.install = function(container) {
     }
   }
 
+  function showUserPreferences() {
+    // TODO
+  }
+
   // Initialize
   this.outer = consoleOuter;
   this.inner = findChild(this.outer, 'console-inner');
@@ -172,6 +176,7 @@ REPLConsole.prototype.install = function(container) {
 
   findChild(container, 'resizer').addEventListener('mousedown', resizeContainer);
   findChild(consoleActions, 'close-button').addEventListener('click', closeContainer);
+  findChild(consoleActions, 'preferences-button').addEventListener('click', showUserPreferences);
   consoleOuter.addEventListener('DOMNodeInserted', shiftConsoleActions);
 
   REPLConsole.currentSession = this;

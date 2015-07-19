@@ -533,4 +533,8 @@ function putRequest(url, params, callback) {
   request("PUT", url, params, callback);
 }
 
-window.REPLConsole = REPLConsole;
+if (typeof exports === 'object') {
+  exports.REPLConsole = REPLConsole;
+} else {
+  window.REPLConsole = REPLConsole;
+}

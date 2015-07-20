@@ -1,6 +1,48 @@
 describe("REPLConsole", function() {
   SpecHelper.prepareStageElement();
 
+  describe("#commandHandle()", function() {
+    beforeEach(function() {
+      this.elm = document.createElement("div");
+      this.elm.innerHTML = '<div id="console"></div>';
+      this.stageElement.appendChild(this.elm);
+    });
+
+    context("remotePath: /mock/repl/result", function() {
+      beforeEach(function(done) {
+        var self = this;
+        this.console = REPLConsole.installInto("console", {remotePath: "/mock/repl/result"});
+        this.console.commandHandle("fake-input", function() {
+          self.consoleMessage = self.elm.getElementsByClassName("console-message")[0];
+          done();
+        });
+      });
+      it("should have fake-result in output", function() {
+        assert.match(this.elm.innerHTML, /=&gt; "fake-result"/);
+      });
+      it("should not have .error-message", function() {
+        assert.notOk(hasClass(this.consoleMessage, "error-message"));
+      });
+    });
+
+    context("remotePath: /mock/repl/error", function() {
+      beforeEach(function(done) {
+        var self = this;
+        this.console = REPLConsole.installInto("console", {remotePath: "/mock/repl/error"});
+        this.console.commandHandle("fake-input", function() {
+          self.consoleMessage = self.elm.getElementsByClassName("console-message")[0];
+          done();
+        });
+      });
+      it("should have fake-error-message in output", function() {
+        assert.match(this.elm.innerHTML, /fake-error-message/);
+      });
+      it("should have .error-message", function() {
+        assert.ok(hasClass(this.consoleMessage, "error-message"));
+      });
+    });
+  });
+
   describe(".installInto()", function() {
     beforeEach(function() {
       this.elm = document.createElement('div');

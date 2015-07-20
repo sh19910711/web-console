@@ -71,16 +71,19 @@ REPLConsole.prototype.getUrl = function(path) {
   }
 };
 
-REPLConsole.prototype.commandHandle = function(line) {
+REPLConsole.prototype.commandHandle = function(line, cb) {
   var self = this;
   var params = 'input=' + encodeURIComponent(line);
+  cb = cb || function() {};
 
   putRequest(self.getUrl(), params, function(xhr) {
     var response = JSON.parse(xhr.responseText);
     self.writeOutput(response.output);
+    cb()
   }, function(xhr) {
     var response = JSON.parse(xhr.responseText);
     self.writeError(response.output);
+    cb();
   });
 };
 

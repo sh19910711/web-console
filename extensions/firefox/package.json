@@ -1,0 +1,7 @@
+{
+  "name": "rails-web-console",
+  "version": "0.0.0",
+  "main": "data/js/main.js",
+  "license": "MIT",
+  "homepage": "https://github.com/rails/web-console"
+}

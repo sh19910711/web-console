@@ -61,6 +61,9 @@ namespace :ext do
   desc 'Build Chrome Extension'
   task chrome: 'chrome:build'
 
+  desc 'Build Firefox Add-on'
+  task firefox: 'firefox:build'
+
   namespace :chrome do
     dist   = Pathname('dist/crx')
     extdir = rootdir.join(dist)
@@ -94,6 +97,32 @@ namespace :ext do
     desc 'Launch a browser with the chrome extension.'
     task run: [ :build ] do
       cd(rootdir) { sh "sh ./script/run_chrome.sh --load-extension=#{dist}" }
+    end
+  end
+
+  namespace :firefox do
+    dist    = Pathname('dist/ffx')
+    datadir = dist.join('data')
+    extdir  = rootdir.join(dist)
+
+    directory extdir
+
+    task build: [ extdir, 'lib:templates' ] do
+      cd(rootdir) do
+        mkdir_p datadir
+        cp_r [ 'tmp/lib/', 'img/' ], datadir
+        `cd firefox && git ls-files`.split("\n").each do |src|
+          dest = dist.join(src)
+          mkdir_p dest.dirname
+          cp Pathname('firefox').join(src), dest
+        end
+      end
+    end
+
+    task run: [ :npm, :build ] do
+      jpm = nil
+      cd(rootdir) { jpm = `printf $(npm bin)/jpm` }
+      cd(extdir) { sh "JPM_FIREFOX_BINARY=`which firefox` node \"#{jpm}\" run" }
     end
   end
 

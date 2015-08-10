@@ -60,15 +60,12 @@ function REPLConsole(config) {
 
   this.commandStorage = new CommandStorage();
   this.prompt = getConfig('promptLabel', ' >>');
-  this.remotePath = getConfig('remotePath');
+  this.mountPoint = getConfig('mountPoint');
+  this.sessionId = getConfig('sessionId');
 }
 
-REPLConsole.prototype.getUrl = function(path) {
-  if (path) {
-    return this.remotePath + '/' + path;
-  } else {
-    return this.remotePath;
-  }
+REPLConsole.prototype.getSessionUrl = function(path) {
+  return concatUrl(this.mountPoint, 'repl_sessions/', this.sessionId, path);
 };
 
 REPLConsole.prototype.commandHandle = function(line, callback) {
@@ -80,7 +77,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
     return status >= 200 && status < 300 || status === 304;
   }
 
-  putRequest(self.getUrl(), params, function(xhr) {
+  putRequest(self.getSessionUrl(), params, function(xhr) {
     var response = JSON.parse(xhr.responseText);
     var result   = isSuccess(xhr.status);
     if (result) {
@@ -428,7 +425,7 @@ REPLConsole.prototype.scrollToBottom = function() {
 
 // Change the binding of the console
 REPLConsole.prototype.switchBindingTo = function(frameId, callback) {
-  var url = this.remotePath + "/trace";
+  var url = this.getSessionUrl('/trace');
   var params = "frame_id=" + encodeURIComponent(frameId);
   postRequest(url, params, callback);
 };
@@ -533,6 +530,27 @@ function postRequest() {
 
 function putRequest() {
   REPLConsole.request.apply(this, ["PUT"].concat([].slice.call(arguments)));
+}
+
+function concatUrl(/* tokens */) {
+  var args = [].slice.call(arguments);
+  var tokens = [];
+
+  function removeTrailingSlash(s) {
+    return s.replace(/\/$/, '');
+  }
+
+  for (var i = 0; i < args.length; ++ i) {
+    if (args[i] && (args[i].length && args[i] !== ".")) {
+      if (i > 0) {
+        tokens.push(removeTrailingSlash(args[i]).replace(/^\//, ''));
+      } else {
+        tokens.push(removeTrailingSlash(args[i]));
+      }
+    }
+  }
+
+  return tokens.join('/');
 }
 
 if (typeof exports === 'object') {

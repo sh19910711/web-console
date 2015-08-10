@@ -8,10 +8,10 @@ describe("REPLConsole", function() {
       this.stageElement.appendChild(this.elm);
     });
 
-    context("remotePath: /mock/repl/result", function() {
+    context("with normal session", function() {
       beforeEach(function(done) {
         var self = this;
-        self.console = REPLConsole.installInto('console', { remotePath: '/mock/repl/result' });
+        self.console = REPLConsole.installInto('console', { mountPoint: '/mock', sessionId: 'result' });
         self.console.commandHandle('fake-input', function(result, response) {
           self.result   = result;
           self.response = response;
@@ -30,10 +30,10 @@ describe("REPLConsole", function() {
       });
     });
 
-    context("remotePath: /mock/repl/error", function() {
+    context("with errored session", function() {
       beforeEach(function(done) {
         var self = this;
-        self.console = REPLConsole.installInto('console', { remotePath: '/mock/repl/error' });
+        self.console = REPLConsole.installInto('console', { mountPoint: '/mock', sessionId: 'error' });
         self.console.commandHandle('fake-input', function(result, response) {
           self.result   = result;
           self.response = response;
@@ -56,8 +56,9 @@ describe("REPLConsole", function() {
   describe(".installInto()", function() {
     beforeEach(function() {
       this.elm = document.createElement('div');
-      this.elm.innerHTML = '<div id="console" data-remote-path="data-remote-path" ' +
-        'data-prompt-label="data-prompt-label"></div>';
+      this.elm.innerHTML = '<div id="console" data-mount-point="attr-mount-point" ' +
+        'data-session-id="attr-session-id" ' +
+        'data-prompt-label="attr-prompt-label"></div>';
       this.stageElement.appendChild(this.elm);
     });
 
@@ -65,20 +66,27 @@ describe("REPLConsole", function() {
       beforeEach(function() {
         this.console = REPLConsole.installInto('console');
       });
-      it("should have data-prompt-label", function() {
-        assert.equal(this.console.prompt, 'data-prompt-label');
+      it("should have attr-prompt-label", function() {
+        assert.equal(this.console.prompt, 'attr-prompt-label');
       });
-      it("should have data-remote-path", function() {
-        assert.equal(this.console.remotePath, 'data-remote-path');
+      it("should have attr-mount-point", function() {
+        assert.equal(this.console.mountPoint, 'attr-mount-point');
+      });
+      it("should have attr-session-id", function() {
+        assert.equal(this.console.sessionId, 'attr-session-id');
       });
     });
 
-    context("install console with {remotePath: 'opt-remote-path'}", function() {
+    context("install console with options", function() {
       beforeEach(function() {
-        this.console = REPLConsole.installInto('console', {remotePath: 'opt-remote-path'});
+        var options = { mountPoint: 'opt-mount-point', sessionId: 'opt-session-id' };
+        this.console = REPLConsole.installInto('console', options);
       });
-      it("should have opt-remote-path", function() {
-        assert.equal(this.console.remotePath, 'opt-remote-path');
+      it("should have opt-mount-point", function() {
+        assert.equal(this.console.mountPoint, 'opt-mount-point');
+      });
+      it("should have opt-session-id", function() {
+        assert.equal(this.console.sessionId, 'opt-session-id');
       });
     });
   });

@@ -102,6 +102,7 @@ function updateTab(tab) {
   }
 }
 
+const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
 const { setTimeout } = require("sdk/timers");
 
@@ -110,7 +111,7 @@ setTimeout(function() {
   PageMod({
     include: "*",
     attachTo: ["existing", "top"],
-    contentScript: "var meta = document.createElement('meta'); meta.id = 'web-console-session-id'; document.head.appendChild(meta);",
+    contentScriptFile: self.data.url("js/content_script.js"),
     onAttach: function(worker) {
       console.log("background: worker.tab => ", worker.tab.id);
     }

@@ -101,3 +101,10 @@ function updateTab(tab) {
     tabCallbacks[key](tab.url);
   }
 }
+
+const { PageMod } = require("sdk/page-mod");
+
+PageMod({
+  include: "*",
+  contentScript: "var div = document.createElement('div'); div.innerHTML = 'hello'; document.body.appendChild(div);"
+});

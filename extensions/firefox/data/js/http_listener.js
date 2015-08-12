@@ -13,6 +13,7 @@ HttpListener.prototype = {
     var sessionId = subject.getResponseHeader("X-Web-Console-Session-Id");
     var mountPoint = subject.getResponseHeader("X-Web-Console-Mount-Point");
     var url = subject.URI.spec;
+    console.log("http_listener: ", sessionId, mountPoint, url);
     if (contentWindow = this.getWindowForChannel(subject)) {
       var currentTab = tabUtils.getTabForContentWindow(contentWindow);
       var tabId = tabUtils.getTabId(currentTab).match(/^-[0-9]+-([0-9]+)$/)[1];

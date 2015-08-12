@@ -55,11 +55,11 @@ const MyPanel = Class({
         panel.url = data.url;
         tabCallbacks[panel.tabId] = function(url) {
           var info = tabInfo[tabKey(panel.tabId, url)];
-          info.type = "session-id";
+          info.type = "session";
           self.sendMessage(info);
         };
         var info = tabInfo[tabKey(panel.tabId, panel.url)];
-        info.type = "session-id";
+        info.type = "session";
         this.sendMessage(info);
       }
     });

@@ -12,7 +12,7 @@ function tabKey(tabId, url) {
 
 const httpListener = new HttpListener({
   onRequest: function(info) {
-    tabInfo[tabKey(info.tabId, info.url)] = info;
+    tabInfo[info.tabId] = info;
   }
 });
 observerService.addObserver(httpListener, "http-on-examine-response", false);
@@ -54,11 +54,11 @@ const MyPanel = Class({
         panel.tabId = data.tabId;
         panel.url = data.url;
         tabCallbacks[panel.tabId] = function(url) {
-          var info = tabInfo[tabKey(panel.tabId, url)];
+          var info = tabInfo[panel.tabId];
           info.type = "session";
           self.sendMessage(info);
         };
-        var info = tabInfo[tabKey(panel.tabId, panel.url)];
+        var info = tabInfo[panel.tabId];
         info.type = "session";
         this.sendMessage(info);
       }
@@ -106,18 +106,19 @@ const self = require("sdk/self");
 const { PageMod } = require("sdk/page-mod");
 const { setTimeout } = require("sdk/timers");
 
-setTimeout(function() {
-  console.log("PageMod!!");
-  PageMod({
-    include: "*",
-    attachTo: ["existing", "top"],
-    contentScriptFile: self.data.url("js/content_script.js"),
-    onAttach: function(worker) {
-      console.log("background: worker.tab => ", worker.tab.id);
-      worker.port.on("hello", function() {
-        console.log("worker said hello");
-        worker.port.emit("hello");
-      });
-    }
-  });
-}, 0);
+PageMod({
+  include: "*",
+  attachTo: ["existing", "top"],
+  contentScriptFile: self.data.url("js/content_script.js"),
+  contentScriptWhen: "end",
+  onAttach: function(worker) {
+    var lowLevelTab = viewFor(worker.tab);
+    var tabId = worker.tab.id.match(/^-\d+-(\d+)$/)[1];
+    var contentWindow = tabUtils.getTabContentWindow(lowLevelTab);
+    var outerWindowId = windowUtils.getOuterId(contentWindow);
+    var key = outerWindowId + "-" + tabId;
+    worker.port.on("session", function() {
+      worker.port.emit("session", tabInfo[key]);
+    });
+  }
+});

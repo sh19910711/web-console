@@ -36,5 +36,13 @@ function removeConsole() {
   chrome.devtools.inspectedWindow.eval(script);
 }
 
+var anchors = document.getElementsByClassName('link');
+for (var i = 0; i < anchors.length; ++ i) {
+  anchors[i].addEventListener('click', function(event) {
+    var url = event.target.dataset.href;
+    port.postMessage({ type: 'open-url', url: url });
+  });
+}
+
 port.postMessage({ type: 'session-id', tabId: tabId });
 removeConsole();

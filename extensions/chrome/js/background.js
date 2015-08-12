@@ -22,12 +22,18 @@ function removeConsole(tabId) {
   panelMessage(tabId, 'remove-console');
 }
 
+function openUrl(url) {
+  chrome.tabs.create({ url: url });
+}
+
 function initPanelMessage() {
   chrome.runtime.onConnect.addListener(onConnect);
 
   function handleMessage(msg) {
     if (msg.type === 'session-id') {
       sendSessionId(msg.tabId);
+    } else if (msg.type === 'open-url') {
+      openUrl(msg.url);
     }
   }
 

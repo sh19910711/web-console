@@ -1,9 +1,13 @@
-var hello = document.createElement("div");
-hello.innerHTML = "hello<br>";
-document.body.appendChild(hello);
+function meta(name, value) {
+  var meta = document.createElement("meta");
+  meta.name = name;
+  meta.content = value;
+  return meta;
+}
 
-self.port.on("hello", function() {
-  hello.innerHTML += "add-on said hello<br>";
+self.port.on("session", function(session) {
+  document.head.appendChild(meta("web-console-session-id", session.sessionId));
+  document.head.appendChild(meta("web-console-mount-point", session.mountPoint));
 });
 
-self.port.emit("hello");
+self.port.emit("session");

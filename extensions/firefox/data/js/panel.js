@@ -11,6 +11,7 @@ function sendMessage(data, callback) {
 
 function receiveMessage(event) {
   var data = JSON.parse(event.data);
+  console.log("panel: receiveMessage: ", JSON.stringify(data));
   if (data.callback) {
     var callback = callbacks[data.type].shift();
     callback(data);
@@ -20,8 +21,9 @@ function receiveMessage(event) {
         repl.sessionId = data.sessionId;
         repl.mountPoint = data.mountPoint;
       } else {
-        var optiosn = { sessionId: data.sessionId, mountPoint: data.mountPoint };
+        var options = { sessionId: data.sessionId, mountPoint: data.mountPoint };
         repl = REPLConsole.installInto("console", options);
+        console.log(repl);
       }
     }
   }

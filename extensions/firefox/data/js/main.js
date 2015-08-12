@@ -110,6 +110,9 @@ setTimeout(function() {
   PageMod({
     include: "*",
     attachTo: ["existing", "top"],
-    contentScript: "var div = document.createElement('div'); div.innerHTML = 'hello, world'; document.body.appendChild(div);"
+    contentScript: "var meta = document.createElement('meta'); meta.id = 'web-console-session-id'; document.head.appendChild(meta);",
+    onAttach: function(worker) {
+      console.log("background: worker.tab => ", worker.tab.id);
+    }
   });
 }, 5000);

@@ -114,6 +114,10 @@ setTimeout(function() {
     contentScriptFile: self.data.url("js/content_script.js"),
     onAttach: function(worker) {
       console.log("background: worker.tab => ", worker.tab.id);
+      worker.port.on("hello", function() {
+        console.log("worker said hello");
+        worker.port.emit("hello");
+      });
     }
   });
-}, 5000);
+}, 0);

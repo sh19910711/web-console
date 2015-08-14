@@ -94,7 +94,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   }
 
   putRequest(self.getSessionUrl(), params, function(xhr) {
-    var response = JSON.parse(xhr.responseText);
+    var response = parseJSON(xhr.responseText);
     var result   = isSuccess(xhr.status);
     if (result) {
       self.writeOutput(response.output);

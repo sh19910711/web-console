@@ -52,10 +52,10 @@ describe("REPLConsole", function() {
       });
     });
 
-    context("remotePath: /mock/repl_sessions/error.txt", function() {
+    context("without no json response", function() {
       beforeEach(function(done) {
         var self = this;
-        var options = { remotePath: '/mock/repl_sessions/error.txt' };
+        var options = { mountPoint: '/mock', sessionId: 'error.txt' };
         self.console = REPLConsole.installInto('console', options);
         self.console.commandHandle('fake-input', function(result, response) {
           self.message = self.elm.getElementsByClassName('console-message')[0];

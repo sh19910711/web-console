@@ -27,7 +27,7 @@ module WebConsole
 
     # Escaped alias for "ActionView::Helpers::TranslationHelper.t".
     def t(key, options = {})
-      super.gsub("\n", "\\n")
+      j super
     end
   end
 end

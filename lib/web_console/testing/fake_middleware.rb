@@ -22,7 +22,7 @@ module WebConsole
       end
 
       def view
-        @view ||= View.new(@view_path)
+        View.new(@view_path)
       end
 
       private

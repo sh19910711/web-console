@@ -25,7 +25,11 @@ module WebConsole
       render(template: template, layout: 'layouts/inlined_string')
     end
 
-    # Escaped alias for "ActionView::Helpers::TranslationHelper.t".
+    # Override method for "ActionView::Helpers::TranslationHelper.t".
+    #
+    # This method escapes the original return value. Since the method returns
+    # a HTML tag with some attributes when the key is not found. So it could
+    # cause a syntax error if we use the value in the string literals.
     def t(key, options = {})
       j super
     end

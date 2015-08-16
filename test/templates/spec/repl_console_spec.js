@@ -1,7 +1,7 @@
 describe("REPLConsole", function() {
   SpecHelper.prepareStageElement();
 
-  function sendCommand(self, consoleOptions, callback) {
+  function runCommandHandle(self, consoleOptions, callback) {
     self.console = REPLConsole.installInto('console', consoleOptions);
     self.console.commandHandle('fake-input', function(result, response) {
       self.result   = result;
@@ -20,7 +20,7 @@ describe("REPLConsole", function() {
 
     context("with normal session", function() {
       beforeEach(function(done) {
-        sendCommand(this, { mountPoint: '/mock', sessionId: 'result' }, done);
+        runCommandHandle(this, { mountPoint: '/mock', sessionId: 'result' }, done);
       });
       it("should be a successful request", function() {
         assert.ok(this.result);
@@ -35,7 +35,7 @@ describe("REPLConsole", function() {
 
     context("with errored session", function() {
       beforeEach(function(done) {
-        sendCommand(this, { mountPoint: '/mock', sessionId: 'error' }, done);
+        runCommandHandle(this, { mountPoint: '/mock', sessionId: 'error' }, done);
       });
       it("should not be a successful request", function() {
         assert.notOk(this.result);
@@ -50,7 +50,7 @@ describe("REPLConsole", function() {
 
     context("get errors without json", function() {
       beforeEach(function(done) {
-        sendCommand(this, { mountPoint: '/mock', sessionId: 'error.txt' }, done);
+        runCommandHandle(this, { mountPoint: '/mock', sessionId: 'error.txt' }, done);
       });
       it("should output HTTP status code", function() {
         assert.match(this.message.innerHTML, /400 Bad Request/);

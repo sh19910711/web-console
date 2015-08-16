@@ -1,6 +1,16 @@
 describe("REPLConsole", function() {
   SpecHelper.prepareStageElement();
 
+  function sendCommand(self, consoleOptions, callback) {
+    self.console = REPLConsole.installInto('console', consoleOptions);
+    self.console.commandHandle('fake-input', function(result, response) {
+      self.result   = result;
+      self.response = response;
+      self.message  = self.elm.getElementsByClassName('console-message')[0];
+      callback();
+    });
+  }
+
   describe("#commandHandle()", function() {
     beforeEach(function() {
       this.elm = document.createElement('div');
@@ -10,14 +20,7 @@ describe("REPLConsole", function() {
 
     context("with normal session", function() {
       beforeEach(function(done) {
-        var self = this;
-        self.console = REPLConsole.installInto('console', { mountPoint: '/mock', sessionId: 'result' });
-        self.console.commandHandle('fake-input', function(result, response) {
-          self.result   = result;
-          self.response = response;
-          self.message  = self.elm.getElementsByClassName('console-message')[0];
-          done();
-        });
+        sendCommand(this, { mountPoint: '/mock', sessionId: 'result' }, done);
       });
       it("should be a successful request", function() {
         assert.ok(this.result);
@@ -32,14 +35,7 @@ describe("REPLConsole", function() {
 
     context("with errored session", function() {
       beforeEach(function(done) {
-        var self = this;
-        self.console = REPLConsole.installInto('console', { mountPoint: '/mock', sessionId: 'error' });
-        self.console.commandHandle('fake-input', function(result, response) {
-          self.result   = result;
-          self.response = response;
-          self.message  = self.elm.getElementsByClassName('console-message')[0];
-          done();
-        });
+        sendCommand(this, { mountPoint: '/mock', sessionId: 'error' }, done);
       });
       it("should not be a successful request", function() {
         assert.notOk(this.result);
@@ -52,15 +48,9 @@ describe("REPLConsole", function() {
       });
     });
 
-    context("without no json response", function() {
+    context("get errors without json", function() {
       beforeEach(function(done) {
-        var self = this;
-        var options = { mountPoint: '/mock', sessionId: 'error.txt' };
-        self.console = REPLConsole.installInto('console', options);
-        self.console.commandHandle('fake-input', function(result, response) {
-          self.message = self.elm.getElementsByClassName('console-message')[0];
-          done();
-        });
+        sendCommand(this, { mountPoint: '/mock', sessionId: 'error.txt' }, done);
       });
       it("should output HTTP status code", function() {
         assert.match(this.message.innerHTML, /400 Bad Request/);

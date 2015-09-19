@@ -1,34 +1,31 @@
 language: ruby
 
 rvm:
-  - 2.2
+  - 2.2.3
   - ruby-head
   - rbx-2
   - jruby
 
-gemfile:
-  - Gemfile
-
 env:
   global:
     - JRUBY_OPTS=--dev
-    - TEST_SUITE=test
 
 sudo: false
+
+cache: bundler
 
 before_script:
   - RAILS_ENV=test bundle exec rake --rakefile=test/dummy/Rakefile db:setup
 
 script:
-  - bundle exec rake ${TEST_SUITE}
+  - bundle exec rake ${TEST_SUITE:-test}
 
 matrix:
   include:
-    - gemfile: gemfiles/Gemfile-4-0-stable
-      env: TEST_SUITE=test:templates
-      rvm: 2.2.2
+    - env: TEST_SUITE=test:templates
+      rvm: 2.2.3
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx-2
     - rvm: jruby
-    - gemfile: Gemfile
+  fast_finish: true

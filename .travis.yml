@@ -28,3 +28,4 @@ matrix:
     - rvm: ruby-head
     - rvm: rbx-2
     - rvm: jruby
+  fast_finish: true

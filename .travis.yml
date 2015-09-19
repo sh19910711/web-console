@@ -16,6 +16,8 @@ env:
 
 sudo: false
 
+cache: bundler
+
 before_script:
   - RAILS_ENV=test bundle exec rake --rakefile=test/dummy/Rakefile db:setup
 

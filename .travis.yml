@@ -4,11 +4,6 @@ rvm:
   - 2.2.3
   - ruby-head
   - rbx-2
-  - jruby
-
-env:
-  global:
-    - JRUBY_OPTS=--dev
 
 sudo: false
 
@@ -24,6 +19,8 @@ matrix:
   include:
     - env: TEST_SUITE=test:templates
       rvm: 2.2.3
+    - env: JRUBY_OPTS=--dev
+      rvm: jruby
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx-2

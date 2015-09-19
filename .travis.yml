@@ -1,7 +1,7 @@
 language: ruby
 
 rvm:
-  - 2.2-head
+  - 2.2.3
   - ruby-head
   - rbx-2
   - jruby
@@ -31,4 +31,3 @@ matrix:
     - rvm: ruby-head
     - rvm: rbx-2
     - rvm: jruby
-    - gemfile: Gemfile

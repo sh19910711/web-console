@@ -25,6 +25,7 @@ script:
 matrix:
   include:
     - env: TEST_SUITE=test:templates
+      gemfile: Gemfile
       rvm: 2.2.3
   allow_failures:
     - rvm: ruby-head

@@ -5,9 +5,8 @@ rvm:
   - ruby-head
   - rbx-2
 
-- rvm: jruby
-  env:
-    global: JRUBY_OPTS=--dev
+env:
+  global: JRUBY_OPTS=--dev
 
 script:
   - bundle exec rake ${TEST_SUITE:-test}

@@ -4,24 +4,16 @@ rvm:
   - 2.2.3
   - ruby-head
   - rbx-2
-  - jruby
 
-gemfile:
-  - Gemfile
-
-env:
-  global:
-    - JRUBY_OPTS=--dev
-    - TEST_SUITE=test
-
-sudo: false
+- rvm: jruby
+  env:
+    global: JRUBY_OPTS=--dev
 
 script:
-  - bundle exec rake ${TEST_SUITE}
+  - bundle exec rake ${TEST_SUITE:-test}
 
 matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx-2
     - rvm: jruby
-    - gemfile: Gemfile

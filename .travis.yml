@@ -4,6 +4,7 @@ rvm:
   - 2.2.3
   - ruby-head
   - rbx-2
+  - jruby
 
 env:
   global: JRUBY_OPTS=--dev

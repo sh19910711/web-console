@@ -11,7 +11,9 @@ Gem::Specification.new do |s|
   s.summary  = "A debugging tool for your Ruby on Rails applications."
   s.license  = 'MIT'
 
-  s.files      = Dir["lib/**/*", "MIT-LICENSE", "Rakefile", "README.markdown", "CHANGELOG.markdown"]
+  s.files    = Dir["lib/**/*", "exe/**/*", "MIT-LICENSE", "Rakefile", "README.markdown", "CHANGELOG.markdown"]
+  s.bindir   = 'bin'
+  s.executables << 'web_console_auth'
 
   s.required_ruby_version = '>= 2.2.2'
 

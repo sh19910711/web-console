@@ -26,7 +26,31 @@ module WebConsole
       xhr? && accepts.any? { |mime| Mime[:web_console_v2] == mime }
     end
 
+    def id_for_repl_session
+      xhr? && id_for_repl_session_update || id_for_repl_session_stack_frame_change
+    end
+
     private
+
+      def repl_sessions_re
+        @_repl_sessions_re ||= %r{#{Middleware.mount_point}/repl_sessions/(?<id>[^/]+)}
+      end
+
+      def update_re
+        @_update_re ||= %r{#{repl_sessions_re}\z}
+      end
+
+      def binding_change_re
+        @_binding_change_re ||= %r{#{repl_sessions_re}/trace\z}
+      end
+
+      def id_for_repl_session_update
+        update_re.match(path) { |m| m[:id] }
+      end
+
+      def id_for_repl_session_stack_frame_change
+        binding_change_re.match(path) { |m| m[:id] }
+      end
 
       class GetSecureIp < ActionDispatch::RemoteIp::GetIp
         def initialize(req, proxies)

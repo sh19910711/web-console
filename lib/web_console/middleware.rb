@@ -19,10 +19,9 @@ module WebConsole
         request = create_regular_or_whiny_request(env)
         return call_app(env) unless request.from_whitelisted_ip?
 
-        if id = id_for_repl_session_update(request)
-          return update_repl_session(id, request)
-        elsif id = id_for_repl_session_stack_frame_change(request)
-          return change_stack_trace(id, request)
+        if id = request.id_for_repl_session
+          return update_repl_session(id, request) if request.put?
+          return change_stack_trace(id, request) if request.post?
         end
 
         status, headers, body = call_app(env)
@@ -75,30 +74,6 @@ module WebConsole
       def create_regular_or_whiny_request(env)
         request = Request.new(env)
         whiny_requests ? WhinyRequest.new(request) : request
-      end
-
-      def repl_sessions_re
-        @_repl_sessions_re ||= %r{#{mount_point}/repl_sessions/(?<id>[^/]+)}
-      end
-
-      def update_re
-        @_update_re ||= %r{#{repl_sessions_re}\z}
-      end
-
-      def binding_change_re
-        @_binding_change_re ||= %r{#{repl_sessions_re}/trace\z}
-      end
-
-      def id_for_repl_session_update(request)
-        if request.xhr? && request.put?
-          update_re.match(request.path) { |m| m[:id] }
-        end
-      end
-
-      def id_for_repl_session_stack_frame_change(request)
-        if request.xhr? && request.post?
-          binding_change_re.match(request.path) { |m| m[:id] }
-        end
       end
 
       def update_repl_session(id, request)

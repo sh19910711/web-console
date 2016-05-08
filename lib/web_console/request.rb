@@ -16,6 +16,11 @@ module WebConsole
       whitelisted_ips.include?(strict_remote_ip)
     end
 
+    # Add remote host into whitelisted networks
+    def trust_me!
+      whitelisted_ips.add(strict_remote_ip)
+    end
+
     # Determines the remote IP using our much stricter whitelist.
     def strict_remote_ip
       GetSecureIp.new(self, whitelisted_ips).to_s
@@ -30,30 +35,18 @@ module WebConsole
       xhr? && repl_sessions_re.match(path) { |m| m[:id] }
     end
 
-    def id_for_repl_session_trace
-      xhr? && repl_session_trace_re.match(path) { |m| m[:id] }
-    end
-
     def auth?
       auth_re.match(path)
     end
 
     def auth_secret?
-      post? && auth_secret_re.match(path)
-    end
-
-    def trust_me!
-      whitelisted_ips.add(strict_remote_ip)
+      auth_secret_re.match(path)
     end
 
     private
 
       def repl_sessions_re
         @_repl_sessions_re ||= %r{#{Middleware.mount_point}/repl_sessions/(?<id>[^/]+)}
-      end
-
-      def repl_session_trace_re
-        @_repl_session_trace_re ||= %r{#{repl_sessions_re}/trace\z}
       end
 
       def auth_re

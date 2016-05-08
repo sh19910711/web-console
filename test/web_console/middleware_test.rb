@@ -174,11 +174,12 @@ module WebConsole
 
       Auth.stubs(:last_secret).returns('secret-key')
       post '/auth', params: { secret: 'secret-key' }, headers: headers
+      passport = response.cookies["passport"]
 
       Session.stubs(:from).returns(session)
 
       get '/', params: nil
-      put "/repl_sessions/#{session.id}", xhr: true, params: { input: '__LINE__' }, headers: headers
+      put "/repl_sessions/#{session.id}", xhr: true, params: { input: '__LINE__' }, headers: headers.merge(:set_cookie => "passport=#{passport}")
 
       assert_equal({ output: "=> #{line}\n" }.to_json, response.body)
     end

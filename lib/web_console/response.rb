@@ -26,7 +26,7 @@ module WebConsole
         headers = { 'Content-Type' => "#{opts.fetch(:type, 'text/plain')}; charset=utf-8" }
         body    = yield
 
-        Rack::Response.new(body, status, headers).finish
+        self.new(body, status, headers).finish
       end
 
       def html(opts = {}, &b)

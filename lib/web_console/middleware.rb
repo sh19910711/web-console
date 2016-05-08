@@ -107,33 +107,23 @@ module WebConsole
 
       def render_auth_secret(request)
         response = Rack::Response.new
-        body = (format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret))
+        body = format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret)
         status = 200
         headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
         Rack::Response.new(body, status, headers).finish
       end
 
       def authenticate(request)
-        request.whitelisted_ips.add(request.ip) if result = Auth.valid?(request.params[:secret])
-        body = result ? 'Good' : 'Bad...'
-        status = 200
+        if Auth.valid?(request.params[:secret])
+          request.trust_me!
+          body = 'OK'
+          status = 200
+        else
+          body = 'Bad Credentials'
+          status = 401
+        end
         headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
         Rack::Response.new(body, status, headers).finish
-      end
-
-      class Auth
-        cattr_reader :last_secret
-
-        class << self
-          def secret
-            @@last_secret = SecureRandom.hex(12)
-          end
-
-          def valid?(secret)
-            p last_secret
-            last_secret == secret unless last_secret.nil?
-          end
-        end
       end
 
       def respond_with_unavailable_session(id)
@@ -152,6 +142,20 @@ module WebConsole
         @app.call(env)
       rescue => e
         throw :app_exception, e
+      end
+
+      class Auth
+        cattr_reader :last_secret
+
+        class << self
+          def secret
+            @@last_secret = SecureRandom.hex(12)
+          end
+
+          def valid?(secret)
+            last_secret == secret unless last_secret.nil?
+          end
+        end
       end
   end
 end

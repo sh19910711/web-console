@@ -42,6 +42,10 @@ module WebConsole
       post? && auth_secret_re.match(path)
     end
 
+    def trust_me!
+      whitelisted_ips.add(ip)
+    end
+
     private
 
       def repl_sessions_re

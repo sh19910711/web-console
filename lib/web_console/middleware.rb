@@ -104,6 +104,7 @@ module WebConsole
         else
           Response.text(status: 401) { 'Bad Credentials' }
         end
+        Auth.reset!
       end
 
       def respond_with_unavailable_session(id)
@@ -134,6 +135,10 @@ module WebConsole
 
           def valid?(secret)
             last_secret == secret unless last_secret.nil?
+          end
+
+          def reset!
+            @@last_secret = nil
           end
         end
       end

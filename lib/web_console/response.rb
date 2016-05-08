@@ -13,7 +13,7 @@ module WebConsole
         raw_body << content
       end
 
-      write raw_body
+      initialize raw_body, status, headers
     end
 
     class << self
@@ -24,7 +24,7 @@ module WebConsole
 
         res = new(body, status, headers)
         if cookies = opts[:cookies]
-          cookies.each { |k, v| res.set_cookie k, v }
+          cookies.each { |k, v| res.set_cookie k, { value: v, path: '/' } }
         end
         res.finish
       end

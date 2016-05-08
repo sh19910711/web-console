@@ -24,7 +24,7 @@ module WebConsole
         end
 
         return call_app(env) unless request.from_whitelisted_ip?
-        return render_auth_secret(request) if request.auth_secret?
+        return render_auth_secret(request) if request.post? && request.auth_secret?
 
         if id = request.id_for_repl_session
           return update_repl_session(id, request) if request.put?

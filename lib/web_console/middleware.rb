@@ -63,29 +63,11 @@ module WebConsole
         Mime::Type.parse(headers['Content-Type']).first == Mime[:html]
       end
 
-      def rack_response(opts = {})
-        status  = opts.fetch(:status, 200)
-        headers = { 'Content-Type' => "#{opts.fetch(:type, 'text/plain')}; charset=utf-8" }
-        body    = yield
-
-        Rack::Response.new(body, status, headers).finish
-      end
-
-      def html_response(opts = {}, &b)
-        rack_response opts.merge(type: 'text/html'), &b
-      end
-
-      def json_response(opts = {})
-        rack_response opts.merge(type: 'application/json') do
-          yield.to_json
-        end
-      end
-
       def json_response_with_session(id, request, opts = {})
         return respond_with_unacceptable_request unless request.acceptable?
         return respond_with_unavailable_session(id) unless session = Session.find(id)
 
-        json_response(opts) { yield session }
+        Response.json(opts) { yield session }
       end
 
       def create_regular_or_whiny_request(env)
@@ -108,30 +90,30 @@ module WebConsole
       end
 
       def render_auth_form(env)
-        html_response { Template.new(env).render('auth_form') }
+        Response.html { Template.new(env).render('auth_form') }
       end
 
       def render_auth_secret
-        rack_response { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
+        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
       end
 
       def auth!(request)
         if Auth.valid?(request.params[:secret])
           request.trust_me!
-          rack_response { 'OK' }
+          Response.text { 'OK' }
         else
-          rack_response(status: 401) { 'Bad Credentials' }
+          Response.text(status: 401) { 'Bad Credentials' }
         end
       end
 
       def respond_with_unavailable_session(id)
-        json_response(status: 404) do
+        Response.json(status: 404) do
           { output: format(I18n.t('errors.unavailable_session'), id: id)}
         end
       end
 
       def respond_with_unacceptable_request
-        json_response(status: 406) do
+        Response.json(status: 406) do
           { output: I18n.t('errors.unacceptable_request') }
         end
       end

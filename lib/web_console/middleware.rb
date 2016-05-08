@@ -17,7 +17,14 @@ module WebConsole
     def call(env)
       app_exception = catch :app_exception do
         request = create_regular_or_whiny_request(env)
+
+        if request.auth?
+          return render_auth_form(env) if request.get?
+          return authenticate(request) if request.post?
+        end
+
         return call_app(env) unless request.from_whitelisted_ip?
+        return render_auth_secret(request) if request.auth_secret?
 
         if id = request.id_for_repl_session
           return update_repl_session(id, request) if request.put?
@@ -87,6 +94,45 @@ module WebConsole
           session.switch_binding_to(request.params[:frame_id])
 
           { ok: true }
+        end
+      end
+
+      def render_auth_form(env)
+        template = Template.new(env)
+        body = template.render('auth_form')
+        status = 200
+        headers = { 'Content-Type' => 'text/html; charset=utf-8' }
+        Rack::Response.new(body, status, headers).finish
+      end
+
+      def render_auth_secret(request)
+        response = Rack::Response.new
+        body = (format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret))
+        status = 200
+        headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
+        Rack::Response.new(body, status, headers).finish
+      end
+
+      def authenticate(request)
+        request.whitelisted_ips.add(request.ip) if result = Auth.valid?(request.params[:secret])
+        body = result ? 'Good' : 'Bad...'
+        status = 200
+        headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
+        Rack::Response.new(body, status, headers).finish
+      end
+
+      class Auth
+        cattr_reader :last_secret
+
+        class << self
+          def secret
+            @@last_secret = SecureRandom.hex(12)
+          end
+
+          def valid?(secret)
+            p last_secret
+            last_secret == secret unless last_secret.nil?
+          end
         end
       end
 

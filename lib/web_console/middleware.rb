@@ -63,12 +63,22 @@ module WebConsole
         Mime::Type.parse(headers['Content-Type']).first == Mime[:html]
       end
 
-      def json_response(opts = {})
+      def rack_response(opts = {})
         status  = opts.fetch(:status, 200)
-        headers = { 'Content-Type' => 'application/json; charset = utf-8' }
-        body    = yield.to_json
+        headers = { 'Content-Type' => "#{opts.fetch(:type, 'text/plain')}; charset=utf-8" }
+        body    = yield
 
         Rack::Response.new(body, status, headers).finish
+      end
+
+      def html_response(opts = {}, &b)
+        rack_response opts.merge(type: 'text/html'), &b
+      end
+
+      def json_response(opts = {})
+        rack_response opts.merge(type: 'application/json') do
+          yield.to_json
+        end
       end
 
       def json_response_with_session(id, request, opts = {})
@@ -98,32 +108,20 @@ module WebConsole
       end
 
       def render_auth_form(env)
-        template = Template.new(env)
-        body = template.render('auth_form')
-        status = 200
-        headers = { 'Content-Type' => 'text/html; charset=utf-8' }
-        Rack::Response.new(body, status, headers).finish
+        html_response { Template.new(env).render('auth_form') }
       end
 
       def render_auth_secret(request)
-        response = Rack::Response.new
-        body = format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret)
-        status = 200
-        headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
-        Rack::Response.new(body, status, headers).finish
+        rack_response { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
       end
 
       def authenticate(request)
         if Auth.valid?(request.params[:secret])
           request.trust_me!
-          body = 'OK'
-          status = 200
+          rack_response { 'OK' }
         else
-          body = 'Bad Credentials'
-          status = 401
+          rack_response(status: 401) { 'Bad Credentials' }
         end
-        headers = { 'Content-Type' => 'text/plain; charset=utf-8' }
-        Rack::Response.new(body, status, headers).finish
       end
 
       def respond_with_unavailable_session(id)

@@ -43,7 +43,7 @@ module WebConsole
     end
 
     def trust_me!
-      whitelisted_ips.add(ip)
+      whitelisted_ips.add(strict_remote_ip)
     end
 
     private

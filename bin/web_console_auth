@@ -3,10 +3,7 @@
 opts = ARGV.getopts('', 'host:localhost', 'mount:__web_console', 'proto:http')
 
 if ARGV.empty?
-  puts <<-EOF
-web_console_auth [--host] [--mount] [--proto] <PORT>
-or web_console_auth <URL>
-EOF
+  puts 'web_console_auth [--host] [--mount] [--proto] <PORT or URL>'
 else
   url = if URI.regexp =~ ARGV.first
     URI.join(ARGV.first, "#{opts['mount']}/auth/secret")

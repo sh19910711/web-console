@@ -94,7 +94,7 @@ module WebConsole
       end
 
       def render_auth_secret
-        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
+        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.new_secret) }
       end
 
       def auth!(request)
@@ -104,7 +104,6 @@ module WebConsole
         else
           Response.text(status: 401) { 'Bad Credentials' }
         end
-        Auth.reset!
       end
 
       def respond_with_unavailable_session(id)
@@ -123,24 +122,6 @@ module WebConsole
         @app.call(env)
       rescue => e
         throw :app_exception, e
-      end
-
-      class Auth
-        cattr_reader :last_secret
-
-        class << self
-          def secret
-            @@last_secret = SecureRandom.hex(12)
-          end
-
-          def valid?(secret)
-            last_secret == secret unless last_secret.nil?
-          end
-
-          def reset!
-            @@last_secret = nil
-          end
-        end
       end
   end
 end

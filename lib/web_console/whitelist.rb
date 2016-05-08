@@ -18,7 +18,7 @@ module WebConsole
     end
 
     def add(network)
-      @networks << network
+      @networks << coerce_network_to_ipaddr(network)
     end
 
     def to_s

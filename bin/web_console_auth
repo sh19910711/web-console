@@ -2,8 +2,8 @@
 
 opts = ARGV.getopts('', 'host:localhost', 'mount:__web_console', 'proto:http')
 if ARGV.empty?
-  puts 'web_console_auth [--host localhost] [--mount __web_console] [--proto http] <port>'
+  puts 'web_console_auth [--host] [--mount] [--proto] <port>'
 else
-  auth_url = "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth/secret"
-  system "curl -s -X POST #{auth_url}"
+  url = "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth/secret"
+  system "curl -s -X POST #{url}"
 end

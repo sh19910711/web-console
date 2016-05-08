@@ -3,8 +3,8 @@ module WebConsole
   # possible.
   #
   # The object quacks like Rack::Response.
-  class Response < Struct.new(:body, :status, :headers)
-    def write(content)
+  class Response < Rack::Response
+    def insert(content)
       raw_body = Array(body).first.to_s
 
       if position = raw_body.rindex('</body>')
@@ -13,11 +13,7 @@ module WebConsole
         raw_body << content
       end
 
-      self.body = raw_body
-    end
-
-    def finish
-      Rack::Response.new(body, status, headers).finish
+      write raw_body
     end
 
     class << self
@@ -26,7 +22,11 @@ module WebConsole
         headers = { 'Content-Type' => "#{opts.fetch(:type, 'text/plain')}; charset=utf-8" }
         body    = yield
 
-        self.new(body, status, headers).finish
+        res = new(body, status, headers)
+        if cookies = opts[:cookies]
+          cookies.each { |k, v| res.set_cookie k, v }
+        end
+        res.finish
       end
 
       def html(opts = {}, &b)

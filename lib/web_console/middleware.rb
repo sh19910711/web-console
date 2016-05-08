@@ -23,7 +23,10 @@ module WebConsole
           return auth!(request) if request.post?
         end
 
-        return call_app(env) unless request.from_whitelisted_ip?
+        unless request.from_whitelisted_ip?
+          return call_app(env) unless Auth.passholder?(request)
+          request.trust_me!
+        end
         return render_auth_secret if request.post? && request.auth_secret?
 
         if id = request.id_for_repl_session
@@ -39,7 +42,7 @@ module WebConsole
 
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-          response.write(template.render('index'))
+          response.insert(template.render('index'))
           response.finish
         else
           [ status, headers, body ]
@@ -99,8 +102,7 @@ module WebConsole
 
       def auth!(request)
         if Auth.valid?(request.params[:secret])
-          request.trust_me!
-          Response.text { 'OK' }
+          Response.text(cookies: { passport: Auth.new_passport }) { 'OK' }
         else
           Response.text(status: 401) { 'Bad Credentials' }
         end

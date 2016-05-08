@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-opts = ARGV.getopts('', 'host:localhost', 'mountpoint:__web_console', 'proto:http')
+opts = ARGV.getopts('', 'host:localhost', 'mount:__web_console', 'proto:http')
 if ARGV.empty?
   puts 'web_console_auth [--host localhost] [--mount __web_console] [--proto http] <port>'
 else
-  auth_url = URI.join("#{opts['proto']}://#{opts['host']}:#{ARGV.first}", opts['mount'], 'auth/new')
-  system "curl -X POST #{auth_url}"
+  auth_url = "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth/secret"
+  system "curl -s -X POST #{auth_url}"
 end

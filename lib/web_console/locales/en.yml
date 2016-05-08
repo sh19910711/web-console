@@ -17,4 +17,4 @@ en:
   auth:
     description: |
       Open "http(s)://example.com:/%{mount}/auth" from browser and input secret code.
-      The secret code is "%{secret}"
+      The secret code is "%{secret}".

@@ -36,7 +36,8 @@ module WebConsole
     end
 
     setup do
-      Request.stubs(:whitelisted_ips).returns(IPAddr.new('0.0.0.0/0'))
+      Auth.stubs(:last_secret).returns(nil)
+      Request.whitelisted_ips = Whitelist.new
 
       Middleware.mount_point = ''
       @app = Middleware.new(Application.new)
@@ -97,7 +98,6 @@ module WebConsole
 
     test "doesn't render console from non whitelisted IP" do
       Thread.current[:__web_console_binding] = binding
-      Request.stubs(:whitelisted_ips).returns(IPAddr.new('127.0.0.1'))
 
       silence(:stderr) do
         get '/', params: nil, headers: { 'REMOTE_ADDR' => '1.1.1.1' }
@@ -168,23 +168,47 @@ module WebConsole
       assert_raises(RuntimeError) { get '/' }
     end
 
+    test 'trusted request can evaluate code' do
+      session, line = Session.new(binding), __LINE__
+      headers = { 'REMOTE_ADDR' => '1.2.3.4' }
+
+      Auth.stubs(:last_secret).returns('secret-key')
+      post '/auth', params: { secret: 'secret-key' }, headers: headers
+
+      Session.stubs(:from).returns(session)
+
+      get '/', params: nil
+      put "/repl_sessions/#{session.id}", xhr: true, params: { input: '__LINE__' }, headers: headers
+
+      assert_equal({ output: "=> #{line}\n" }.to_json, response.body)
+    end
+
+    test 'non whiny request cannot create auth secret' do
+      post '/auth/secret', headers: { 'REMOTE_ADDR' => '1.2.3.4' }
+
+      assert_equal(500, response.status)
+    end
+
     private
 
-      # Override the put and post testing helper of ActionDispatch to customize http headers
-      def put(http_method, path, *args)
-        update_path_args(path)
-        super
+      # Override the request helper of ActionDispatch to customize headers
+      def get(path, opts = {})
+        super path, set_custom_header(opts)
       end
 
-      def post(http_method, path, *args)
-        update_path_args(path)
-        super
+      def put(path, opts = {})
+        super path, set_custom_header(opts)
       end
 
-      def update_path_args(path)
-        unless path[:headers]
-          path.merge!(headers: { 'HTTP_ACCEPT' => Mime[:web_console_v2] })
-        end
+      def post(path, opts = {})
+        super path, set_custom_header(opts)
+      end
+
+      def set_custom_header(opts)
+        opts[:headers] ||= {}
+        opts[:headers]['HTTP_ACCEPT'] ||= Mime[:web_console_v2]
+        opts[:headers]['REMOTE_ADDR'] ||= '127.0.0.1'
+        opts
       end
 
       def raise_exception

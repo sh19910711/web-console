@@ -20,7 +20,7 @@ module WebConsole
 
         if request.auth?
           return render_auth_form(env) if request.get?
-          return authenticate(request) if request.post?
+          return auth!(request) if request.post?
         end
 
         return call_app(env) unless request.from_whitelisted_ip?
@@ -115,7 +115,7 @@ module WebConsole
         rack_response { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
       end
 
-      def authenticate(request)
+      def auth!(request)
         if Auth.valid?(request.params[:secret])
           request.trust_me!
           rack_response { 'OK' }

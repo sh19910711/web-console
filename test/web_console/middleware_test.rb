@@ -199,7 +199,7 @@ module WebConsole
 
     private
 
-      # Override the request helper of ActionDispatch to customize headers
+      # Override the request helpers of ActionDispatch to customize request headers
       def get(path, opts = {})
         super path, set_custom_header(opts)
       end

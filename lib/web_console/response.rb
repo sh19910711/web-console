@@ -19,5 +19,25 @@ module WebConsole
     def finish
       Rack::Response.new(body, status, headers).finish
     end
+
+    class << self
+      def text(opts = {})
+        status  = opts.fetch(:status, 200)
+        headers = { 'Content-Type' => "#{opts.fetch(:type, 'text/plain')}; charset=utf-8" }
+        body    = yield
+
+        Rack::Response.new(body, status, headers).finish
+      end
+
+      def html(opts = {}, &b)
+        text opts.merge(type: 'text/html'), &b
+      end
+
+      def json(opts = {})
+        text opts.merge(type: 'application/json') do
+          yield.to_json
+        end
+      end
+    end
   end
 end

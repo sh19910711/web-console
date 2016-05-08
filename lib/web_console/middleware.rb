@@ -24,7 +24,7 @@ module WebConsole
         end
 
         return call_app(env) unless request.from_whitelisted_ip?
-        return render_auth_secret(request) if request.post? && request.auth_secret?
+        return render_auth_secret if request.post? && request.auth_secret?
 
         if id = request.id_for_repl_session
           return update_repl_session(id, request) if request.put?
@@ -111,7 +111,7 @@ module WebConsole
         html_response { Template.new(env).render('auth_form') }
       end
 
-      def render_auth_secret(request)
+      def render_auth_secret
         rack_response { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.secret) }
       end
 

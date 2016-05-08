@@ -27,7 +27,19 @@ module WebConsole
     end
 
     def id_for_repl_session
-      xhr? && id_for_repl_session_update || id_for_repl_session_stack_frame_change
+      xhr? && repl_sessions_re.match(path) { |m| m[:id] }
+    end
+
+    def id_for_repl_session_trace
+      xhr? && repl_session_trace_re.match(path) { |m| m[:id] }
+    end
+
+    def auth?
+      auth_re.match(path)
+    end
+
+    def auth_secret?
+      post? && auth_secret_re.match(path)
     end
 
     private
@@ -36,20 +48,16 @@ module WebConsole
         @_repl_sessions_re ||= %r{#{Middleware.mount_point}/repl_sessions/(?<id>[^/]+)}
       end
 
-      def update_re
-        @_update_re ||= %r{#{repl_sessions_re}\z}
+      def repl_session_trace_re
+        @_repl_session_trace_re ||= %r{#{repl_sessions_re}/trace\z}
       end
 
-      def binding_change_re
-        @_binding_change_re ||= %r{#{repl_sessions_re}/trace\z}
+      def auth_re
+        @_auth_re ||= %r{#{Middleware.mount_point}/auth\z}
       end
 
-      def id_for_repl_session_update
-        update_re.match(path) { |m| m[:id] }
-      end
-
-      def id_for_repl_session_stack_frame_change
-        binding_change_re.match(path) { |m| m[:id] }
+      def auth_secret_re
+        @_auth_new_re ||= %r{#{Middleware.mount_point}/auth/secret\z}
       end
 
       class GetSecureIp < ActionDispatch::RemoteIp::GetIp

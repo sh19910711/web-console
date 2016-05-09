@@ -36,8 +36,7 @@ module WebConsole
     end
 
     setup do
-      Auth.stubs(:last_secret).returns(nil)
-      Request.whitelisted_ips = Whitelist.new
+      Request.stubs(:whitelisted_ips).returns(IPAddr.new('0.0.0.0/0'))
 
       Middleware.mount_point = ''
       @app = Middleware.new(Application.new)
@@ -106,6 +105,7 @@ module WebConsole
 
     test "doesn't render console from non whitelisted IP" do
       Thread.current[:__web_console_binding] = binding
+      Request.stubs(:whitelisted_ips).returns(IPAddr.new('127.0.0.1'))
 
       silence(:stderr) do
         get '/', params: nil, headers: { 'REMOTE_ADDR' => '1.1.1.1' }
@@ -176,24 +176,26 @@ module WebConsole
       assert_raises(RuntimeError) { get '/' }
     end
 
-    test 'trusted request can evaluate code' do
+    test 'passholder can evaluate code' do
       session, line = Session.new(binding), __LINE__
       headers = { 'REMOTE_ADDR' => '1.2.3.4' }
 
-      Auth.stubs(:last_secret).returns('secret-key')
-      post '/auth', params: { secret: 'secret-key' }, headers: headers
-      passport = response.cookies["passport"]
+      Request.new_passport
+      secret = Request.new_secret
+
+      post '/auth', params: { secret: secret }, headers: headers
+      headers.merge!(set_cookie: "__web_console_passport=#{response.cookies["__web_console_passport"]}")
 
       Session.stubs(:from).returns(session)
 
       get '/', params: nil
-      put "/repl_sessions/#{session.id}", xhr: true, params: { input: '__LINE__' }, headers: headers.merge(:set_cookie => "passport=#{passport}")
+      put "/repl_sessions/#{session.id}", params: { input: '__LINE__' }, headers: headers
 
       assert_equal({ output: "=> #{line}\n" }.to_json, response.body)
     end
 
-    test 'non whiny request cannot create auth secret' do
-      post '/auth/secret', headers: { 'REMOTE_ADDR' => '1.2.3.4' }
+    test 'non whiny request cannot generatesecret' do
+      post '/auth', headers: { 'REMOTE_ADDR' => '1.2.3.4' }
 
       assert_equal(500, response.status)
     end
@@ -216,7 +218,6 @@ module WebConsole
       def set_custom_header(opts)
         opts[:headers] ||= {}
         opts[:headers]['HTTP_ACCEPT'] ||= Mime[:web_console_v2]
-        opts[:headers]['REMOTE_ADDR'] ||= '127.0.0.1'
         opts
       end
 

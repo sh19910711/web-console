@@ -24,3 +24,4 @@ matrix:
     - rvm: ruby-head
     - rvm: rbx-2
     - rvm: jruby
+    - env: TEST_SUITE=test:templates

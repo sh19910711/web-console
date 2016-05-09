@@ -6,9 +6,9 @@ if ARGV.empty?
   puts 'web_console_auth [--host] [--mount] [--proto] <PORT or URL>'
 else
   url = if URI.regexp =~ ARGV.first
-    URI.join(ARGV.first, "#{opts['mount']}/auth/secret")
+    URI.join(ARGV.first, "#{opts['mount']}/auth")
   else
-    "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth/secret"
+    "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth"
   end
-  system "curl -s -X POST #{url}"
+  system "curl -s -X PUT #{url}"
 end

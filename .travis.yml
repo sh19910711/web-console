@@ -9,12 +9,11 @@ rvm:
 
 matrix:
   include:
-    - env: TEST_SUITE=test:templates
-      rvm: "2.2"
+    - rvm: "2.2"
+      env: TEST_SUITE=test:templates
 
 env:
-  global:
-    - JRUBY_OPTS=--dev
+  - JRUBY_OPTS=--dev
 
 script:
   - bundle exec rake ${TEST_SUITE:-test}

@@ -7,6 +7,11 @@ rvm:
   - rbx-2
   - jruby
 
+matrix:
+  include:
+    - env: TEST_SUITE=test:templates
+      rvm: "2.2"
+
 env:
   global:
     - JRUBY_OPTS=--dev

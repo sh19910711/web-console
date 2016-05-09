@@ -13,10 +13,13 @@ matrix:
       env: TEST_SUITE=test:templates
 
 env:
-  - JRUBY_OPTS=--dev
+  global:
+    - JRUBY_OPTS=--dev
+  matrix:
+    - TEST_SUITE=test
 
 script:
-  - bundle exec rake ${TEST_SUITE:-test}
+  - bundle exec rake ${TEST_SUITE:}
 
 matrix:
   allow_failures:

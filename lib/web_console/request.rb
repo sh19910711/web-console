@@ -5,9 +5,6 @@ module WebConsole
     cattr_accessor :whitelisted_ips
     @@whitelisted_ips = Whitelist.new
 
-    # Define a vendor MIME type. We can call it using Mime[:web_console_v2].
-    Mime::Type.register 'application/vnd.web-console.v2', :web_console_v2
-
     # A token to access Web Console features from non whitelisted ips
     cattr_reader :passport
     cattr_reader :secret
@@ -21,6 +18,9 @@ module WebConsole
     def self.new_secret
       @@secret = SecureRandom.hex(16)
     end
+
+    # Define a vendor MIME type. We can call it using Mime[:web_console_v2].
+    Mime::Type.register 'application/vnd.web-console.v2', :web_console_v2
 
     # Returns whether a request came from a whitelisted IP or a passholder.
     #

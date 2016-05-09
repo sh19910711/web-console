@@ -19,7 +19,7 @@ module WebConsole
 
     # Generates a new secret key and returns it
     def self.new_secret
-      @@secret = SecureRandom.hex(12)
+      @@secret = SecureRandom.hex(16)
     end
 
     # Returns whether a request came from a whitelisted IP or a passholder.

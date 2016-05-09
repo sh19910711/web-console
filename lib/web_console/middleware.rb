@@ -21,13 +21,10 @@ module WebConsole
         if request.auth?
           return render_auth_form(env) if request.get?
           return auth!(request) if request.post?
+          return update_auth_secret if request.put? and request.whitelisted?
         end
 
-        unless request.from_whitelisted_ip?
-          return call_app(env) unless Auth.passholder?(request)
-          request.trust_me!
-        end
-        return render_auth_secret if request.post? && request.auth_secret?
+        return call_app(env) unless request.whitelisted?
 
         if id = request.id_for_repl_session
           return update_repl_session(id, request) if request.put?
@@ -96,13 +93,14 @@ module WebConsole
         Response.html { Template.new(env).render('auth_form') }
       end
 
-      def render_auth_secret
-        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: Auth.new_secret) }
+      def update_auth_secret
+        secret = Request.new_secret
+        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: secret) }
       end
 
       def auth!(request)
-        if Auth.valid?(request.params[:secret])
-          Response.text(cookies: { passport: Auth.new_passport }) { 'OK' }
+        if request.has_secret?
+          Response.text(cookies: { '__web_console_passport': Request.new_passport }) { 'OK' }
         else
           Response.text(status: 401) { 'Bad Credentials' }
         end

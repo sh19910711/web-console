@@ -7,21 +7,19 @@ rvm:
   - rbx-2
   - jruby
 
+
+env:
+  global:
+    - JRUBY_OPTS=--dev
+
+script:
+  - bundle exec rake ${TEST_SUITE:-test}
+
 matrix:
   include:
     - rvm: "2.2"
       env: TEST_SUITE=test:templates
 
-env:
-  global:
-    - JRUBY_OPTS=--dev
-  matrix:
-    - TEST_SUITE=test
-
-script:
-  - bundle exec rake ${TEST_SUITE:}
-
-matrix:
   allow_failures:
     - rvm: ruby-head
     - rvm: rbx-2

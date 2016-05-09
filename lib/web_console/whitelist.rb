@@ -17,10 +17,6 @@ module WebConsole
       @networks.any? { |whitelist| whitelist.include?(network.to_s) }
     end
 
-    def add(network)
-      @networks << coerce_network_to_ipaddr(network)
-    end
-
     def to_s
       @networks.map(&method(:human_readable_ipaddr)).join(', ')
     end

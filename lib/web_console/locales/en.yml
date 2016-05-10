@@ -13,3 +13,8 @@ en:
     connection_refused: |
       Oops! Failed to connect to the Web Console middleware.
       Please make sure a rails development server is running.
+
+  auth:
+    description: |
+      Open "http://<your-host>%{mount}/auth" from browser and input secret code.
+      The secret code is "%{secret}".

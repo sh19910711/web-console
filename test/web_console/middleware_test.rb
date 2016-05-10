@@ -176,23 +176,48 @@ module WebConsole
       assert_raises(RuntimeError) { get '/' }
     end
 
+    test 'passholder can evaluate code from out of whitelisted ips' do
+      session, line = Session.new(binding), __LINE__
+      headers = { 'REMOTE_ADDR' => '1.2.3.4' }
+      headers.merge!(cookie: "__web_console_passport=#{Request.new_passport}")
+
+      Session.stubs(:from).returns(session)
+
+      get '/', params: nil, headers: headers
+      put "/repl_sessions/#{session.id}", xhr: true, params: { input: '__LINE__' }, headers: headers
+
+      assert_equal({ output: "=> #{line}\n" }.to_json, response.body)
+    end
+
+    test 'request should have secret to generate passport' do
+      headers  = { 'REMOTE_ADDR' => '1.2.3.4' }
+
+      post '/auth', params: { secret: Request.new_secret }, headers: headers
+
+      assert_equal Request.passport, response.cookies["__web_console_passport"]
+    end
+
+    test 'non whiny request cannot update secret' do
+      put '/auth', headers: { 'REMOTE_ADDR' => '1.2.3.4' }
+
+      assert_equal(500, response.status)
+    end
+
     private
 
-      # Override the put and post testing helper of ActionDispatch to customize http headers
-      def put(http_method, path, *args)
-        update_path_args(path)
-        super
+      # Override the request helpers of ActionDispatch to customize request headers
+      def put(path, opts = {})
+        super path, set_custom_header(opts)
       end
 
-      def post(http_method, path, *args)
-        update_path_args(path)
-        super
+      def post(path, opts = {})
+        super path, set_custom_header(opts)
       end
 
-      def update_path_args(path)
-        unless path[:headers]
-          path.merge!(headers: { 'HTTP_ACCEPT' => Mime[:web_console_v2] })
-        end
+      def set_custom_header(opts)
+        opts[:headers] ||= {}
+        opts[:headers]['HTTP_ACCEPT'] ||= Mime[:web_console_v2]
+        opts
       end
 
       def raise_exception

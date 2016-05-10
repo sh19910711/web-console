@@ -1,0 +1,16 @@
+#!/usr/bin/env ruby
+
+def url
+  opts = ARGV.getopts('', 'host:localhost', 'mount:__web_console', 'proto:http')
+  if URI.regexp =~ ARGV.first
+    URI.join(ARGV.first, "#{opts['mount']}/auth")
+  else
+    "#{opts['proto']}://#{opts['host']}:#{ARGV.first}/#{opts['mount']}/auth"
+  end
+end
+
+if ARGV.empty?
+  puts 'web_console_auth [--host] [--mount] [--proto] <PORT or URL>'
+else
+  system "curl -s -X PUT #{url}"
+end

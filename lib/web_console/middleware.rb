@@ -17,12 +17,18 @@ module WebConsole
     def call(env)
       app_exception = catch :app_exception do
         request = create_regular_or_whiny_request(env)
-        return call_app(env) unless request.from_whitelisted_ip?
 
-        if id = id_for_repl_session_update(request)
-          return update_repl_session(id, request)
-        elsif id = id_for_repl_session_stack_frame_change(request)
-          return change_stack_trace(id, request)
+        if request.auth?
+          return render_auth_form(env) if request.get?
+          return auth!(request) if request.post?
+          return update_auth_secret if request.put? and request.whitelisted?
+        end
+
+        return call_app(env) unless request.whitelisted?
+
+        if id = request.id_for_repl_session
+          return update_repl_session(id, request) if request.put?
+          return change_stack_trace(id, request) if request.post?
         end
 
         status, headers, body = call_app(env)
@@ -33,7 +39,7 @@ module WebConsole
 
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-          response.write(template.render('index'))
+          response.insert(template.render('index'))
           response.finish
         else
           [ status, headers, body ]
@@ -57,48 +63,16 @@ module WebConsole
         Mime::Type.parse(headers['Content-Type']).first == Mime[:html]
       end
 
-      def json_response(opts = {})
-        status  = opts.fetch(:status, 200)
-        headers = { 'Content-Type' => 'application/json; charset = utf-8' }
-        body    = yield.to_json
-
-        Rack::Response.new(body, status, headers).finish
-      end
-
       def json_response_with_session(id, request, opts = {})
         return respond_with_unacceptable_request unless request.acceptable?
         return respond_with_unavailable_session(id) unless session = Session.find(id)
 
-        json_response(opts) { yield session }
+        Response.json(opts) { yield session }
       end
 
       def create_regular_or_whiny_request(env)
         request = Request.new(env)
         whiny_requests ? WhinyRequest.new(request) : request
-      end
-
-      def repl_sessions_re
-        @_repl_sessions_re ||= %r{#{mount_point}/repl_sessions/(?<id>[^/]+)}
-      end
-
-      def update_re
-        @_update_re ||= %r{#{repl_sessions_re}\z}
-      end
-
-      def binding_change_re
-        @_binding_change_re ||= %r{#{repl_sessions_re}/trace\z}
-      end
-
-      def id_for_repl_session_update(request)
-        if request.xhr? && request.put?
-          update_re.match(request.path) { |m| m[:id] }
-        end
-      end
-
-      def id_for_repl_session_stack_frame_change(request)
-        if request.xhr? && request.post?
-          binding_change_re.match(request.path) { |m| m[:id] }
-        end
       end
 
       def update_repl_session(id, request)
@@ -115,14 +89,31 @@ module WebConsole
         end
       end
 
+      def render_auth_form(env)
+        Response.html { Template.new(env).render('auth_form') }
+      end
+
+      def update_auth_secret
+        secret = Request.new_secret
+        Response.text { format(I18n.t('auth.description'), mount: Middleware.mount_point, secret: secret) }
+      end
+
+      def auth!(request)
+        if request.has_secret?
+          Response.text(cookies: { '__web_console_passport': Request.new_passport }) { 'OK' }
+        else
+          Response.text(status: 401) { 'Bad Credentials' }
+        end
+      end
+
       def respond_with_unavailable_session(id)
-        json_response(status: 404) do
+        Response.json(status: 404) do
           { output: format(I18n.t('errors.unavailable_session'), id: id)}
         end
       end
 
       def respond_with_unacceptable_request
-        json_response(status: 406) do
+        Response.json(status: 406) do
           { output: I18n.t('errors.unacceptable_request') }
         end
       end

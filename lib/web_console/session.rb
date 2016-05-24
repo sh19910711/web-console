@@ -65,7 +65,15 @@ module WebConsole
     private
 
       def initial_binding
-        @bindings.find {|b| b.eval('__FILE__').start_with?(Rails.root.to_s) }
+        @bindings.find {|b| binding_path(b).start_with?(Rails.root.to_s) }
+      end
+
+      def binding_path(b)
+        if b.respond_to?(:backtrace)
+          b.backtrace.first.scan(/(.*?):/)[0][0]
+        else
+          b.eval('__FILE__')
+        end
       end
 
       def store_into_memory

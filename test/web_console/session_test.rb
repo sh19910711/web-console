@@ -17,6 +17,7 @@ module WebConsole
     end
 
     setup do
+      Rails.stubs(:root).returns Pathname(__FILE__).parent
       Session.inmemory_storage.clear
       @session = Session.new TOPLEVEL_BINDING
     end

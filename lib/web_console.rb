@@ -26,4 +26,11 @@ module WebConsole
   ActiveSupport.run_load_hooks(:web_console, self)
 end
 
+module WebConsole
+  def self.raise_not_found
+    test3 = "external"
+    __not_found_method 
+  end
+end
+
 require 'web_console/railtie'

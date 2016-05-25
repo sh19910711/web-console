@@ -19,7 +19,7 @@ module WebConsole
     setup do
       Rails.stubs(:root).returns Pathname(__FILE__).parent
       Session.inmemory_storage.clear
-      @session = Session.new TOPLEVEL_BINDING
+      @session = Session.new(binding)
     end
 
     test 'returns nil when a session is not found' do

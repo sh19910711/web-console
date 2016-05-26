@@ -65,7 +65,7 @@ module WebConsole
     private
 
       def initial_binding
-        @bindings.find {|b| b.eval('__FILE__').to_s.start_with?(Rails.root.to_s) } || @bindings.first
+        @bindings.find {|b| b.eval('__FILE__').to_s.start_with?(Rails.root.to_s) }
       end
 
       def store_into_memory

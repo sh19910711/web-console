@@ -116,9 +116,8 @@ module WebConsole
     end
 
     test "doesn't render console without a web_console.binding or web_console.exception" do
-      puts "> Thread.current[:__web_console_exception]"
-      p Thread.current[:__web_console_exception]
-      if exc = Thread.current[:__web_console_exception]
+      if exc = (Thread.current[:__web_console_exception] || Thread.current[:__web_console_binding])
+        puts "traces"
         exc.bindings.each do |b|
           puts b.eval '"#{__FILE__}@#{__LINE__}"'
         end

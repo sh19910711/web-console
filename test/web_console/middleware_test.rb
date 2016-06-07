@@ -181,11 +181,11 @@ module WebConsole
     end
 
     test 'respond with the X-Web-Console header if anywhere' do
-      Thread.current[:__web_console_binding] = binding
+      put '/', xhr: true
+      assert_equal response.headers['X-Web-Console'], nil
+
       Middleware.anywhere = true
-
-      get '/', params: nil
-
+      put '/', xhr: true
       assert_equal response.headers['X-Web-Console'], '1'
     end
 

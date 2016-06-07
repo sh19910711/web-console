@@ -29,7 +29,6 @@ module WebConsole
         end
 
         status, headers, body = call_app(env)
-
         headers['X-Web-Console'] = '1' if anywhere?
 
         if session = Session.from(Thread.current) and acceptable_content_type?(headers)

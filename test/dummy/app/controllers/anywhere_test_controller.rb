@@ -1,6 +1,7 @@
 class AnywhereTestController < ApplicationController
-  def index
+  def view_console
     test1 = 'foo'
+    render :console
   end
 
   def xhr_console

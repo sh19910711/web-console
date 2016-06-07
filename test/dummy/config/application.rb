@@ -11,9 +11,10 @@ module Dummy
   class Application < Rails::Application
     # Run outside of the development mode so our test suite runs.
     config.web_console.development_only = false
+    config.web_console.anywhere = true
+
+    config.web_console.whitelisted_ips = '172.17.0.1'
 
     config.active_support.test_order = :random
-
-    config.web_console.anywhere = true
   end
 end

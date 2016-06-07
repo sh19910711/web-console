@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   get :controller_helper_test, to: "controller_helper_test#index"
 
   namespace :anywhere_test do
-    get :console
+    get :view_console
     get :xhr_console, format: "text/plain"
   end
 

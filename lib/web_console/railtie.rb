@@ -60,6 +60,10 @@ module WebConsole
       end
     end
 
+    initializer 'web_console.anywhere' do
+      Middleware.anywhere = config.web_console.anywhere
+    end
+
     initializer 'i18n.load_path' do
       config.i18n.load_path.concat(Dir[File.expand_path('../locales/*.yml', __FILE__)])
     end

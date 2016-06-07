@@ -13,5 +13,7 @@ module Dummy
     config.web_console.development_only = false
 
     config.active_support.test_order = :random
+
+    config.web_console.anywhere = true
   end
 end

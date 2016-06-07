@@ -42,6 +42,7 @@ module WebConsole
       Request.stubs(:whitelisted_ips).returns(IPAddr.new('0.0.0.0/0'))
 
       Middleware.mount_point = ''
+      Middleware.anywhere = false
       @app = Middleware.new(Application.new)
     end
 
@@ -177,6 +178,15 @@ module WebConsole
       @app = proc { raise }
 
       assert_raises(RuntimeError) { get '/' }
+    end
+
+    test 'respond with the X-Web-Console header if anywhere' do
+      Thread.current[:__web_console_binding] = binding
+      Middleware.anywhere = true
+
+      get '/', params: nil
+
+      assert_equal response.headers['X-Web-Console'], '1'
     end
 
     private

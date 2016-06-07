@@ -30,6 +30,8 @@ module WebConsole
 
         status, headers, body = call_app(env)
 
+        headers['X-Web-Console'] = '1' if anywhere?
+
         if session = Session.from(Thread.current) and acceptable_content_type?(headers)
           response = Response.new(body, status, headers)
           template = Template.new(env, session)
@@ -55,6 +57,10 @@ module WebConsole
     end
 
     private
+
+      def anywhere?
+        Middleware.anywhere
+      end
 
       def acceptable_content_type?(headers)
         Mime::Type.parse(headers['Content-Type']).first == Mime[:html]

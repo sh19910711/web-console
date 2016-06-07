@@ -1,0 +1,11 @@
+(function(global, original) {
+  if (!global.fetch) return;
+
+  global.fetch = function() {
+    return original.apply(this, arguments).then(function(res) {
+      if (res.headers.get('X-Web-Console') === '1') {
+        REPLConsole.installInto('console');
+      }
+    });
+  };
+})(window, window.fetch);

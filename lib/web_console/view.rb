@@ -7,6 +7,10 @@ module WebConsole
     def only_on_error_page(*args)
       yield if Thread.current[:__web_console_exception].present?
     end
+    
+    def only_on_anywhere(*args)
+      yield if Middleware.anywhere
+    end
 
     # Render JavaScript inside a script tag and a closure.
     #

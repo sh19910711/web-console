@@ -1,0 +1,14 @@
+(function(original) {
+  XMLHttpRequest.prototype.open = function(_args_) {
+    console.log('hijacked');
+    this.addEventListener('readystatechange', function() {
+      if (this.readyState === 4) {
+        var header = this.getResponseHeader('X-Web-Console');
+        if (header === '1') {
+          REPLConsole.installInto('console');
+        }
+      }
+    }, false);
+    original.apply(this, arguments);
+  };
+})(XMLHttpRequest.prototype.open);

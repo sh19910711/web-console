@@ -1,11 +1,11 @@
-(function(global, original) {
-  if (!global.fetch) return;
-
-  global.fetch = function() {
-    return original.apply(this, arguments).then(function(res) {
-      if (res.headers.get('X-Web-Console') === '1') {
-        REPLConsole.installInto('console');
+(function(origin) {
+  if (!origin) return;
+  window.fetch = function() {
+    return origin.apply(this, arguments).then(function(res) {
+      function header(key) { return res.headers.get(key); }
+      if (header('X-Web-Console') === '1') {
+        REPLConsole.installInto('console', REPLConsole.parseHeaders(header));
       }
     });
   };
-})(window, window.fetch);
+})(window.fetch);

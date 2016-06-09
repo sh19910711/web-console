@@ -8,6 +8,8 @@ module WebConsole
     cattr_accessor :template_paths
     @@template_paths = [ File.expand_path('../templates', __FILE__) ]
 
+    attr_accessor :session
+
     def initialize
       @mount_point = Middleware.mount_point
     end
@@ -16,11 +18,6 @@ module WebConsole
     def render(template)
       view = View.new(template_paths, instance_values)
       view.render(template: template, layout: false)
-    end
-
-    def render_with_session(template, session)
-      @session = session
-      render template
     end
   end
 end

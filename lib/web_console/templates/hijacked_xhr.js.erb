@@ -1,14 +1,16 @@
-(function(original) {
+(function(global, original) {
+  if (!original) return;
   XMLHttpRequest.prototype.open = function(_args_) {
-    console.log('hijacked');
-    this.addEventListener('readystatechange', function() {
-      if (this.readyState === 4) {
-        var header = this.getResponseHeader('X-Web-Console');
-        if (header === '1') {
-          REPLConsole.installInto('console');
+    var self = this;
+    self.addEventListener('readystatechange', function() {
+      if (self.readyState === 4) {
+        function header(key) { return self.getResponseHeader(key); }
+        if (header('X-Web-Console') === '1') {
+          console.log('hijacked xhr');
+          REPLConsole.installInto('console', REPLConsole.parseHeaders(header));
         }
       }
     }, false);
-    original.apply(this, arguments);
+    original.apply(self, arguments);
   };
-})(XMLHttpRequest.prototype.open);
+})(window, window.XMLHttpRequest.prototype.open);

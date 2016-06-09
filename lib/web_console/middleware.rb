@@ -35,12 +35,18 @@ module WebConsole
         response.headers['X-Web-Console'] = '1' if anywhere?
 
         if session = Session.from(Thread.current)
+          template.session = session
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-          response.insert_head(template.render('head'))
-          response.insert_body(template.render_with_session('console', session))
+          if acceptable_content_type?(headers)
+            response.insert_head(template.render('head'))
+            response.insert_body(template.render('console'))
+            response.insert_body(template.render('index'))
+          end
         else
-          response.insert_head(template.render('head')) if anywhere?
+          if anywhere? && acceptable_content_type?(headers)
+            response.insert_head(template.render('head'))
+          end
         end
 
         response.finish

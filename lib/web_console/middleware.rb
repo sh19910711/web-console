@@ -10,6 +10,9 @@ module WebConsole
     cattr_accessor :whiny_requests
     @@whiny_requests = true
 
+    cattr_accessor :anywhere
+    @@anywhere = false
+
     def initialize(app)
       @app = app
     end
@@ -56,6 +59,10 @@ module WebConsole
     end
 
     private
+
+      def anywhere?
+        Middleware.anywhere
+      end
 
       def acceptable_content_type?(headers)
         Mime::Type.parse(headers['Content-Type']).first == Mime[:html]

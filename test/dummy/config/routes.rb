@@ -8,6 +8,11 @@ Rails.application.routes.draw do
   get :helper_error, to: "helper_error#index"
   get :controller_helper_test, to: "controller_helper_test#index"
 
+  namespace :anywhere_test do
+    get :view_console
+    get :xhr_console, format: "text/plain"
+  end
+
   namespace :tests do
     get :render_console_ontop_of_text
     get :renders_console_only_once

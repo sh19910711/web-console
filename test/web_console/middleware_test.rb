@@ -179,6 +179,16 @@ module WebConsole
       assert_raises(RuntimeError) { get '/' }
     end
 
+    test 'hijack web requests if anywhere' do
+      Thread.current[:__web_console_binding] = binding
+
+      Middleware.stubs(:anywhere).returns(true)
+      get '/', params: nil
+      Middleware.stubs(:anywhere).returns(false)
+
+      assert_select 'script[data-template="anywhere"]'
+    end
+
     private
 
       # Override the put and post testing helper of ActionDispatch to customize http headers

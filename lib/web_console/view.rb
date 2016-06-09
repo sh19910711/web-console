@@ -8,6 +8,10 @@ module WebConsole
       yield if Thread.current[:__web_console_exception].present?
     end
 
+    def only_on_anywhere(*args)
+      yield if Middleware.anywhere
+    end
+
     # Render JavaScript inside a script tag and a closure.
     #
     # This one lets write JavaScript that will automatically get wrapped in a

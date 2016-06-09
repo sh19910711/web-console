@@ -462,6 +462,12 @@ REPLConsole.prototype.switchBindingTo = function(frameId, callback) {
 REPLConsole.installInto = function(id, options) {
   var consoleElement = document.getElementById(id);
 
+  if (!consoleElement) {
+    consoleElement = document.createElement('div');
+    consoleElement.id = 'console';
+    document.body.appendChild(consoleElement);
+  }
+
   options = options || {};
 
   for (var prop in consoleElement.dataset) {
@@ -472,6 +478,13 @@ REPLConsole.installInto = function(id, options) {
   replConsole.install(consoleElement);
   return replConsole;
 };
+
+REPLConsole.parseHeaders = function(getHeader) {
+  return {
+    sessionId: getHeader('X-Web-Console-Session-Id'),
+    mountPoint: getHeader('X-Web-Console-Mount-Point')
+  };
+}
 
 // This is to store the latest single session, and the stored session
 // is updated by the REPLConsole#install() method.

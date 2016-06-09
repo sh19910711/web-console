@@ -1,3 +1,7 @@
+<% only_on_anywhere do %>
+  <%= render_javascript 'anywhere' %>
+<% end %>
+
 <%= render_javascript 'console' %>
 <% only_on_error_page do %>
   <%= render_javascript 'error_page' %>

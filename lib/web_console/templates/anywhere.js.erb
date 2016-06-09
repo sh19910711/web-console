@@ -1,0 +1,29 @@
+// Hijacking Fetch API
+(function(origin) {
+  if (!origin) return;
+  window.fetch = function() {
+    return origin.apply(this, arguments).then(function(res) {
+      function header(key) { return res.headers.get(key); }
+      if (header('X-Web-Console-Session-Id')) {
+        REPLConsole.installInto('console', REPLConsole.parseHeaders(header));
+      }
+    });
+  };
+})(window.fetch);
+
+// Hijacking XHR
+(function(global, original) {
+  if (!original) return;
+  XMLHttpRequest.prototype.open = function(_args_) {
+    var self = this;
+    self.addEventListener('readystatechange', function() {
+      if (self.readyState === 4) {
+        function header(key) { return self.getResponseHeader(key); }
+        if (header('X-Web-Console-Session-Id')) {
+          REPLConsole.installInto('console', REPLConsole.parseHeaders(header));
+        }
+      }
+    }, false);
+    original.apply(self, arguments);
+  };
+})(window, window.XMLHttpRequest.prototype.open);

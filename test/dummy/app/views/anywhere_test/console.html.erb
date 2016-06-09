@@ -1,11 +1,14 @@
 <h1>Anywhere Test</h1>
+<button id="xhr">XHR</button>
+<button id="fetch">Fetch API</button>
 <script>
-  setTimeout(function() {
+  document.getElementById('xhr').onclick = function() {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', 'xhr_console');
     xhr.send();
-  }, 1000);
-  // setTimeout(function() {
-  //   fetch('xhr_console');
-  // }, 1000);
+  };
+
+  document.getElementById('fetch').onclick = function() {
+    fetch('xhr_console');
+  };
 </script>

@@ -30,15 +30,12 @@ module WebConsole
         template = Template.new
         response = Response.new(body, status, headers)
 
-        if session = Session.from(Thread.current)
+        if session = Session.from(Thread.current) and acceptable_content_type?(headers)
           template.session = session
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-        end
-
-        if acceptable_content_type?(headers)
-          response.insert_head(template.render('head')) if session or anywhere?
-          response.insert_body(template.render('index')) if session
+          response.insert_head(template.render('head'))
+          response.insert_body(template.render('index'))
         end
 
         response.finish

@@ -1,28 +1,30 @@
 // Try intercept traces links in Rails 4.2.
-var traceFrames = document.getElementsByClassName('trace-frames');
-var selectedFrame, currentSource = document.getElementById('frame-source-0');
+document.addEventListener('DOMContentLoaded', function() {
+  var traceFrames = document.getElementsByClassName('trace-frames');
+  var selectedFrame, currentSource = document.getElementById('frame-source-0');
 
-// Add click listeners for all stack frames
-for (var i = 0; i < traceFrames.length; i++) {
-  traceFrames[i].addEventListener('click', function(e) {
-    e.preventDefault();
-    var target = e.target;
-    var frameId = target.dataset.frameId;
+  // Add click listeners for all stack frames
+  for (var i = 0; i < traceFrames.length; i++) {
+    traceFrames[i].addEventListener('click', function(e) {
+      e.preventDefault();
+      var target = e.target;
+      var frameId = target.dataset.frameId;
 
-    // Change the binding of the console.
-    changeBinding(frameId, function() {
-      if (selectedFrame) {
-        selectedFrame.className = selectedFrame.className.replace("selected", "");
-      }
+      // Change the binding of the console.
+      changeBinding(frameId, function() {
+        if (selectedFrame) {
+          selectedFrame.className = selectedFrame.className.replace("selected", "");
+        }
 
-      target.className += " selected";
-      selectedFrame = target;
+        target.className += " selected";
+        selectedFrame = target;
+      });
+
+      // Change the extracted source code
+      changeSourceExtract(frameId);
     });
-
-    // Change the extracted source code
-    changeSourceExtract(frameId);
-  });
-}
+  }
+});
 
 function changeBinding(frameId, callback) {
   REPLConsole.currentSession.switchBindingTo(frameId, callback);

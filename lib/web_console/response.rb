@@ -1,6 +1,6 @@
 module WebConsole
-  # A response object that writes content before the closing </body> tag, if
-  # possible.
+  # A rack response object that writes content before the closing </body> tag
+  # the opening <head> tag, if possible.
   class Response < Rack::Response
     def insert_head(content)
       insert '<head>', content, true

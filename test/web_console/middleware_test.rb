@@ -66,7 +66,7 @@ module WebConsole
 
       get '/', params: nil
 
-      assert_select 'body > script[data-template=error_page]'
+      assert_select 'head > script[data-template=error_page]'
     end
 
     test 'render console if response format is HTML' do

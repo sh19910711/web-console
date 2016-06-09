@@ -1,23 +1,28 @@
 module WebConsole
-  # A response object that writes content before the closing </body> tag, if
-  # possible.
-  #
-  # The object quacks like Rack::Response.
-  class Response < Struct.new(:body, :status, :headers)
-    def write(content)
-      raw_body = Array(body).first.to_s
+  # An extension of Rack::Response that writes content before the </body> tag
+  # or after the <head> tag, if possible.
+  class Response < ::Rack::Response
+    def insert_head(content)
+      insert '<head>', content, true
+    end
 
-      if position = raw_body.rindex('</body>')
-        raw_body.insert(position, content)
-      else
-        raw_body << content
+    def insert_body(content)
+      insert '</body>', content, false
+    end
+
+    private
+
+      def insert(tag, content, shift)
+        raw_body = Array(body).first.to_s
+
+        if pos = raw_body.rindex(tag)
+          pos += tag.length if shift
+          raw_body.insert(pos, content)
+        else
+          raw_body << content
+        end
+
+        initialize raw_body, status, headers
       end
-
-      self.body = raw_body
-    end
-
-    def finish
-      Rack::Response.new(body, status, headers).finish
-    end
   end
 end

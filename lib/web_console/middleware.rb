@@ -26,18 +26,17 @@ module WebConsole
         end
 
         status, headers, body = call_app(env)
+        response = Response.new(body, status, headers)
 
         if session = Session.from(Thread.current) and acceptable_content_type?(headers)
-          response = Response.new(body, status, headers)
           template = Template.new(env, session)
-
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-          response.write(template.render('index'))
-          response.finish
-        else
-          [ status, headers, body ]
+          response.insert_head(template.render('head'))
+          response.insert_body(template.render('index'))
         end
+
+        response.finish
       end
     rescue => e
       WebConsole.logger.error("\n#{e.class}: #{e}\n\tfrom #{e.backtrace.join("\n\tfrom ")}")

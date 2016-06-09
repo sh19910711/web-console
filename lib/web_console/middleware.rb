@@ -26,11 +26,10 @@ module WebConsole
         end
 
         status, headers, body = call_app(env)
-
-        template = Template.new
         response = Response.new(body, status, headers)
 
         if session = Session.from(Thread.current) and acceptable_content_type?(headers)
+          template = Template.new
           template.session = session
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point

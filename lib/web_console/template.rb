@@ -8,9 +8,9 @@ module WebConsole
     cattr_accessor :template_paths
     @@template_paths = [ File.expand_path('../templates', __FILE__) ]
 
-    def initialize(env, session)
-      @env = env
-      @session = session
+    attr_accessor :session
+
+    def initialize
       @mount_point = Middleware.mount_point
     end
 

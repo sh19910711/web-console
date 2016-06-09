@@ -3,31 +3,20 @@ module WebConsole
   # possible.
   class Response < Rack::Response
     def insert_head(content)
-      insert_after '<head>', content
+      insert '<head>', content, true
     end
 
     def insert_body(content)
-      insert_before '</body>', content
+      insert '</body>', content, false
     end
 
     private
 
-      def insert_before(*args)
-        insert(*args) { |body, tag| body.index(tag) }
-      end
-
-      def insert_after(*args)
-        insert(*args) do |body, tag|
-          if pos = body.rindex(tag)
-            pos + tag.length
-          end
-        end
-      end
-
-      def insert(tag, content)
+      def insert(tag, content, shift)
         raw_body = Array(body).first.to_s
 
-        if pos = yield(raw_body, tag)
+        if pos = raw_body.rindex(tag)
+          pos += tag.length if shift
           raw_body.insert(pos, content)
         else
           raw_body << content

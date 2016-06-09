@@ -1,4 +1,11 @@
 <h1>Anywhere Test</h1>
 <script>
-  fetch('xhr_console')
+  setTimeout(function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', 'xhr_console');
+    xhr.send();
+  }, 1000);
+  // setTimeout(function() {
+  //   fetch('xhr_console');
+  // }, 1000);
 </script>

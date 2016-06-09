@@ -27,17 +27,21 @@ module WebConsole
 
         status, headers, body = call_app(env)
 
-        if session = Session.from(Thread.current) and acceptable_content_type?(headers)
-          response = Response.new(body, status, headers)
-          template = Template.new(env, session)
+        template = Template.new
+        response = Response.new(body, status, headers)
 
+        if session = Session.from(Thread.current)
+          template.session = session
           response.headers["X-Web-Console-Session-Id"] = session.id
           response.headers["X-Web-Console-Mount-Point"] = mount_point
-          response.write(template.render('index'))
-          response.finish
-        else
-          [ status, headers, body ]
         end
+
+        if acceptable_content_type?(headers)
+          response.insert_head(template.render('head')) if session or anywhere?
+          response.insert_body(template.render('index')) if session
+        end
+
+        response.finish
       end
     rescue => e
       WebConsole.logger.error("\n#{e.class}: #{e}\n\tfrom #{e.backtrace.join("\n\tfrom ")}")

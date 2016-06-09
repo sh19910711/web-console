@@ -182,20 +182,11 @@ module WebConsole
     test 'hijack web requests if anywhere' do
       Thread.current[:__web_console_binding] = binding
 
-      Middleware.anywhere = true
+      Middleware.stubs(:anywhere).returns(true)
       get '/', params: nil
-      Middleware.anywhere = false
+      Middleware.stubs(:anywhere).returns(false)
 
-      assert_select 'script[data-template="console"]'
-      assert_select 'script[data-template="xhr"]'
-    end
-
-    test 'respond with the X-Web-Console header if anywhere' do
-      Middleware.anywhere = true
-      put '/', xhr: true
-      Middleware.anywhere = false
-
-      assert_equal response.headers['X-Web-Console'], '1'
+      assert_select 'script[data-template="anywhere"]'
     end
 
     private

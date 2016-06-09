@@ -13,9 +13,7 @@ module WebConsole
     private
 
       def insert_before(*args)
-        insert(*args) do |body, tag|
-          body.index(tag)
-        end
+        insert(*args) { |body, tag| body.index(tag) }
       end
 
       def insert_after(*args)
@@ -29,13 +27,12 @@ module WebConsole
       def insert(tag, content)
         raw_body = Array(body).first.to_s
 
-        if position = yield(raw_body, tag)
-          raw_body.insert(position, content)
+        if pos = yield(raw_body, tag)
+          raw_body.insert(pos, content)
         else
           raw_body << content
         end
 
-        self.body = raw_body
         initialize raw_body, status, headers
       end
   end

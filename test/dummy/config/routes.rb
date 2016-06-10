@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   root to: "exception_test#index"
 
   get :exception_test, to: "exception_test#index"
+  get :external_exception_test, to: "exception_test#external"
   get :xhr_test, to: "exception_test#xhr"
   get :helper_test, to: "helper_test#index"
   get :model_test, to: "model_test#index"

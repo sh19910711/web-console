@@ -43,7 +43,7 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = Array(bindings)
-      @evaluator = Evaluator.new(initial_binding)
+      @evaluator = Evaluator.new(initial_binding || @bindings.first)
 
       store_into_memory
     end

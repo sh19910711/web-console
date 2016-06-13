@@ -344,23 +344,25 @@ REPLConsole.prototype.startCompleting = function() {
 };
 
 REPLConsole.prototype.stopCompleting = function() {
-  this.completing = false;
-  removeElements(this.inner.getElementsByClassName('temp console-message'));
-
-  function removeElements(items) {
-    for (var i = 0; i < items.length; ++i) {
-      removeFromParent(items[i]);
-    }
-  }
-
   function removeFromParent(el) {
     el.parentNode.removeChild(el);
   }
+
+  var result = this._autoComplete.getInput();
+  this.completing = false;
+  this._autoComplete.close();
+
+  var items = this.inner.getElementsByClassName('auto-complete');
+  for (var i = 0; i < items.length; ++i) {
+    removeFromParent(items[i]);
+  }
+
+  return result;
 };
 
 REPLConsole.prototype.onEnterKey = function() {
   if (this.completing) {
-    this.stopCompleting();
+    this._input = this.stopCompleting();
   }
 
   var input = this._input;
@@ -370,6 +372,56 @@ REPLConsole.prototype.onEnterKey = function() {
   }
 
   this.commandHandle(input);
+};
+
+// TODO
+function AutoComplete(list) {
+  this.list = list;
+  this.next = this.next.bind(this);
+}
+
+AutoComplete.prototype.render = function() {
+  var self = this;
+
+  function createItem(label) {
+    var el = document.createElement('span');
+    el.innerText = label;
+    addClass(el, 'keyword');
+    return el;
+  }
+
+  var box = self.view = document.createElement('pre');
+  addClass(box, 'console-message');
+  addClass(box, 'auto-complete');
+  for (var key in self.list) {
+    box.appendChild(createItem(self.list[key]));
+  }
+
+  document.addEventListener('keydown', self.next);
+
+  return box;
+};
+
+AutoComplete.prototype.getInput = function() {
+  return findChild(this.view, 'selected').innerText;
+};
+
+AutoComplete.prototype.close = function() {
+  document.removeEventListener('keydown', this.next);
+};
+
+AutoComplete.prototype.next = function() {
+  var box = this.view;
+  var selected = findChild(box, 'selected');
+  if (!selected) {
+    addClass(box.children[0], 'selected')
+    selected = box.children[0];
+  } else {
+    var next = selected.nextSibling;
+    if (!next) next= box.children[0];
+    addClass(next, 'selected');
+    removeClass(selected, 'selected');
+  }
 };
 
 REPLConsole.prototype.onTabKey = function() {
@@ -382,22 +434,10 @@ REPLConsole.prototype.onTabKey = function() {
     self.startCompleting();
     self.commandHandle(cmd, function(ok, obj) {
       if (ok) {
-        var box = document.createElement('div');
-        addClass(box, 'console-message');
-        addClass(box, 'temp');
-        var list = JSON.parse(obj['output']);
-        for (var key in list) {
-          box.appendChild(createItem(list[key]));
-        }
-        self.inner.appendChild(box);
+        self._autoComplete = new AutoComplete(JSON.parse(obj['output']));
+        self.inner.appendChild(self._autoComplete.render());
       }
     });
-  }
-
-  function createItem(label) {
-    var el = document.createElement('span');
-    el.innerText = label;
-    return el;
   }
 };
 

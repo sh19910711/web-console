@@ -62,6 +62,7 @@ function REPLConsole(config) {
   this.prompt = getConfig('promptLabel', ' >>');
   this.mountPoint = getConfig('mountPoint');
   this.sessionId = getConfig('sessionId');
+  this.completing = false;
 }
 
 REPLConsole.prototype.getSessionUrl = function(path) {
@@ -77,6 +78,10 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   var self = this;
   var params = 'input=' + encodeURIComponent(line);
   callback = callback || function() {};
+
+  if (this.completing) {
+    params += '&jsonize=true';
+  }
 
   function isSuccess(status) {
     return status >= 200 && status < 300 || status === 304;
@@ -316,6 +321,7 @@ REPLConsole.prototype.renderInput = function() {
 };
 
 REPLConsole.prototype.writeOutput = function(output) {
+  if (this.completing) return;
   var consoleMessage = document.createElement('pre');
   consoleMessage.className = "console-message";
   consoleMessage.innerHTML = escapeHTML(output);
@@ -325,12 +331,27 @@ REPLConsole.prototype.writeOutput = function(output) {
 };
 
 REPLConsole.prototype.writeError = function(output) {
+  if (this.completing) return;
   var consoleMessage = this.writeOutput(output);
   addClass(consoleMessage, "error-message");
   return consoleMessage;
 };
 
+REPLConsole.prototype.startCompleting = function() {
+  if (this.completing) return;
+  this.completing = true;
+  console.log('start completing');
+};
+
+REPLConsole.prototype.stopCompleting = function() {
+  this.completing = false;
+};
+
 REPLConsole.prototype.onEnterKey = function() {
+  if (this.completing) {
+    this.stopCompleting();
+  }
+
   var input = this._input;
 
   if(input != "" && input !== undefined) {
@@ -338,6 +359,21 @@ REPLConsole.prototype.onEnterKey = function() {
   }
 
   this.commandHandle(input);
+};
+
+REPLConsole.prototype.onTabKey = function() {
+  var input = this._input;
+
+  if (this.completing) {
+  } else {
+    var cmd = "::WebConsole::WebAPI.complete('" + this.sessionId + "', '" + input + "')";
+    this.startCompleting();
+    this.commandHandle(cmd, function(ok, obj) {
+      if (ok) {
+        console.log(cmd + ' => ' + obj['output']);
+      }
+    });
+  }
 };
 
 REPLConsole.prototype.onNavigateHistory = function(offset) {
@@ -350,6 +386,11 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   switch (ev.keyCode) {
+    case 9:
+      // Tab
+      this.onTabKey();
+      ev.preventDefault();
+      break;
     case 13:
       // Enter key
       this.onEnterKey();

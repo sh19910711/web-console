@@ -14,8 +14,12 @@ module WebConsole
       @binding = binding
     end
 
-    def eval(input)
-      "=> #{@binding.eval(input).inspect}\n"
+    def eval(input, jsonize = false)
+      if jsonize
+        @binding.eval(input).to_json
+      else
+        "=> #{@binding.eval(input).inspect}\n"
+      end
     rescue Exception => exc
       format_exception(exc)
     end

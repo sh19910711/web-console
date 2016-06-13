@@ -14,10 +14,10 @@ module WebConsole
       @binding = binding
     end
 
-    def eval(input, serializer = nil)
+    def eval(input, serialize_method = nil)
       res = @binding.eval(input)
-      if type = serializer
-        res.respond_to?(serializer) ? res.send(serializer) : res
+      if m = serialize_method
+        res.respond_to?(m) ? res.send(m) : res
       else
         "=> #{res.inspect}\n"
       end

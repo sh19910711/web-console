@@ -51,8 +51,8 @@ module WebConsole
     # Evaluate +input+ on the current Evaluator associated binding.
     #
     # Returns a string of the Evaluator output.
-    def eval(input, serialize_method = nil)
-      @evaluator.eval(input, serialize_method)
+    def eval(input, serializer = nil)
+      @evaluator.eval(input, serializer)
     end
 
     # Switches the current binding to the one at specified +index+.

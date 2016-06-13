@@ -103,8 +103,7 @@ module WebConsole
 
       def update_repl_session(id, request)
         json_response_with_session(id, request) do |session|
-          serialize_method = :to_json if request.params[:jsonize]
-          { output: session.eval(request.params[:input], serialize_method) }
+          { output: session.eval(request.params[:input], (request.params[:jsonize] && :to_json)) }
         end
       end
 

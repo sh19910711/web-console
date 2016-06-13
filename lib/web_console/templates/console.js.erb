@@ -345,6 +345,17 @@ REPLConsole.prototype.startCompleting = function() {
 
 REPLConsole.prototype.stopCompleting = function() {
   this.completing = false;
+  removeElements(this.inner.getElementsByClassName('temp console-message'));
+
+  function removeElements(items) {
+    for (var i = 0; i < items.length; ++i) {
+      removeFromParent(items[i]);
+    }
+  }
+
+  function removeFromParent(el) {
+    el.parentNode.removeChild(el);
+  }
 };
 
 REPLConsole.prototype.onEnterKey = function() {
@@ -363,19 +374,30 @@ REPLConsole.prototype.onEnterKey = function() {
 
 REPLConsole.prototype.onTabKey = function() {
   var input = this._input;
+  var self = this;
 
-  if (this.completing) {
+  if (self.completing) {
   } else {
-    var cmd = "::WebConsole::WebAPI.complete('" + this.sessionId + "', '" + input + "')";
-    this.startCompleting();
-    this.commandHandle(cmd, function(ok, obj) {
+    var cmd = "::WebConsole::WebAPI.complete('" + self.sessionId + "', '" + input + "')";
+    self.startCompleting();
+    self.commandHandle(cmd, function(ok, obj) {
       if (ok) {
+        var box = document.createElement('div');
+        addClass(box, 'console-message');
+        addClass(box, 'temp');
         var list = JSON.parse(obj['output']);
-        for (var i = 0; i < list.length; ++i) {
-          console.log('item: ', list[i]);
+        for (var key in list) {
+          box.appendChild(createItem(list[key]));
         }
+        self.inner.appendChild(box);
       }
     });
+  }
+
+  function createItem(label) {
+    var el = document.createElement('span');
+    el.innerText = label;
+    return el;
   }
 };
 

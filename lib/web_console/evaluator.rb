@@ -14,6 +14,8 @@ module WebConsole
       @binding = binding
     end
 
+    # You can specify the way to serialize the result of input
+    # (e.g., :to_json, :itself)
     def eval(input, serialize_method = nil)
       res = @binding.eval(input)
       if m = serialize_method

@@ -14,11 +14,17 @@ module WebConsole
       @binding = binding
     end
 
-    def eval(input, jsonize = false)
-      if jsonize
-        @binding.eval(input).to_json
+    def eval(input, serialize_method = nil)
+      res = @binding.eval(input)
+
+      if type = serialize_method
+        if res.respond_to?(serialize_method)
+          res.send(serialize_method)
+        else
+          res
+        end
       else
-        "=> #{@binding.eval(input).inspect}\n"
+        "=> #{res.inspect}\n"
       end
     rescue Exception => exc
       format_exception(exc)

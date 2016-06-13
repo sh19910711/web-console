@@ -370,7 +370,10 @@ REPLConsole.prototype.onTabKey = function() {
     this.startCompleting();
     this.commandHandle(cmd, function(ok, obj) {
       if (ok) {
-        console.log(cmd + ' => ' + obj['output']);
+        var list = JSON.parse(obj['output']);
+        for (var i = 0; i < list.length; ++i) {
+          console.log('item: ', list[i]);
+        }
       }
     });
   }
@@ -385,6 +388,9 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
+  if (this.completing && ev.keyCode !== 9 && ev.keyCode !== 13) {
+    this.stopCompleting();
+  }
   switch (ev.keyCode) {
     case 9:
       // Tab

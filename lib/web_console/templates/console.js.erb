@@ -411,15 +411,18 @@ AutoComplete.prototype.close = function() {
   document.removeEventListener('keydown', this.next);
 };
 
-AutoComplete.prototype.next = function() {
+AutoComplete.prototype.next = function(e) {
   var box = this.view;
   var selected = findChild(box, 'selected');
+
+  if (e.keyCode !== 9) return;
+
   if (!selected) {
     addClass(box.children[0], 'selected')
     selected = box.children[0];
   } else {
-    var next = selected.nextSibling;
-    if (!next) next= box.children[0];
+    var next = e.shiftKey ? selected.previousSibling : selected.nextSibling;
+    if (!next) next = e.shiftKey ? box.children[box.children.length - 1] : box.children[0];
     addClass(next, 'selected');
     removeClass(selected, 'selected');
   }
@@ -437,6 +440,7 @@ REPLConsole.prototype.onTabKey = function() {
       if (ok) {
         self._autoComplete = new AutoComplete(JSON.parse(obj['output']));
         self.inner.appendChild(self._autoComplete.render());
+        self.scrollToBottom();
       }
     });
   }
@@ -451,9 +455,19 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
-  if (this.completing && ev.keyCode !== 9 && ev.keyCode !== 13) {
-    this.stopCompleting();
+  console.log(ev.keyCode, ev.shiftKey, ev.ctrlKey);
+  if (this.completing) {
+    if (ev.keyCode === 9) {
+      // Tab
+    } else if (ev.keyCode === 13) {
+      // Enter
+    } else if (ev.keyCode === 16) {
+      // Shift
+    } else {
+      this.stopCompleting();
+    }
   }
+
   switch (ev.keyCode) {
     case 9:
       // Tab

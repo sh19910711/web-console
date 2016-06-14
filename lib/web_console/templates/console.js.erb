@@ -362,7 +362,8 @@ REPLConsole.prototype.stopCompleting = function() {
 
 REPLConsole.prototype.onEnterKey = function() {
   if (this.completing) {
-    this._input = this.stopCompleting();
+    this.setInput(this.stopCompleting());
+    return;
   }
 
   var input = this._input;

@@ -14,8 +14,15 @@ module WebConsole
       @binding = binding
     end
 
-    def eval(input)
-      "=> #{@binding.eval(input).inspect}\n"
+    # You can specify the way to serialize the result of input
+    # (e.g., :to_json, :itself)
+    def eval(input, serialize_method = nil)
+      res = @binding.eval(input)
+      if m = serialize_method
+        res.respond_to?(m) ? res.send(m) : res
+      else
+        "=> #{res.inspect}\n"
+      end
     rescue Exception => exc
       format_exception(exc)
     end

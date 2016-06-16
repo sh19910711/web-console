@@ -378,7 +378,7 @@ REPLConsole.prototype.onEnterKey = function() {
 // TODO
 function AutoComplete(list) {
   this.list = list;
-  this.next = this.next.bind(this);
+  this.onKeyDown = this.onKeyDown.bind(this);
 }
 
 AutoComplete.prototype.render = function() {
@@ -398,7 +398,7 @@ AutoComplete.prototype.render = function() {
     box.appendChild(createItem(self.list[key]));
   }
 
-  document.addEventListener('keydown', self.next);
+  document.addEventListener('keydown', self.onKeyDown);
 
   return box;
 };
@@ -408,10 +408,10 @@ AutoComplete.prototype.getInput = function() {
 };
 
 AutoComplete.prototype.close = function() {
-  document.removeEventListener('keydown', this.next);
+  document.removeEventListener('keydown', this.onKeyDown);
 };
 
-AutoComplete.prototype.next = function(e) {
+AutoComplete.prototype.onKeyDown = function(e) {
   var box = this.view;
   var selected = findChild(box, 'selected');
 

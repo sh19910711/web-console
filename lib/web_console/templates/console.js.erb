@@ -344,6 +344,9 @@ REPLConsole.prototype.startCompleting = function() {
 };
 
 REPLConsole.prototype.stopCompleting = function() {
+  if (!this.completing) return;
+  console.log('stop completing');
+
   function removeFromParent(el) {
     el.parentNode.removeChild(el);
   }
@@ -362,7 +365,8 @@ REPLConsole.prototype.stopCompleting = function() {
 
 REPLConsole.prototype.onEnterKey = function() {
   if (this.completing) {
-    this.setInput(this.stopCompleting());
+    var res = this.stopCompleting();
+    if (res) this.setInput(res);
     return;
   }
 
@@ -404,7 +408,10 @@ AutoComplete.prototype.render = function() {
 };
 
 AutoComplete.prototype.getInput = function() {
-  return findChild(this.view, 'selected').innerText;
+  var elm;
+  if (elm = findChild(this.view, 'selected')) {
+    return elm.innerText;
+  }
 };
 
 AutoComplete.prototype.close = function() {
@@ -415,7 +422,7 @@ AutoComplete.prototype.onKeyDown = function(e) {
   var box = this.view;
   var selected = findChild(box, 'selected');
 
-  if (e.keyCode !== 9) return;
+  if (e.keyCode !== 9) return true;
 
   if (!selected) {
     addClass(box.children[0], 'selected')
@@ -461,19 +468,25 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       // Tab
     } else if (ev.keyCode === 13) {
       // Enter
+      this.onEnterKey();
+      ev.preventDefault();
     } else if (ev.keyCode === 16) {
       // Shift
     } else {
       this.stopCompleting();
     }
+    this.focus();
+    ev.preventDefault();
+    return;
   }
 
   switch (ev.keyCode) {
     case 9:
       // Tab
       this.onTabKey();
+      this.focus();
       ev.preventDefault();
-      break;
+      return true;
     case 13:
       // Enter key
       this.onEnterKey();

@@ -51,8 +51,8 @@ module WebConsole
     # Evaluate +input+ on the current Evaluator associated binding.
     #
     # Returns a string of the Evaluator output.
-    def eval(input)
-      @evaluator.eval(input)
+    def eval(input, rawdata = false)
+      @evaluator.eval(input, rawdata)
     end
 
     # Switches the current binding to the one at specified +index+.
@@ -60,6 +60,14 @@ module WebConsole
     # Returns nothing.
     def switch_binding_to(index)
       @evaluator = Evaluator.new(@bindings[index.to_i])
+    end
+
+    def variables
+      vars = []
+      vars << eval('local_variables', true)
+      vars << eval('methods', true)
+      vars << eval('instance_variables', true)
+      vars.flatten
     end
 
     private

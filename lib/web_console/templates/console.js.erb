@@ -80,7 +80,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   callback = callback || function() {};
 
   if (this.completing) {
-    params += '&jsonize=true';
+    params += '&rawdata=true';
   }
 
   function isSuccess(status) {

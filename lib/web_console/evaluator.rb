@@ -14,8 +14,8 @@ module WebConsole
       @binding = binding
     end
 
-    def eval(input, raw = nil)
-      raw ? @binding.eval(input) : "=> #{@binding.eval(input).inspect}\n"
+    def eval(input, rawdata = nil)
+      rawdata ? @binding.eval(input) : "=> #{@binding.eval(input).inspect}\n"
     rescue Exception => exc
       format_exception(exc)
     end

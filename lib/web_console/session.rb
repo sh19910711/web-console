@@ -62,6 +62,14 @@ module WebConsole
       @evaluator = Evaluator.new(@bindings[index.to_i])
     end
 
+    def variables
+      vars = []
+      vars << eval('local_variables', true)
+      vars << eval('methods', true)
+      vars << eval('instance_variables', true)
+      vars.flatten
+    end
+
     private
 
       def store_into_memory

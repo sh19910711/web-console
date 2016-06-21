@@ -44,6 +44,61 @@ function CommandStorage() {
   }
 }
 
+function AutoComplete(list) {
+  this.list = list;
+  this.onKeyDown = this.onKeyDown.bind(this);
+  document.addEventListener('keydown', this.onKeyDown);
+}
+
+AutoComplete.prototype.render = function() {
+  function createKeyword(label) {
+    var el = document.createElement('span');
+    el.innerText = label;
+    addClass(el, 'keyword');
+    return el;
+  }
+
+  this.view = document.createElement('pre');
+  addClass(this.view, 'console-message');
+  addClass(this.view, 'auto-complete');
+  for (var key in this.list) {
+    this.view.appendChild(createKeyword(this.list[key]));
+  }
+
+  return this.view;
+};
+
+AutoComplete.prototype.getCurrentWord = function() {
+  return this.selected && this.selected.innerText;
+};
+
+AutoComplete.prototype.close = function() {
+  document.removeEventListener('keydown', this.onKeyDown);
+  this.view.parentNode.removeChild(this.view);
+};
+
+AutoComplete.prototype.onKeyDown = function(e) {
+  var self = this;
+
+  function selectItem(el) {
+    if (self.selected) removeClass(self.selected, 'selected');
+    self.selected = el;
+    addClass(el, 'selected');
+  }
+  function first() { return self.view.children[0]; }
+  function last() { return self.view.children[self.view.children.length - 1]; }
+
+  if (!this.list.length || e.keyCode !== 9) return;
+
+  if (!self.selected) {
+    selectItem(first());
+  } else if (e.shiftKey) {
+    selectItem(self.selected.previousSibling || last());
+  } else {
+    selectItem(self.selected.nextSibling || first());
+  }
+};
+
 // HTML strings for dynamic elements.
 var consoleInnerHtml = <%= render_inlined_string '_inner_console_markup.html' %>;
 var promptBoxHtml = <%= render_inlined_string '_prompt_box_markup.html' %>;
@@ -62,6 +117,7 @@ function REPLConsole(config) {
   this.prompt = getConfig('promptLabel', ' >>');
   this.mountPoint = getConfig('mountPoint');
   this.sessionId = getConfig('sessionId');
+  this.completing = false;
 }
 
 REPLConsole.prototype.getSessionUrl = function(path) {
@@ -77,6 +133,10 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   var self = this;
   var params = 'input=' + encodeURIComponent(line);
   callback = callback || function() {};
+
+  if (this.completing) {
+    params += '&rawdata=true';
+  }
 
   function isSuccess(status) {
     return status >= 200 && status < 300 || status === 304;
@@ -316,6 +376,7 @@ REPLConsole.prototype.renderInput = function() {
 };
 
 REPLConsole.prototype.writeOutput = function(output) {
+  if (this.completing) return;
   var consoleMessage = document.createElement('pre');
   consoleMessage.className = "console-message";
   consoleMessage.innerHTML = escapeHTML(output);
@@ -325,12 +386,29 @@ REPLConsole.prototype.writeOutput = function(output) {
 };
 
 REPLConsole.prototype.writeError = function(output) {
+  if (this.completing) return;
   var consoleMessage = this.writeOutput(output);
   addClass(consoleMessage, "error-message");
   return consoleMessage;
 };
 
+REPLConsole.prototype.stopCompleting = function() {
+  if (!this.completing) return;
+
+  var result = this._autoComplete.getCurrentWord();
+  this.completing = false;
+  this._autoComplete.close();
+
+  return result;
+};
+
 REPLConsole.prototype.onEnterKey = function() {
+  if (this.completing) {
+    var res = this.stopCompleting();
+    if (res) this.setInput(res);
+    return;
+  }
+
   var input = this._input;
 
   if(input != "" && input !== undefined) {
@@ -338,6 +416,24 @@ REPLConsole.prototype.onEnterKey = function() {
   }
 
   this.commandHandle(input);
+};
+
+REPLConsole.prototype.onTabKey = function() {
+  var input = this._input;
+  var self = this;
+
+  if (!self.completing) {
+    var cmd = "::WebConsole::WebAPI.complete('" + self.sessionId + "', '" + input + "')";
+    self.completing = true;
+    self.commandHandle(cmd, function(ok, obj) {
+      if (!ok) return self.completing = false;
+      var list = obj['output'];
+      if (!list.length) return self.completing = false;
+      self._autoComplete = new AutoComplete(list);
+      self.inner.appendChild(self._autoComplete.render());
+      self.scrollToBottom();
+    });
+  }
 };
 
 REPLConsole.prototype.onNavigateHistory = function(offset) {
@@ -349,7 +445,28 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
+  if (this.completing) {
+    if (ev.keyCode === 9 || ev.keyCode === 16) {
+      // Tab or Shift
+      this.focus();
+      ev.preventDefault();
+    } else if (ev.keyCode === 13) {
+      // Enter
+      this.onEnterKey();
+      ev.preventDefault();
+    } else {
+      this.stopCompleting();
+    }
+    return;
+  }
+
   switch (ev.keyCode) {
+    case 9:
+      // Tab
+      this.onTabKey();
+      this.focus();
+      ev.preventDefault();
+      return true;
     case 13:
       // Enter key
       this.onEnterKey();

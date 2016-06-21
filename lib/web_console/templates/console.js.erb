@@ -74,6 +74,7 @@ AutoComplete.prototype.getCurrentWord = function() {
 
 AutoComplete.prototype.close = function() {
   document.removeEventListener('keydown', this.onKeyDown);
+  this.view.parentNode.removeChild(this.view);
 };
 
 AutoComplete.prototype.onKeyDown = function(e) {
@@ -81,10 +82,9 @@ AutoComplete.prototype.onKeyDown = function(e) {
 
   function selectItem(el) {
     if (self.selected) removeClass(self.selected, 'selected');
+    self.selected = el;
     addClass(el, 'selected');
-    return self.selected = el;
   }
-
   function first() { return self.view.children[0]; }
   function last() { return self.view.children[self.view.children.length - 1]; }
 
@@ -392,26 +392,12 @@ REPLConsole.prototype.writeError = function(output) {
   return consoleMessage;
 };
 
-REPLConsole.prototype.startCompleting = function() {
-  if (this.completing) return;
-  this.completing = true;
-};
-
 REPLConsole.prototype.stopCompleting = function() {
   if (!this.completing) return;
-
-  function removeFromParent(el) {
-    el.parentNode.removeChild(el);
-  }
 
   var result = this._autoComplete.getCurrentWord();
   this.completing = false;
   this._autoComplete.close();
-
-  var items = this.inner.getElementsByClassName('auto-complete');
-  for (var i = 0; i < items.length; ++i) {
-    removeFromParent(items[i]);
-  }
 
   return result;
 };
@@ -436,10 +422,9 @@ REPLConsole.prototype.onTabKey = function() {
   var input = this._input;
   var self = this;
 
-  if (self.completing) {
-  } else {
+  if (!self.completing) {
+    self.completing = true;
     var cmd = "::WebConsole::WebAPI.complete('" + self.sessionId + "', '" + input + "')";
-    self.startCompleting();
     self.commandHandle(cmd, function(ok, obj) {
       if (ok) {
         self._autoComplete = new AutoComplete(obj['output']);

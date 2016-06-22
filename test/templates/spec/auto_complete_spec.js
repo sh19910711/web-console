@@ -2,7 +2,16 @@ describe("Auto Complete", function() {
   describe("move functions", function() {
     context("set up with three elements", function() {
       beforeEach(function() {
-        this.autoComplete = new AutoComplete(["something", "somewhat", "somewhere"]);
+        var self = this.autoComplete = new AutoComplete(["something", "somewhat", "somewhere"]);
+        this.assertSelected = function(pos) {
+          for (var i = 0; i < self.view.children.length; ++i) {
+            if (i === pos) {
+              assert.ok(hasClass(self.view.children[i], 'selected'));
+            } else {
+              assert.ok(!hasClass(self.view.children[i], 'selected'));
+            }
+          }
+        };
       });
       it("should have three elements", function() {
         assert.ok(this.autoComplete.view.children.length === 3)
@@ -16,30 +25,24 @@ describe("Auto Complete", function() {
           this.autoComplete.next();
           this.autoComplete.next();
         });
-        it("should have selected element in the second", function() {
-          assert.ok(!hasClass(this.autoComplete.view.children[0], 'selected'));
-          assert.ok(hasClass(this.autoComplete.view.children[1], 'selected'));
-          assert.ok(!hasClass(this.autoComplete.view.children[2], 'selected'));
+        it("should point the 1-th element", function() {
+          this.assertSelected(1);
         });
 
         context("back once", function() {
           beforeEach(function() {
             this.autoComplete.back();
           });
-          it("should have selected element in the first", function() {
-            assert.ok(hasClass(this.autoComplete.view.children[0], 'selected'));
-            assert.ok(!hasClass(this.autoComplete.view.children[1], 'selected'));
-            assert.ok(!hasClass(this.autoComplete.view.children[2], 'selected'));
+          it("should point the 0-th element", function() {
+            this.assertSelected(0);
           });
 
           context("back once again", function() {
             beforeEach(function() {
               this.autoComplete.back();
             });
-            it("should have selected element in the last element", function() {
-              assert.ok(!hasClass(this.autoComplete.view.children[0], 'selected'));
-              assert.ok(!hasClass(this.autoComplete.view.children[1], 'selected'));
-              assert.ok(hasClass(this.autoComplete.view.children[2], 'selected'));
+            it("should point the last element", function() {
+              this.assertSelected(2);
             });
           });
         });
@@ -50,9 +53,7 @@ describe("Auto Complete", function() {
             this.autoComplete.next();
           });
           it("should back to the first of list", function() {
-            assert.ok(hasClass(this.autoComplete.view.children[0], 'selected'));
-            assert.ok(!hasClass(this.autoComplete.view.children[1], 'selected'));
-            assert.ok(!hasClass(this.autoComplete.view.children[2], 'selected'));
+            this.assertSelected(0);
           });
         });
       });

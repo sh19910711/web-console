@@ -382,19 +382,12 @@ REPLConsole.prototype.writeError = function(output) {
   return consoleMessage;
 };
 
-REPLConsole.prototype.stopCompleting = function() {
-  if (!this.completing) return;
-
-  var result = this._autoComplete.getCurrentWord();
-  this.completing = false;
-  this._autoComplete.close();
-
-  return result;
-};
-
 REPLConsole.prototype.onEnterKey = function() {
   if (this.completing) {
-    this.setInput(this.stopCompleting());
+    var word = this._autoComplete.getCurrentWord();
+    this.completing = false;
+    this._autoComplete.close();
+    this.setInput(word);
     return;
   }
 

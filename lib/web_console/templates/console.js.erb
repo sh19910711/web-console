@@ -422,22 +422,22 @@ REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.completing) {
     if (ev.keyCode === 16) {
       // Nothing to do for only Shift key
-    } else if (ev.keyCode === 9) {
+    } else if (ev.keyCode === 9) { // TAB key
       if (ev.shiftKey) {
         this._autoComplete.back();
       } else {
         this._autoComplete.next();
       }
-    } else if (ev.keyCode === 13) { // Enter key
-      var word = this._autoComplete.getCurrentWord();
+    } else {
+      if (ev.keyCode === 13) { // Enter key
+        this.setInput(this._autoComplete.getCurrentWord());
+      }
       this.completing = false;
       this._autoComplete.close();
-      this.setInput(word);
-    } else {
-      this.stopCompleting();
     }
+    this.focus();
     ev.preventDefault();
-    return false;
+    return;
   }
 
   switch (ev.keyCode) {
@@ -446,7 +446,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       this.onTabKey();
       this.focus();
       ev.preventDefault();
-      return true;
+      return;
     case 13:
       // Enter key
       this.onEnterKey();

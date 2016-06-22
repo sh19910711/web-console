@@ -383,14 +383,6 @@ REPLConsole.prototype.writeError = function(output) {
 };
 
 REPLConsole.prototype.onEnterKey = function() {
-  if (this.completing) {
-    var word = this._autoComplete.getCurrentWord();
-    this.completing = false;
-    this._autoComplete.close();
-    this.setInput(word);
-    return;
-  }
-
   var input = this._input;
 
   if(input != "" && input !== undefined) {
@@ -436,8 +428,11 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       } else {
         this._autoComplete.next();
       }
-    } else if (ev.keyCode === 13) {
-      this.onEnterKey();
+    } else if (ev.keyCode === 13) { // Enter key
+      var word = this._autoComplete.getCurrentWord();
+      this.completing = false;
+      this._autoComplete.close();
+      this.setInput(word);
     } else {
       this.stopCompleting();
     }

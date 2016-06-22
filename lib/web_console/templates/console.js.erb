@@ -391,13 +391,11 @@ REPLConsole.prototype.onTabKey = function() {
   var self = this;
 
   if (!self.completing) {
-    var cmd = "::WebConsole::WebAPI.complete('" + self.sessionId + "', '" + input + "')";
     self.completing = true;
-    self.commandHandle(cmd, function(ok, obj) {
+    self.commandHandle("nil", function(ok, obj) {
       if (!ok) return self.completing = false;
-      var list = obj['output'];
-      if (!list.length) return self.completing = false;
-      self._autoComplete = new AutoComplete(list);
+      if (!obj['context'].length) return self.completing = false;
+      self._autoComplete = new AutoComplete(obj['context']);
       self.inner.appendChild(self._autoComplete.view);
       self.scrollToBottom();
     });

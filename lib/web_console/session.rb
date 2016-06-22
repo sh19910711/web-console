@@ -43,7 +43,8 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = bindings
-      @evaluator = Evaluator.new(bindings.first)
+      @current_binding = bindings.first
+      @evaluator = Evaluator.new(@current_binding)
 
       store_into_memory
     end
@@ -51,22 +52,23 @@ module WebConsole
     # Evaluate +input+ on the current Evaluator associated binding.
     #
     # Returns a string of the Evaluator output.
-    def eval(input, rawdata = false)
-      @evaluator.eval(input, rawdata)
+    def eval(input)
+      @evaluator.eval(input)
     end
 
     # Switches the current binding to the one at specified +index+.
     #
     # Returns nothing.
     def switch_binding_to(index)
-      @evaluator = Evaluator.new(@bindings[index.to_i])
+      @evaluator = Evaluator.new(@current_binding = @bindings[index.to_i])
     end
 
-    def variables
+    # Returns context of the current binding
+    def context
       vars = []
-      vars << eval('local_variables', true)
-      vars << eval('methods', true)
-      vars << eval('instance_variables', true)
+      vars << @current_binding.eval('local_variables')
+      vars << @current_binding.eval('methods')
+      vars << @current_binding.eval('instance_variables')
       vars.flatten
     end
 

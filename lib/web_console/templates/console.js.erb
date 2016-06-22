@@ -317,6 +317,7 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
 };
 
 REPLConsole.prototype.setInput = function(input, caretPos) {
+  if (typeof input === 'undefined') return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
   this.renderInput();
@@ -393,8 +394,7 @@ REPLConsole.prototype.stopCompleting = function() {
 
 REPLConsole.prototype.onEnterKey = function() {
   if (this.completing) {
-    var res = this.stopCompleting();
-    if (res) this.setInput(res);
+    this.setInput(this.stopCompleting());
     return;
   }
 
@@ -444,7 +444,6 @@ REPLConsole.prototype.onKeyDown = function(ev) {
         this._autoComplete.next();
       }
     } else if (ev.keyCode === 13) {
-      // Enter
       this.onEnterKey();
     } else {
       this.stopCompleting();

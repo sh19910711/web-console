@@ -65,11 +65,12 @@ module WebConsole
 
     # Returns context of the current binding
     def context
-      vars = []
-      vars << @current_binding.eval('local_variables')
-      vars << @current_binding.eval('methods')
-      vars << @current_binding.eval('instance_variables')
-      vars.flatten
+      [
+        'local_variables',
+        'instance_variables',
+        'methods',
+        'constants',
+      ].map { |cmd| @current_binding.eval("#{cmd} rescue []") }.flatten
     end
 
     private

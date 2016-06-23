@@ -43,8 +43,7 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = bindings
-      @current_binding = bindings.first
-      @evaluator = Evaluator.new(@current_binding)
+      @evaluator = Evaluator.new(@current_binding = bindings.first)
 
       store_into_memory
     end
@@ -70,7 +69,7 @@ module WebConsole
         'instance_variables',
         'methods',
         'constants',
-      ].map { |cmd| @current_binding.eval("#{cmd} rescue []") }.flatten
+      ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
     end
 
     private

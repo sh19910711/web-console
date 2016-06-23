@@ -69,6 +69,7 @@ module WebConsole
         'instance_variables',
         'methods',
         'constants',
+        'Object.constants',
       ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
     end
 

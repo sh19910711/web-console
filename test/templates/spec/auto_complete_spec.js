@@ -2,15 +2,12 @@ describe("Auto Complete", function() {
   describe("move functions", function() {
     context("set up with three elements", function() {
       beforeEach(function() {
-        var self = this.autoComplete = new AutoComplete(["something", "somewhat", "somewhere"]);
+        var self = this.autoComplete = new Autocomplete(["something", "somewhat", "somewhere"]);
         this.moveNext = function(times) {
           for (var i = 0; i < times; ++i) self.next();
         };
         this.assertSelect = function(pos) {
-          assert.ok(hasClass(self.view.children[pos], 'selected'));
-          for (var i = 0; i < self.view.children.length; ++i) {
-            if (i !== pos) assert.ok(!hasClass(self.view.children[i], 'selected'));
-          }
+          assert.equal(self.current, pos);
         };
       });
       it("should have three elements", function() {

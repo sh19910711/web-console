@@ -69,8 +69,8 @@ function Autocomplete(words, prefix) {
   this.inc(prefix);
 }
 
-function startsWith(str, prefix){
-  return str.substr(0, prefix.length) === prefix;
+function startsWith(str, prefix) {
+  return prefix && str.substr(0, prefix.length) === prefix;
 }
 
 Autocomplete.prototype.inc = function(prefix) {

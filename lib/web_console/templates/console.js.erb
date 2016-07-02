@@ -143,15 +143,16 @@ Autocomplete.prototype.getCurrentWord = function() {
 
 Autocomplete.prototype.confirm = function() {
   if (this.left <= this.current && this.current < this.right) {
-    this.onCloseCallback(this.words[this.current]);
+    if (this.onCloseCallback) this.onCloseCallback(this.words[this.current]);
+    this.view.parentNode.removeChild(this.view);
   } else {
-    this.onCloseCallback();
+    this.cancel();
   }
-  this.cancel();
 };
 
 Autocomplete.prototype.cancel = function() {
   this.view.parentNode.removeChild(this.view);
+  if (this.onCloseCallback) this.onCloseCallback();
 };
 
 Autocomplete.prototype.change = function(nextCurrent) {
@@ -523,6 +524,8 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       ev.preventDefault();
       ev.stopPropagation();
       return;
+    } else if (ev.keyCode == 27) { // ESC
+      this._autoComplete.cancel();
     }
   }
 

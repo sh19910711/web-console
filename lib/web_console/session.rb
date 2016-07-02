@@ -63,15 +63,27 @@ module WebConsole
     end
 
     # Returns context of the current binding
-    def context
-      [
-        'global_variables',
-        'local_variables',
-        'instance_variables',
-        'methods',
-        'constants',
-        'Object.constants',
-      ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
+    def context(context_of)
+      context_of = nil if context_of == ''
+
+      if context_of
+        [
+          'methods',
+          'class_variables',
+        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}.#{m}" }.concat [
+          'constants',
+        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}::#{m}" }.flatten
+      else
+        [
+          'global_variables',
+          'local_variables',
+          'instance_variables',
+          'class_variables',
+          'methods',
+          'constants',
+          'Object.constants'
+        ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
+      end
     end
 
     private

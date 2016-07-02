@@ -180,14 +180,18 @@ REPLConsole.prototype.getSessionUrl = function(path) {
   return parts.join('/').replace(/([^:]\/)\/+/g, '$1');
 };
 
+REPLConsole.prototype.getContext = function() {
+  var s = this.getWordOnCaret();
+  var methodOp = s.lastIndexOf('.');
+  var moduleOp = s.lastIndexOf('::');
+  var x = methodOp > moduleOp ? methodOp : moduleOp;
+  if (x !== -1) return s.substr(0, x);
+};
+
 REPLConsole.prototype.commandHandle = function(line, callback) {
   var self = this;
   var params = 'input=' + encodeURIComponent(line);
   callback = callback || function() {};
-
-  if (this.completing) {
-    params += '&rawdata=true';
-  }
 
   function isSuccess(status) {
     return status >= 200 && status < 300 || status === 304;
@@ -206,6 +210,13 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
       return "<%= t 'errors.connection_refused' %>";
     } else {
       return xhr.status + ' ' + xhr.statusText;
+    }
+  }
+
+  var context;
+  if (this.completing) {
+    if (context = this.getContext()) {
+      params += '&context=' + context;
     }
   }
 
@@ -462,7 +473,7 @@ REPLConsole.prototype.onTabKey = function() {
   self.commandHandle("nil", function(ok, obj) {
     if (!ok) return self.completing = false;
     if (!obj['context'].length) return self.completing = false;
-    self._autoComplete = new Autocomplete(obj['context'], self.getWordOnCaret());
+    self._autoComplete = new Autocomplete(obj['context'], self.getWordOnCaret(), self.getContext());
     self.inner.appendChild(self._autoComplete.view);
     self.scrollToBottom();
   });
@@ -477,7 +488,7 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
-  if (this.completing) {
+  if (this.completing && this._autoComplete) {
     if (ev.keyCode === 9) { // TAB key
       if (ev.shiftKey) {
         this._autoComplete.back();

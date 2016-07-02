@@ -597,15 +597,31 @@ REPLConsole.prototype.insertAtCurrent = function(char) {
   this.setInput(before + char + after, this._caretPos + 1);
 };
 
+REPLConsole.prototype.swapWordOnCaret = function(next) {
+  function left(s, pos) {
+    return s.lastIndexOf(' ', pos);
+  }
+
+  function right(s, pos) {
+    var x = s.indexOf(' ', pos);
+    return x === -1 ? s.length : x;
+  }
+
+  function swap(s, pos) {
+    return s.substr(0, left(s, pos) + 1) + next + s.substr(right(s, pos))
+  }
+
+  this.setInput(swap(this._input, this._caretPos), this._caretPos);
+};
+
 REPLConsole.prototype.getWordOnCaret = function() {
-  function find(s, pos) {
+  return (function(s, pos) {
     var left = s.lastIndexOf(' ', pos);
     if (left === -1) left = 0;
     var right = s.indexOf(' ', pos)
     if (right === -1) right = s.length - 1;
     return s.substr(left, right - left + 1).replace(/^\s+|\s+$/g,'');
-  }
-  return find(this._input, this._caretPos);
+  })(this._input, this._caretPos);
 };
 
 REPLConsole.prototype.scrollToBottom = function() {

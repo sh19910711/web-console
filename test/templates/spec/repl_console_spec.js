@@ -1,6 +1,48 @@
 describe("REPLConsole", function() {
   SpecHelper.prepareStageElement();
 
+  describe("#swapWord", function() {
+    beforeEach(function() {
+      var elm = document.createElement('div');
+      elm.innerHTML = '<div id="console"></div>';
+      this.stageElement.appendChild(elm);
+      var consoleOptions = { mountPoint: '/mock', sessionId: 'result' };
+      this.console = REPLConsole.installInto('console', consoleOptions);
+    });
+    context("caret points to last item", function() {
+      beforeEach(function() {
+        this.console.setInput('hello world');
+        this.console.swapWordOnCaret('swapped');
+      });
+      it('should be last word', function() { assert.equal(this.console._input, 'hello swapped'); });
+    });
+    context("points to first item", function() {
+      beforeEach(function() {
+        this.console.setInput('hello world', 3);
+        this.console.swapWordOnCaret('swapped');
+      });
+      it('should be first word', function() { assert.equal(this.console._input, 'swapped world'); });
+    });
+  });
+
+  describe("#getWordOnCaret", function() {
+    beforeEach(function() {
+      var elm = document.createElement('div');
+      elm.innerHTML = '<div id="console"></div>';
+      this.stageElement.appendChild(elm);
+      var consoleOptions = { mountPoint: '/mock', sessionId: 'result' };
+      this.console = REPLConsole.installInto('console', consoleOptions);
+    });
+    context("caret points to last item", function() {
+      beforeEach(function() { this.console.setInput('hello world'); });
+      it('should be last word', function() { assert.equal(this.console.getWordOnCaret(), 'world'); });
+    });
+    context("points to first item", function() {
+      beforeEach(function() { this.console.setInput('hello world', 0); });
+      it('should be first word', function() { assert.equal(this.console.getWordOnCaret(), 'hello'); });
+    });
+  });
+
   describe("#commandHandle", function() {
     function runCommandHandle(self, consoleOptions, callback) {
       self.console = REPLConsole.installInto('console', consoleOptions);

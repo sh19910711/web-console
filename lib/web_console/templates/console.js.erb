@@ -69,6 +69,10 @@ function Autocomplete(words, prefix) {
   this.inc(prefix);
 }
 
+Autocomplete.prototype.onClose = function(callback) {
+  this.onCloseCallback = callback;
+};
+
 function startsWith(str, prefix) {
   return prefix && str.substr(0, prefix.length) === prefix;
 }
@@ -134,6 +138,7 @@ Autocomplete.prototype.getCurrentWord = function() {
 
 Autocomplete.prototype.close = function() {
   this.view.parentNode.removeChild(this.view);
+  this.onCloseCallback.call(this)
 };
 
 Autocomplete.prototype.change = function(nextCurrent) {
@@ -206,7 +211,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   }
 
   function getContext() {
-    var s = this.getWordOnCaret();
+    var s = self.getWordOnCaret();
     var methodOp = s.lastIndexOf('.');
     var moduleOp = s.lastIndexOf('::');
     var x = methodOp > moduleOp ? methodOp : moduleOp;
@@ -471,9 +476,10 @@ REPLConsole.prototype.onTabKey = function() {
 
   self.completing = true;
   self.commandHandle("nil", function(ok, obj) {
-    if (!ok) return self.completing = false;
-    if (!obj['context'].length) return self.completing = false;
+    if (!ok) return self._autoComplete.close();
+    if (!obj['context'].length) return self._autoComplete.close();
     self._autoComplete = new Autocomplete(obj['context'], self.getWordOnCaret());
+    self._autoComplete.onClose(function() { self.completing = false; });
     self.inner.appendChild(self._autoComplete.view);
     self.scrollToBottom();
   });
@@ -497,7 +503,6 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       }
     } else if (ev.keyCode === 13) { // Enter key
       this.swapWordOnCaret(this._autoComplete.getCurrentWord());
-      this.completing = false;
       this._autoComplete.close();
       ev.preventDefault();
       ev.stopPropagation();
@@ -618,6 +623,7 @@ REPLConsole.prototype.swapWordOnCaret = function(next) {
     return s.substr(0, s.lastIndexOf(' ', pos) + 1) + next + s.substr(right(s, pos))
   }
 
+  if (!next) return;
   var swapped = swap(this._input, this._caretPos);
   this.setInput(swapped, this._caretPos + swapped.length - this._input.length);
 };

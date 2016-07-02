@@ -48,9 +48,9 @@ function Autocomplete(words, prefix) {
   this.words = words.concat();
   this.words.sort(); // by alphabetically order
   this.current = -1;
-  // [left, right)
-  this.left = 0;
+  this.left = 0; // [left, right)
   this.right = words.length;
+  this.confirmed = false;
 
   function createKeyword(label) {
     var el = document.createElement('span');
@@ -71,31 +71,50 @@ function Autocomplete(words, prefix) {
 
 Autocomplete.prototype.onClose = function(callback) {
   this.onCloseCallback = callback;
+  if (this.confirmed) callback(this.confirmed);
 };
 
 function startsWith(str, prefix) {
   return prefix && str.substr(0, prefix.length) === prefix;
 }
 
-Autocomplete.prototype.inc = function(prefix) {
-  function hide(el) {
+Autocomplete.prototype.flip = function(prefix, inc) {
+  var self = this;
+
+  function toggle(el) {
     if (hasClass(el, 'selected')) removeClass(el, 'selected');
-    addClass(el, 'hidden');
+    toggleClass(el, 'hidden');
   }
 
-  // TODO: image: => <=
-  while (this.left < this.right) {
-    if (!startsWith(this.words[this.left], prefix)) {
-      hide(this.view.children[this.left]);
-      ++this.left;
+  function condLeft(inc) {
+    if (inc) {
+      return self.left < self.right;
+    } else {
+      return 0 <= self.left;
+    }
+  }
+
+  function condRight(inc) {
+    if (inc) {
+      return self.left < self.right;
+    } else {
+      return self.right < self.words.length;
+    }
+  }
+
+  while (condLeft(inc)) {
+    if (inc !== startsWith(this.words[this.left], prefix)) {
+      toggle(this.view.children[this.left]);
+      this.left += inc ? 1 : -1;
     } else {
       break;
     }
   }
-  while (this.left < this.right) {
-    if (!startsWith(this.words[this.right - 1], prefix)) {
-      hide(this.view.children[this.right - 1]);
-      --this.right;
+
+  while (condRight(inc)) {
+    if (inc !== startsWith(this.words[this.right - 1], prefix)) {
+      toggle(this.view.children[this.right - 1]);
+      this.right += inc ? -1 : 1;
     } else {
       break;
     }
@@ -103,47 +122,21 @@ Autocomplete.prototype.inc = function(prefix) {
 
   if (this.current < this.left) {
     this.current = this.left - 1;
-  }
-  if (this.current > this.right) {
+  } else if (this.current > this.right) {
     this.current = this.right;
   }
-
   if (this.left + 1 >= this.right) {
+    this.current = this.left;
     this.confirm();
   }
 };
 
+Autocomplete.prototype.inc = function(prefix) {
+  this.flip(prefix, true);
+};
+
 Autocomplete.prototype.dec = function(prefix) {
-  console.log(prefix);
-  function show(el) {
-    if (hasClass(el, 'selected')) removeClass(el, 'selected');
-    removeClass(el, 'hidden');
-  }
-
-  // TODO: image: <= =>
-  while (0 <= this.left) {
-    if (startsWith(this.words[this.left], prefix)) {
-      show(this.view.children[this.left]);
-      --this.left;
-    } else {
-      break;
-    }
-  }
-  while (this.right < this.words.length) {
-    if (startsWith(this.words[this.right - 1], prefix)) {
-      show(this.view.children[this.right - 1]);
-      ++this.right;
-    } else {
-      break;
-    }
-  }
-
-  if (this.current < this.left) {
-    this.current = this.left - 1;
-  }
-  if (this.current > this.right) {
-    this.current = this.right;
-  }
+  this.flip(prefix, false);
 };
 
 Autocomplete.prototype.isSelected = function() {
@@ -157,18 +150,26 @@ Autocomplete.prototype.getCurrentWord = function() {
 Autocomplete.prototype.confirm = function() {
   if (this.left <= this.current && this.current < this.right) {
     if (this.onCloseCallback) this.onCloseCallback(this.words[this.current]);
-    this.view.parentNode.removeChild(this.view);
+    this.removeView();
+    this.confirmed = this.words[this.current];
   } else {
     this.cancel();
   }
 };
 
+Autocomplete.prototype.removeView = function() {
+  if (this.view.parentNode) this.view.parentNode.removeChild(this.view);
+  removeAllChildren(this.view);
+}
+
 Autocomplete.prototype.cancel = function() {
   if (this.onCloseCallback) this.onCloseCallback();
-  this.view.parentNode.removeChild(this.view);
+  this.removeView();
+  this.confirmed = this.words[this.current];
 };
 
 Autocomplete.prototype.change = function(nextCurrent) {
+  if (this.confirmed) return;
   if (this.isSelected()) removeClass(this.view.children[this.current], 'selected');
   addClass(this.view.children[nextCurrent], 'selected');
   this.current = nextCurrent;
@@ -736,6 +737,14 @@ function hasClass(el, className) {
 function isNodeList(el) {
   return typeof el.length === 'number' &&
     typeof el.item === 'function';
+}
+
+function toggleClass(el, className) {
+  if (hasClass(el, className)) {
+    removeClass(el, className);
+  } else {
+    addClass(el, className);
+  }
 }
 
 function addClass(el, className) {

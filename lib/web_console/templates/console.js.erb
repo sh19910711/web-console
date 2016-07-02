@@ -102,7 +102,7 @@ Autocomplete.prototype.inc = function(prefix) {
   }
 
   if (this.left + 1 >= this.right) {
-    this.close();
+    this.confirm();
   }
 
   if (this.current < this.left) {
@@ -141,9 +141,17 @@ Autocomplete.prototype.getCurrentWord = function() {
   return this.isSelected() && this.words[this.current];
 };
 
-Autocomplete.prototype.close = function() {
+Autocomplete.prototype.confirm = function() {
+  if (this.left <= this.current && this.current < this.right) {
+    this.onCloseCallback(this.words[this.current]);
+  } else {
+    this.onCloseCallback();
+  }
+  this.cancel();
+};
+
+Autocomplete.prototype.cancel = function() {
   this.view.parentNode.removeChild(this.view);
-  this.onCloseCallback.call(this)
 };
 
 Autocomplete.prototype.change = function(nextCurrent) {
@@ -481,10 +489,13 @@ REPLConsole.prototype.onTabKey = function() {
 
   self.completing = true;
   self.commandHandle("nil", function(ok, obj) {
-    if (!ok) return self._autoComplete.close();
-    if (!obj['context'].length) return self._autoComplete.close();
+    if (!ok) return self._autoComplete.cancel();
+    if (!obj['context'].length) return self._autoComplete.cancel();
     self._autoComplete = new Autocomplete(obj['context'], self.getWordOnCaret());
-    self._autoComplete.onClose(function() { self.completing = false; });
+    self._autoComplete.onClose(function(word) {
+      if (word) self.setInput(word);
+      self.completing = false;
+    });
     self.inner.appendChild(self._autoComplete.view);
     self.scrollToBottom();
   });
@@ -508,7 +519,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       }
     } else if (ev.keyCode === 13) { // Enter key
       this.swapWordOnCaret(this._autoComplete.getCurrentWord());
-      this._autoComplete.close();
+      this._autoComplete.confirm();
       ev.preventDefault();
       ev.stopPropagation();
       return;

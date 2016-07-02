@@ -101,8 +101,41 @@ Autocomplete.prototype.inc = function(prefix) {
     }
   }
 
+  if (this.current < this.left) {
+    this.current = this.left - 1;
+  }
+  if (this.current > this.right) {
+    this.current = this.right;
+  }
+
   if (this.left + 1 >= this.right) {
     this.confirm();
+  }
+};
+
+Autocomplete.prototype.dec = function(prefix) {
+  console.log(prefix);
+  function show(el) {
+    if (hasClass(el, 'selected')) removeClass(el, 'selected');
+    removeClass(el, 'hidden');
+  }
+
+  // TODO: image: <= =>
+  while (0 <= this.left) {
+    if (startsWith(this.words[this.left], prefix)) {
+      show(this.view.children[this.left]);
+      --this.left;
+    } else {
+      break;
+    }
+  }
+  while (this.right < this.words.length) {
+    if (startsWith(this.words[this.right - 1], prefix)) {
+      show(this.view.children[this.right - 1]);
+      ++this.right;
+    } else {
+      break;
+    }
   }
 
   if (this.current < this.left) {
@@ -110,26 +143,6 @@ Autocomplete.prototype.inc = function(prefix) {
   }
   if (this.current > this.right) {
     this.current = this.right;
-  }
-};
-
-Autocomplete.prototype.dec = function(prefix) {
-  // TODO: image: <= =>
-  while (this.left > 0) {
-    if (startsWith(this.words[this.left-1], prefix)) {
-      --this.left;
-      removeClass(this.view.children[this.left], 'hidden');
-    } else {
-      break;
-    }
-  }
-  while (this.right < this.words.length) {
-    if (startsWith(this.words[this.right+1], prefix)) {
-      ++this.right;
-      removeClass(this.view.children[this.right], 'hidden');
-    } else {
-      break;
-    }
   }
 };
 
@@ -151,8 +164,8 @@ Autocomplete.prototype.confirm = function() {
 };
 
 Autocomplete.prototype.cancel = function() {
-  this.view.parentNode.removeChild(this.view);
   if (this.onCloseCallback) this.onCloseCallback();
+  this.view.parentNode.removeChild(this.view);
 };
 
 Autocomplete.prototype.change = function(nextCurrent) {
@@ -572,6 +585,9 @@ REPLConsole.prototype.onKeyDown = function(ev) {
     case 8:
       // Delete
       this.deleteAtCurrent();
+      if (this.completing) {
+        this._autoComplete.dec(this.getWordOnCaret());
+      }
       ev.preventDefault();
       break;
     default:

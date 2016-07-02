@@ -485,7 +485,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
         this._autoComplete.next();
       }
     } else if (ev.keyCode === 13) { // Enter key
-      this.setInput(this._autoComplete.getCurrentWord());
+      this.swapWordOnCaret(this._autoComplete.getCurrentWord());
       this.completing = false;
       this._autoComplete.close();
       ev.preventDefault();
@@ -611,7 +611,8 @@ REPLConsole.prototype.swapWordOnCaret = function(next) {
     return s.substr(0, left(s, pos) + 1) + next + s.substr(right(s, pos))
   }
 
-  this.setInput(swap(this._input, this._caretPos), this._caretPos);
+  var swapped = swap(this._input, this._caretPos);
+  this.setInput(swapped, this._caretPos + swapped.length - this._input.length);
 };
 
 REPLConsole.prototype.getWordOnCaret = function() {

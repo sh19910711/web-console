@@ -101,6 +101,10 @@ Autocomplete.prototype.inc = function(prefix) {
     }
   }
 
+  if (this.left + 1 >= this.right) {
+    this.close();
+  }
+
   if (this.current < this.left) {
     this.current = this.left - 1;
   } else if (this.current > this.right) {

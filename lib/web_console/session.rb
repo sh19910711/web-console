@@ -65,6 +65,7 @@ module WebConsole
     # Returns context of the current binding
     def context
       [
+        'global_variables',
         'local_variables',
         'instance_variables',
         'methods',

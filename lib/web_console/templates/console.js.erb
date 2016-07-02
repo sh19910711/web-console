@@ -78,43 +78,47 @@ function startsWith(str, prefix) {
   return prefix && str.substr(0, prefix.length) === prefix;
 }
 
-Autocomplete.prototype.flip = function(prefix, inc) {
+Autocomplete.prototype.flip = function(prefix, incrementally) {
   var self = this;
 
   function toggle(el) {
     if (hasClass(el, 'selected')) removeClass(el, 'selected');
-    toggleClass(el, 'hidden');
+    if (incrementally) {
+      addClass(el, 'hidden');
+    } else {
+      removeClass(el, 'hidden');
+    }
   }
 
-  function condLeft(inc) {
-    if (inc) {
+  function condLeft(incrementally) {
+    if (incrementally) {
       return self.left < self.right;
     } else {
       return 0 <= self.left;
     }
   }
 
-  function condRight(inc) {
-    if (inc) {
-      return self.left < self.right;
+  function condRight(incrementally) {
+    if (incrementally) {
+      return self.left < self.right - 1;
     } else {
-      return self.right < self.words.length;
+      return self.right - 1 < self.words.length;
     }
   }
 
-  while (condLeft(inc)) {
-    if (inc !== startsWith(this.words[this.left], prefix)) {
+  while (condLeft(incrementally)) {
+    if (incrementally !== startsWith(this.words[this.left], prefix)) {
       toggle(this.view.children[this.left]);
-      this.left += inc ? 1 : -1;
+      this.left += incrementally ? 1 : -1;
     } else {
       break;
     }
   }
 
-  while (condRight(inc)) {
-    if (inc !== startsWith(this.words[this.right - 1], prefix)) {
+  while (condRight(incrementally)) {
+    if (incrementally !== startsWith(this.words[this.right - 1], prefix)) {
       toggle(this.view.children[this.right - 1]);
-      this.right += inc ? -1 : 1;
+      this.right += incrementally ? -1 : 1;
     } else {
       break;
     }

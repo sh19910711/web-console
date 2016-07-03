@@ -1,6 +1,6 @@
 describe("Auto Complete", function() {
   beforeEach(function() {
-    var self = this.autoComplete = new Autocomplete(["something", "somewhat", "somewhere"]);
+    var self = this.autoComplete = new Autocomplete(["something", "somewhat", "somewhere"], 'some');
     this.moveNext = function(times) {
       for (var i = 0; i < times; ++i) self.next();
     };

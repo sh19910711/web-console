@@ -743,14 +743,6 @@ function isNodeList(el) {
     typeof el.item === 'function';
 }
 
-function toggleClass(el, className) {
-  if (hasClass(el, className)) {
-    removeClass(el, className);
-  } else {
-    addClass(el, className);
-  }
-}
-
 function addClass(el, className) {
   if (isNodeList(el)) {
     for (var i = 0; i < el.length; ++ i) {

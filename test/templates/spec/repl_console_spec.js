@@ -12,20 +12,20 @@ describe("REPLConsole", function() {
     context("caret points to last item", function() {
       beforeEach(function() {
         this.console.setInput('hello world');
-        this.console.swapWordOnCaret('swapped');
+        this.console.swapCurrentWord('swapped');
       });
       it('should be last word', function() { assert.equal(this.console._input, 'hello swapped'); });
     });
     context("points to first item", function() {
       beforeEach(function() {
         this.console.setInput('hello world', 3);
-        this.console.swapWordOnCaret('swapped');
+        this.console.swapCurrentWord('swapped');
       });
       it('should be first word', function() { assert.equal(this.console._input, 'swapped world'); });
     });
   });
 
-  describe("#getWordOnCaret", function() {
+  describe("#getCurrentWord", function() {
     beforeEach(function() {
       var elm = document.createElement('div');
       elm.innerHTML = '<div id="console"></div>';
@@ -35,11 +35,11 @@ describe("REPLConsole", function() {
     });
     context("caret points to last item", function() {
       beforeEach(function() { this.console.setInput('hello world'); });
-      it('should be last word', function() { assert.equal(this.console.getWordOnCaret(), 'world'); });
+      it('should be last word', function() { assert.equal(this.console.getCurrentWord(), 'world'); });
     });
     context("points to first item", function() {
       beforeEach(function() { this.console.setInput('hello world', 0); });
-      it('should be first word', function() { assert.equal(this.console.getWordOnCaret(), 'hello'); });
+      it('should be first word', function() { assert.equal(this.console.getCurrentWord(), 'hello'); });
     });
   });
 

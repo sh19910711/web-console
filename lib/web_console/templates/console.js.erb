@@ -243,7 +243,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   }
 
   function getContext() {
-    var s = self.getWordOnCaret();
+    var s = self.getCurrentWord();
     var methodOp = s.lastIndexOf('.');
     var moduleOp = s.lastIndexOf('::');
     var x = methodOp > moduleOp ? methodOp : moduleOp;
@@ -510,7 +510,7 @@ REPLConsole.prototype.onTabKey = function() {
   self.commandHandle("nil", function(ok, obj) {
     if (!ok) return self._autoComplete.cancel();
     if (!obj['context'].length) return self._autoComplete.cancel();
-    self._autoComplete = new Autocomplete(obj['context'], self.getWordOnCaret());
+    self._autoComplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self._autoComplete.onClose(function(word) {
       if (word) self.setInput(word);
       self.completing = false;
@@ -537,7 +537,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
         this._autoComplete.next();
       }
     } else if (ev.keyCode === 13) { // Enter key
-      this.swapWordOnCaret(this._autoComplete.getCurrentWord());
+      this.swapCurrentWord(this._autoComplete.getCurrentWord());
       this._autoComplete.confirm();
       ev.preventDefault();
       ev.stopPropagation();
@@ -591,7 +591,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
       // Delete
       this.deleteAtCurrent();
       if (this.completing) {
-        this._autoComplete.dec(this.getWordOnCaret());
+        this._autoComplete.dec(this.getCurrentWord());
       }
       ev.preventDefault();
       break;
@@ -626,7 +626,7 @@ REPLConsole.prototype.onKeyPress = function(ev) {
   var keyCode = ev.keyCode || ev.which;
   this.insertAtCurrent(String.fromCharCode(keyCode));
   if (this.completing) {
-    this._autoComplete.inc(this.getWordOnCaret());
+    this._autoComplete.inc(this.getCurrentWord());
   }
   ev.stopPropagation();
   ev.preventDefault();
@@ -653,7 +653,7 @@ REPLConsole.prototype.insertAtCurrent = function(char) {
   this.setInput(before + char + after, this._caretPos + 1);
 };
 
-REPLConsole.prototype.swapWordOnCaret = function(next) {
+REPLConsole.prototype.swapCurrentWord = function(next) {
   function right(s, pos) {
     var x = s.indexOf(' ', pos);
     return x === -1 ? s.length : x;
@@ -668,7 +668,7 @@ REPLConsole.prototype.swapWordOnCaret = function(next) {
   this.setInput(swapped, this._caretPos + swapped.length - this._input.length);
 };
 
-REPLConsole.prototype.getWordOnCaret = function() {
+REPLConsole.prototype.getCurrentWord = function() {
   return (function(s, pos) {
     var left = s.lastIndexOf(' ', pos);
     if (left === -1) left = 0;

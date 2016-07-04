@@ -94,7 +94,7 @@ Autocomplete.prototype.flip = function(prefix, incrementally) {
     if (incrementally) {
       return self.left < self.right;
     } else {
-      return 0 <= self.left;
+      return 0 < self.left;
     }
   }
 
@@ -116,7 +116,7 @@ Autocomplete.prototype.flip = function(prefix, incrementally) {
   }
 
   while (condRight(incrementally)) {
-    if (incrementally !== startsWith(this.words[this.right - 1], prefix)) {
+    if (this.right - 1 < this.words.length && incrementally !== startsWith(this.words[this.right - 1], prefix)) {
       toggle(this.view.children[this.right - 1]);
       this.right += incrementally ? -1 : 1;
     } else {
@@ -129,6 +129,7 @@ Autocomplete.prototype.flip = function(prefix, incrementally) {
   } else if (this.current > this.right) {
     this.current = this.right;
   }
+
   if (this.left + 1 >= this.right) {
     this.current = this.left;
     this.confirm();
@@ -161,16 +162,15 @@ Autocomplete.prototype.confirm = function() {
   }
 };
 
+Autocomplete.prototype.cancel = function() {
+  if (this.onCloseCallback) this.onCloseCallback();
+  this.removeView();
+};
+
 Autocomplete.prototype.removeView = function() {
   if (this.view.parentNode) this.view.parentNode.removeChild(this.view);
   removeAllChildren(this.view);
 }
-
-Autocomplete.prototype.cancel = function() {
-  if (this.onCloseCallback) this.onCloseCallback();
-  this.removeView();
-  this.confirmed = this.words[this.current];
-};
 
 Autocomplete.prototype.change = function(nextCurrent) {
   if (this.confirmed) return;

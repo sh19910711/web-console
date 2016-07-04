@@ -14,7 +14,7 @@ end
 # test runners
 map "/html" do
   run WebConsole::Testing::FakeMiddleware.new(
-    req_path_regex: %r{^/html/(.*)\.html$},
+    req_path_regex: %r{^/html/(.*)},
     headers: {"Content-Type" => "text/html"},
     view_path: TEST_ROOT.join("html"),
   )

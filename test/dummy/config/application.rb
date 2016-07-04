@@ -12,6 +12,8 @@ module Dummy
     # Run outside of the development mode so our test suite runs.
     config.web_console.development_only = false
 
+    config.web_console.whitelisted_ips = '0.0.0.0/0'
+
     config.active_support.test_order = :random
   end
 end

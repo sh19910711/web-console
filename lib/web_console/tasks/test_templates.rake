@@ -3,13 +3,15 @@ namespace :test do
   task templates: "templates:all"
 
   namespace :templates do
-    task all: [ :daemonize, :npm, :rackup, :wait, :mocha, :kill, :exit ]
+    task all: [ :daemonize, :npm, :rackup, :wait, :mocha_test, :kill, :exit ]
     task serve: [ :npm, :rackup ]
 
     work_dir    = Pathname(EXPANDED_CWD).join("test/templates")
     pid_file    = Pathname(Dir.tmpdir).join("web_console.#{SecureRandom.uuid}.pid")
-    runner_uri  = URI.parse("http://localhost:29292/html/spec_runner.html")
-    rackup_opts = "-p #{runner_uri.port}"
+    html_uri    = URI.parse("http://localhost:29292/html/")
+    spec_runner = 'spec_runner.html'
+    test_runner = 'test_runner.html'
+    rackup_opts = "-p #{html_uri.port}"
     test_result = nil
 
     def need_to_wait?(uri)
@@ -32,11 +34,16 @@ namespace :test do
 
     task :wait do
       cnt = 0
-      need_to_wait?(runner_uri) { sleep 1; cnt += 1; cnt < 5 }
+      need_to_wait?(URI.join(html_uri, spec_runner)) { sleep 1; cnt += 1; cnt < 5 }
+      need_to_wait?(URI.join(html_uri, test_runner)) { sleep 1; cnt += 1; cnt < 5 }
     end
 
-    task :mocha do
-      Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{runner_uri}") }
+    task :mocha_spec do
+      Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, spec_runner)}") }
+    end
+
+    task :mocha_test do
+      Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, test_runner)}") }
     end
 
     task :kill do

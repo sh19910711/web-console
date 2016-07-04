@@ -1,14 +1,17 @@
 suite('AutocompleteTests', function() {
   setup(function() {
-    var self = this.ac = new Autocomplete(["something", "somewhat", "somewhere"], '');
-    this.moveNext = function(times) {
-      for (var i = 0; i < times; ++i) self.next();
+    var self = this;
+    self.ac = new Autocomplete(["something", "somewhat", "somewhere"], '');
+    self.called = false;
+    self.ac.onClose(function() { self.called = true; });
+    self.moveNext = function(times) {
+      for (var i = 0; i < times; ++i) self.ac.next();
     };
-    this.assertSelect = function(pos) {
-      assert.equal(self.current, pos);
+    self.assertSelect = function(pos) {
+      assert.equal(self.ac.current, pos);
     };
-    this.assertCount = function(className, cnt) {
-      assert.equal(self.view.getElementsByClassName(className).length, cnt);
+    self.assertCount = function(className, cnt) {
+      assert.equal(self.ac.view.getElementsByClassName(className).length, cnt);
     }
   });
 
@@ -23,6 +26,6 @@ suite('AutocompleteTests', function() {
 
   test('inc(somet)', function() {
     this.ac.inc('somet');
-    this.assertCount('hidden', 2);
+    assert(this.called)
   });
 });

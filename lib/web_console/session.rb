@@ -43,7 +43,7 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = bindings
-      @evaluator = Evaluator.new(bindings.first)
+      @evaluator = Evaluator.new(@current_binding = bindings.first)
 
       store_into_memory
     end
@@ -59,7 +59,31 @@ module WebConsole
     #
     # Returns nothing.
     def switch_binding_to(index)
-      @evaluator = Evaluator.new(@bindings[index.to_i])
+      @evaluator = Evaluator.new(@current_binding = @bindings[index.to_i])
+    end
+
+    # Returns context of the current binding
+    def context(context_of)
+      context_of = nil if context_of == ''
+
+      if context_of
+        [
+          'methods',
+          'class_variables',
+        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}.#{m}" }.concat [
+          'constants',
+        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}::#{m}" }.flatten
+      else
+        [
+          'global_variables',
+          'local_variables',
+          'instance_variables',
+          'class_variables',
+          'methods',
+          'constants',
+          'Object.constants'
+        ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
+      end
     end
 
     private

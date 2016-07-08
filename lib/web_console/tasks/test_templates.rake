@@ -3,7 +3,7 @@ namespace :test do
   task templates: "templates:all"
 
   namespace :templates do
-    task all: [ :daemonize, :npm, :rackup, :wait, :mocha_spec, :mocha_test, :kill, :exit ]
+    task all: [ :daemonize, :npm, :rackup, :wait, :spec, :test, :kill, :exit ]
     task serve: [ :npm, :rackup ]
 
     host = ENV['IP'] || 'localhost'
@@ -40,11 +40,11 @@ namespace :test do
       need_to_wait?(URI.join(html_uri, test_runner)) { sleep 1; cnt += 1; cnt < 5 }
     end
 
-    task :mocha_spec do
+    task :spec do
       Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, spec_runner)}") }
     end
 
-    task :mocha_test do
+    task :test do
       Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, test_runner)}") }
     end
 

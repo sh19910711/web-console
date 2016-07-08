@@ -45,7 +45,7 @@ function CommandStorage() {
 }
 
 function Autocomplete(words, prefix) {
-  this.words = words.concat();
+  this.words = words.concat(); // to clone
   this.words.sort(); // by alphabetically order
   this.current = -1;
   this.left = 0; // [left, right)
@@ -66,7 +66,7 @@ function Autocomplete(words, prefix) {
     this.view.appendChild(createKeyword(this.words[key]));
   }
 
-  this.inc(prefix);
+  this.refine(prefix, true);
 }
 
 Autocomplete.prototype.onClose = function(callback) {
@@ -158,14 +158,6 @@ Autocomplete.prototype.refine = function(prefix, incrementally) {
   }
 };
 
-Autocomplete.prototype.inc = function(prefix) {
-  this.refine(prefix, true);
-};
-
-Autocomplete.prototype.dec = function(prefix) {
-  this.refine(prefix, false);
-};
-
 Autocomplete.prototype.isSelected = function() {
   return this.left <= this.current && this.current < this.right;
 };
@@ -227,7 +219,7 @@ function REPLConsole(config) {
   this.prompt = getConfig('promptLabel', ' >>');
   this.mountPoint = getConfig('mountPoint');
   this.sessionId = getConfig('sessionId');
-  this.completing = false;
+  this.autocomplete = false;
 }
 
 REPLConsole.prototype.getSessionUrl = function(path) {
@@ -273,7 +265,7 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
   }
 
   var context;
-  if (this.completing) {
+  if (this.autocomplete) {
     if (context = getContext()) {
       params += '&context=' + context;
     }
@@ -498,7 +490,7 @@ REPLConsole.prototype.renderInput = function() {
 };
 
 REPLConsole.prototype.writeOutput = function(output) {
-  if (this.completing) return;
+  if (this.autocomplete) return;
   var consoleMessage = document.createElement('pre');
   consoleMessage.className = "console-message";
   consoleMessage.innerHTML = escapeHTML(output);
@@ -508,7 +500,7 @@ REPLConsole.prototype.writeOutput = function(output) {
 };
 
 REPLConsole.prototype.writeError = function(output) {
-  if (this.completing) return;
+  if (this.autocomplete) return;
   var consoleMessage = this.writeOutput(output);
   addClass(consoleMessage, "error-message");
   return consoleMessage;
@@ -528,16 +520,16 @@ REPLConsole.prototype.onTabKey = function() {
   var input = this._input;
   var self = this;
 
-  self.completing = true;
+  self.autocomplete = true;
   self.commandHandle("nil", function(ok, obj) {
-    if (!ok) return self._autoComplete.cancel();
-    if (!obj['context'].length) return self._autoComplete.cancel();
-    self._autoComplete = new Autocomplete(obj['context'], self.getCurrentWord());
-    self._autoComplete.onClose(function(word) {
+    if (!ok) return self.autocomplete.cancel();
+    if (!obj['context'].length) return self.autocomplete.cancel();
+    self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
+    self.autocomplete.onClose(function(word) {
       if (word) self.setInput(word);
-      self.completing = false;
+      self.autocomplete = false;
     });
-    self.inner.appendChild(self._autoComplete.view);
+    self.inner.appendChild(self.autocomplete.view);
     self.scrollToBottom();
   });
 };
@@ -551,28 +543,28 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
-  if (this.completing && this._autoComplete) {
+  if (this.autocomplete instanceof Autocomplete) {
     if (ev.keyCode === 9) { // TAB key
       if (ev.shiftKey) {
-        this._autoComplete.back();
+        this.autocomplete.back();
       } else {
-        this._autoComplete.next();
+        this.autocomplete.next();
       }
     } else if (ev.keyCode === 13) { // Enter key
-      this.swapCurrentWord(this._autoComplete.getCurrentWord());
-      this._autoComplete.confirm();
+      this.autocomplete.confirm();
+      this.swapCurrentWord(this.autocomplete.confirmed);
       ev.preventDefault();
       ev.stopPropagation();
       return;
     } else if (ev.keyCode == 27) { // ESC
-      this._autoComplete.cancel();
+      this.autocomplete.cancel();
     }
   }
 
   switch (ev.keyCode) {
     case 9:
       // Tab
-      if (!this.completing) this.onTabKey();
+      if (!this.autocomplete) this.onTabKey();
       ev.preventDefault();
       break;
     case 13:
@@ -612,8 +604,8 @@ REPLConsole.prototype.onKeyDown = function(ev) {
     case 8:
       // Delete
       this.deleteAtCurrent();
-      if (this.completing) {
-        this._autoComplete.dec(this.getCurrentWord());
+      if (this.autocomplete) {
+        this.autocomplete.refine(this.getCurrentWord(), false);
       }
       ev.preventDefault();
       break;
@@ -647,8 +639,8 @@ REPLConsole.prototype.onKeyPress = function(ev) {
   if (ev.ctrlKey || ev.metaKey) { return; }
   var keyCode = ev.keyCode || ev.which;
   this.insertAtCurrent(String.fromCharCode(keyCode));
-  if (this.completing) {
-    this._autoComplete.inc(this.getCurrentWord());
+  if (this.autocomplete) {
+    this.autocomplete.refine(this.getCurrentWord(), true);
   }
   ev.stopPropagation();
   ev.preventDefault();

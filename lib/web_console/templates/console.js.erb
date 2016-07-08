@@ -75,10 +75,11 @@ Autocomplete.prototype.onClose = function(callback) {
 };
 
 function startsWith(str, prefix) {
+  if (!prefix) return true;
   return prefix && str.substr(0, prefix.length) === prefix;
 }
 
-Autocomplete.prototype.flip = function(prefix, incrementally) {
+Autocomplete.prototype.refine = function(prefix, incrementally) {
   var self = this;
 
   function toggle(el) {
@@ -102,46 +103,67 @@ Autocomplete.prototype.flip = function(prefix, incrementally) {
     if (incrementally) {
       return self.left < self.right - 1;
     } else {
-      return self.right - 1 < self.words.length;
+      return self.right < self.words.length;
     }
   }
 
   while (condLeft(incrementally)) {
-    if (incrementally !== startsWith(this.words[this.left], prefix)) {
-      toggle(this.view.children[this.left]);
-      this.left += incrementally ? 1 : -1;
+    if (incrementally) { // >>
+      if (!startsWith(self.words[self.left], prefix)) {
+        toggle(self.view.children[self.left])
+        ++self.left;
+      } else{
+        break;
+      }
     } else {
-      break;
+      var next = self.left - 1;
+      if (next >= 0 && startsWith(self.words[next], prefix)) {
+        toggle(self.view.children[next]);
+        self.left = next;
+      } else {
+        break;
+      }
     }
   }
 
   while (condRight(incrementally)) {
-    if (this.right - 1 < this.words.length && incrementally !== startsWith(this.words[this.right - 1], prefix)) {
-      toggle(this.view.children[this.right - 1]);
-      this.right += incrementally ? -1 : 1;
+    if (incrementally) { // <<
+      var next = self.right - 1;
+      if (!startsWith(self.words[next], prefix)) {
+        toggle(self.view.children[next]);
+        self.right = next;
+      } else {
+        break;
+      }
     } else {
-      break;
+      var next = self.right + 1;
+      if (next <= self.words.length && startsWith(self.words[self.right], prefix)) {
+        toggle(self.view.children[self.right]);
+        self.right = next;
+      } else {
+        break;
+      }
     }
   }
 
-  if (this.current < this.left) {
-    this.current = this.left - 1;
-  } else if (this.current > this.right) {
-    this.current = this.right;
+  if (self.current < self.left) {
+    self.current = self.left - 1;
+  } else if (self.current > self.right) {
+    self.current = self.right;
   }
 
-  if (this.left + 1 >= this.right) {
-    this.current = this.left;
-    this.confirm();
+  if (self.left + 1 >= self.right) {
+    self.current = self.left;
+    self.confirm();
   }
 };
 
 Autocomplete.prototype.inc = function(prefix) {
-  this.flip(prefix, true);
+  this.refine(prefix, true);
 };
 
 Autocomplete.prototype.dec = function(prefix) {
-  this.flip(prefix, false);
+  this.refine(prefix, false);
 };
 
 Autocomplete.prototype.isSelected = function() {

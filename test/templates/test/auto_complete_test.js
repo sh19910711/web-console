@@ -8,10 +8,12 @@ suite('AutocompleteTests', function() {
     self.assertCount = function(className, cnt) {
       assert.equal(self.ac.view.getElementsByClassName(className).length, cnt);
     }
+    self.inc = function(prefix) { self.ac.refine(prefix, true); };
+    self.dec = function(prefix) { self.ac.refine(prefix, false); };
   });
 
   test('inc()', function() {
-    this.ac.inc('');
+    this.inc('');
 
     assert(!this.ac.confirmed);
     assert.equal(this.ac.left, 0);
@@ -20,7 +22,7 @@ suite('AutocompleteTests', function() {
   });
 
   test('inc(some)', function() {
-    this.ac.inc('some');
+    this.inc('some');
 
     assert(!this.ac.confirmed);
     assert.equal(this.ac.left, 2);
@@ -29,7 +31,7 @@ suite('AutocompleteTests', function() {
   });
 
   test('inc(somet)', function() {
-    this.ac.inc('somet');
+    this.inc('somet');
 
     assert.equal(this.ac.confirmed, 'something');
     assert.equal(this.ac.left, 2);
@@ -37,7 +39,7 @@ suite('AutocompleteTests', function() {
   });
 
   test('inc(somewh)', function() {
-    this.ac.inc('somewh');
+    this.inc('somewh');
 
     this.assertCount('hidden', 4);
     assert(!this.ac.confirmed);
@@ -46,8 +48,8 @@ suite('AutocompleteTests', function() {
   });
 
   test('inc(o) => dec()', function() {
-    this.ac.inc('o');
-    this.ac.dec('');
+    this.inc('o');
+    this.dec('');
 
     assert.equal(this.ac.left, 0);
     assert.equal(this.ac.right, this.ac.words.length);
@@ -55,9 +57,9 @@ suite('AutocompleteTests', function() {
   });
 
   test('inc(other) => dec() => inc(some)', function() {
-    this.ac.inc('other');
-    this.ac.dec('');
-    this.ac.inc('some');
+    this.inc('other');
+    this.dec('');
+    this.inc('some');
 
     assert.equal(this.ac.left, 2);
     assert.equal(this.ac.right, this.ac.words.length - 1);

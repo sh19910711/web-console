@@ -152,19 +152,18 @@ Autocomplete.prototype.removeView = function() {
   removeAllChildren(this.view);
 }
 
-Autocomplete.prototype.change = function(nextCurrent) {
-  if (this.confirmed) return;
-  if (this.left <= this.current && this.current < this.right) removeClass(this.view.children[this.current], 'selected');
+Autocomplete.prototype.select = function(nextCurrent) {
+  if (0 <= this.current && this.current < this.words.length) removeClass(this.view.children[this.current], 'selected');
   addClass(this.view.children[nextCurrent], 'selected');
   this.current = nextCurrent;
 };
 
 Autocomplete.prototype.next = function() {
-  this.change(this.current + 1 >= this.right ? this.left : this.current + 1);
+  this.select(this.current + 1 >= this.right ? this.left : this.current + 1);
 };
 
 Autocomplete.prototype.back = function() {
-  this.change(this.current - 1 < this.left ? this.right - 1 : this.current - 1);
+  this.select(this.current - 1 < this.left ? this.right - 1 : this.current - 1);
 };
 
 // HTML strings for dynamic elements.

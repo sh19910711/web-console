@@ -87,7 +87,7 @@ Autocomplete.prototype.refine = function(prefix, inc) {
   }
 
   function moveRight(l, r) {
-    while (l < r) { // >>
+    while (l < r) {
       var next = l + 1;
       if (inc !== startsWith(self.words[l], prefix)) {
         toggle(self.view.children[l]);
@@ -100,7 +100,7 @@ Autocomplete.prototype.refine = function(prefix, inc) {
   }
 
   function moveLeft(l, r) {
-    while (l < r - 1) { // <<
+    while (l < r - 1) {
       var next = r - 1;
       if (inc !== startsWith(self.words[next], prefix)) {
         toggle(self.view.children[next]);
@@ -229,11 +229,9 @@ REPLConsole.prototype.commandHandle = function(line, callback) {
     if (x !== -1) return s.substr(0, x);
   }
 
-  var context;
   if (this.autocomplete) {
-    if (context = getContext()) {
-      params += '&context=' + context;
-    }
+    var c = getContext();
+    params += c ? '&context=' + c : c;
   }
 
   putRequest(self.getSessionUrl(), params, function(xhr) {
@@ -487,14 +485,13 @@ REPLConsole.prototype.onTabKey = function() {
 
   self.autocomplete = true;
   self.commandHandle("nil", function(ok, obj) {
-    if (!ok) return self.autocomplete.cancel();
-    if (!obj['context'].length) return self.autocomplete.cancel();
+    if (!ok) return;
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
+    self.inner.appendChild(self.autocomplete.view);
     self.autocomplete.onClose(function(word) {
       if (word) self.setInput(word);
       self.autocomplete = false;
     });
-    self.inner.appendChild(self.autocomplete.view);
     self.scrollToBottom();
   });
 };
@@ -509,13 +506,13 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete instanceof Autocomplete) {
-    if (ev.keyCode === 9) { // TAB key
+    if (ev.keyCode === 9) { // TAB
       if (ev.shiftKey) {
         this.autocomplete.back();
       } else {
         this.autocomplete.next();
       }
-    } else if (ev.keyCode === 13) { // Enter key
+    } else if (ev.keyCode === 13) { // Enter
       this.swapCurrentWord(this.autocomplete.finish());
       ev.preventDefault();
       ev.stopPropagation();

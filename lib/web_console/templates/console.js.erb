@@ -87,27 +87,17 @@ Autocomplete.prototype.refine = function(prefix, inc) {
   }
 
   function moveRight(l, r) {
-    while (l < r) {
-      var next = l + 1;
-      if (inc !== startsWith(self.words[l], prefix)) {
-        toggle(self.view.children[l]);
-        l = next;
-      } else {
-        break;
-      }
+    while (l < r && inc !== startsWith(self.words[l], prefix)) {
+      toggle(self.view.children[l]);
+      ++ l;
     }
     return l;
   }
 
   function moveLeft(l, r) {
-    while (l < r - 1) {
-      var next = r - 1;
-      if (inc !== startsWith(self.words[next], prefix)) {
-        toggle(self.view.children[next]);
-        r = next;
-      } else {
-        break;
-      }
+    while (l < r - 1 && inc !== startsWith(self.words[r - 1], prefix)) {
+      toggle(self.view.children[r - 1]);
+      -- r;
     }
     return r;
   }

@@ -132,14 +132,6 @@ Autocomplete.prototype.refine = function(prefix, inc) {
   }
 };
 
-Autocomplete.prototype.isSelected = function() {
-  return this.left <= this.current && this.current < this.right;
-};
-
-Autocomplete.prototype.getCurrentWord = function() {
-  return this.isSelected() && this.words[this.current];
-};
-
 Autocomplete.prototype.finish = function() {
   if (this.left <= this.current && this.current < this.right) {
     if (this.onCloseCallback) this.onCloseCallback(this.words[this.current]);
@@ -162,7 +154,7 @@ Autocomplete.prototype.removeView = function() {
 
 Autocomplete.prototype.change = function(nextCurrent) {
   if (this.confirmed) return;
-  if (this.isSelected()) removeClass(this.view.children[this.current], 'selected');
+  if (this.left <= this.current && this.current < this.right) removeClass(this.view.children[this.current], 'selected');
   addClass(this.view.children[nextCurrent], 'selected');
   this.current = nextCurrent;
 };

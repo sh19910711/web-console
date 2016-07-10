@@ -69,8 +69,8 @@ function Autocomplete(words, prefix) {
   this.refine(prefix, true);
 }
 
-Autocomplete.prototype.onClose = function(callback) {
-  this.onCloseCallback = callback;
+Autocomplete.prototype.onFinish = function(callback) {
+  this.onFinishCallback = callback;
   if (this.confirmed) callback(this.confirmed);
 };
 
@@ -124,7 +124,7 @@ Autocomplete.prototype.refine = function(prefix, inc) {
 
 Autocomplete.prototype.finish = function() {
   if (this.left <= this.current && this.current < this.right) {
-    if (this.onCloseCallback) this.onCloseCallback(this.words[this.current]);
+    if (this.onFinishCallback) this.onFinishCallback(this.words[this.current]);
     this.removeView();
     return this.confirmed = this.words[this.current];
   } else {
@@ -133,7 +133,7 @@ Autocomplete.prototype.finish = function() {
 };
 
 Autocomplete.prototype.cancel = function() {
-  if (this.onCloseCallback) this.onCloseCallback();
+  if (this.onFinishCallback) this.onFinishCallback();
   this.removeView();
 };
 
@@ -478,7 +478,7 @@ REPLConsole.prototype.onTabKey = function() {
     if (!ok) return;
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self.inner.appendChild(self.autocomplete.view);
-    self.autocomplete.onClose(function(word) {
+    self.autocomplete.onFinish(function(word) {
       if (word) self.setInput(word);
       self.autocomplete = false;
     });

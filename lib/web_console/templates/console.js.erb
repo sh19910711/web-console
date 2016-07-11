@@ -479,7 +479,7 @@ REPLConsole.prototype.onTabKey = function() {
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self.inner.appendChild(self.autocomplete.view);
     self.autocomplete.onFinish(function(word) {
-      if (word) self.setInput(word);
+      self.swapCurrentWord(word);
       self.autocomplete = false;
     });
     self.scrollToBottom();
@@ -503,7 +503,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
         this.autocomplete.next();
       }
     } else if (ev.keyCode === 13) { // Enter
-      this.swapCurrentWord(this.autocomplete.finish());
+      this.autocomplete.finish();
       ev.preventDefault();
       ev.stopPropagation();
       return;

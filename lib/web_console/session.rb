@@ -70,7 +70,7 @@ module WebConsole
     private
 
       def object_name?(s)
-        s if s.is_a?(String) && !s.empty? && !s.match(/[^a-zA-Z0-9\@\$\.\:]/)
+        s.is_a?(String) && !s.empty? && !s.match(/[^a-zA-Z0-9\@\$\.\:]/)
       end
 
       def context_eval(cmd)

@@ -83,5 +83,19 @@ module WebConsole
 
       assert_equal "=> #{saved_line}\n", session.eval('__LINE__')
     end
+
+    test '#context returns instance method names' do
+      exc = LineAwareError.raise
+
+      session = Session.from(__web_console_exception: exc, __web_console_binding: binding)
+      session.switch_binding_to(0)
+
+      assert session.context('').include?(:line)
+    end
+
+    test '#context(o) returns method names' do
+      session = Session.new([binding])
+      assert session.context('Rails').include?('Rails.root')
+    end
   end
 end

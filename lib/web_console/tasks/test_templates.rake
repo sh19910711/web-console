@@ -14,8 +14,6 @@ namespace :test do
     rackup_opts = "--host #{html_uri.host} --port #{html_uri.port}"
     test_result = nil
 
-    p "html_uri = #{html_uri}"
-
     def need_to_wait?(uri)
       Net::HTTP.start(uri.host, uri.port) { |http| http.get(uri.path) }
     rescue Errno::ECONNREFUSED
@@ -31,7 +29,7 @@ namespace :test do
     end
 
     task :rackup do
-      Dir.chdir(work_dir) { system "bundle exec rackup #{rackup_opts}" }
+      Dir.chdir(work_dir) { sh "bundle exec rackup #{rackup_opts}" }
     end
 
     task :wait do

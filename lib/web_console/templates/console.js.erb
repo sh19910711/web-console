@@ -474,7 +474,7 @@ REPLConsole.prototype.onTabKey = function() {
   var self = this;
 
   if (self.autocomplete) return;
-  self.autocomplete = true;
+  self.autocomplete = new Autocomplete([]);
 
   self.commandHandle("nil", function(ok, obj) {
     if (!ok) return self.autocomplete = false;
@@ -497,7 +497,7 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  * Handle control keys like up, down, left, right.
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
-  if (this.autocomplete instanceof Autocomplete) {
+  if (this.autocomplete) {
     function check(self) {
       if (ev.keyCode === 9) { // TAB
         if (ev.shiftKey) {

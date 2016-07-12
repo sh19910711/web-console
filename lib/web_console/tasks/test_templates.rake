@@ -6,7 +6,7 @@ namespace :test do
     task all: [ :daemonize, :npm, :rackup, :wait, :spec, :test, :kill, :exit ]
     task serve: [ :npm, :rackup ]
 
-    work_dir    = Pathname(EXPANDED_CWD).join("test/templates")
+    workdir    = Pathname(EXPANDED_CWD).join("test/templates")
     pid_file    = Pathname(Dir.tmpdir).join("web_console.#{SecureRandom.uuid}.pid")
     html_uri    = URI.parse("http://#{ENV['IP'] || 'localhost'}:#{ENV['PORT'] || 29292}/html/")
     spec_runner = 'spec_runner.html'
@@ -15,6 +15,7 @@ namespace :test do
     test_result = nil
 
     def need_to_wait?(uri)
+      puts "connect"
       Net::HTTP.start(uri.host, uri.port) { |http| http.get(uri.path) }
     rescue Errno::ECONNREFUSED
       retry if yield
@@ -25,11 +26,11 @@ namespace :test do
     end
 
     task :npm do
-      Dir.chdir(work_dir) { system "npm install --silent" }
+      Dir.chdir(workdir) { system "npm install --silent" }
     end
 
     task :rackup do
-      Dir.chdir(work_dir) { sh "bundle exec rackup #{rackup_opts}" }
+      Dir.chdir(workdir) { sh "bundle exec rackup #{rackup_opts}" }
     end
 
     task :wait do
@@ -38,11 +39,11 @@ namespace :test do
     end
 
     task :spec do
-      Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, spec_runner)}") }
+      Dir.chdir(workdir) { test_result = system("./node_modules/.bin/mocha-phantomjs #{URI.join(html_uri, spec_runner)}") }
     end
 
     task :test do
-      Dir.chdir(work_dir) { test_result = system("$(npm bin)/mocha-phantomjs #{URI.join(html_uri, test_runner)}") }
+      Dir.chdir(workdir) { test_result = system("./node_modules/.bin/mocha-phantomjs #{URI.join(html_uri, test_runner)}") }
     end
 
     task :kill do

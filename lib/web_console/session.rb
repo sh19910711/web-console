@@ -64,14 +64,13 @@ module WebConsole
 
     # Returns context of the current binding
     def context(o)
-      o = nil if o == ''
       ( object_name?(o) ? context_of(o) : global_context ).flatten
     end
 
     private
 
       def object_name?(s)
-        s if s.is_a?(String) && s.match(/[~a-zA-Z0-9@\$\.\:]/)
+        s if s.is_a?(String) && !s.empty? && !s.match(/[^a-zA-Z0-9\@\$\.\:]/)
       end
 
       def context_eval(cmd)
@@ -83,6 +82,7 @@ module WebConsole
           'global_variables',
           'local_variables',
           'instance_variables',
+          'instance_methods',
           'class_variables',
           'methods',
           'Object.constants',

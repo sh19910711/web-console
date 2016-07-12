@@ -69,8 +69,8 @@ function Autocomplete(words, prefix) {
   this.refine(prefix, true);
 }
 
-Autocomplete.prototype.onFinish = function(callback) {
-  this.onFinishCallback = callback;
+Autocomplete.prototype.onFinished = function(callback) {
+  this.onFinishedCallback = callback;
   if (this.confirmed) callback(this.confirmed);
 };
 
@@ -124,7 +124,7 @@ Autocomplete.prototype.refine = function(prefix, inc) {
 
 Autocomplete.prototype.finish = function() {
   if (this.left <= this.current && this.current < this.right) {
-    if (this.onFinishCallback) this.onFinishCallback(this.words[this.current]);
+    if (this.onFinishedCallback) this.onFinishedCallback(this.words[this.current]);
     this.removeView();
     this.confirmed = this.words[this.current];
   } else {
@@ -133,7 +133,7 @@ Autocomplete.prototype.finish = function() {
 };
 
 Autocomplete.prototype.cancel = function() {
-  if (this.onFinishCallback) this.onFinishCallback();
+  if (this.onFinishedCallback) this.onFinishedCallback();
   this.removeView();
 };
 
@@ -473,12 +473,14 @@ REPLConsole.prototype.onTabKey = function() {
   var input = this._input;
   var self = this;
 
+  if (self.autocomplete) return;
   self.autocomplete = true;
+
   self.commandHandle("nil", function(ok, obj) {
-    if (!ok) return;
+    if (!ok) return self.autocomplete = false;
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self.inner.appendChild(self.autocomplete.view);
-    self.autocomplete.onFinish(function(word) {
+    self.autocomplete.onFinished(function(word) {
       self.swapCurrentWord(word);
       self.autocomplete = false;
     });

@@ -63,30 +63,43 @@ module WebConsole
     end
 
     # Returns context of the current binding
-    def context(context_of)
-      context_of = nil if context_of == ''
+    def context(o)
+      o = nil if o == ''
+      ( object_name?(o) ? context_of(o) : global_context ).flatten
+    end
 
-      if context_of
-        [
-          'methods',
-          'class_variables',
-        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}.#{m}" }.concat [
-          'constants',
-        ].map { |cmd| @current_binding.eval("#{context_of}.send :#{cmd}") rescue [] }.flatten.map { |m| "#{context_of}::#{m}" }.flatten
-      else
+    private
+
+      def object_name?(s)
+        s if s.is_a?(String) && s.match(/[~a-zA-Z0-9@\$\.\:]/)
+      end
+
+      def context_eval(cmd)
+        @current_binding.eval(cmd) rescue []
+      end
+
+      def global_context
         [
           'global_variables',
           'local_variables',
           'instance_variables',
-          'class_variables',
-          'methods',
-          'constants',
-          'Object.constants'
-        ].map { |cmd| @current_binding.eval(cmd) rescue [] }.flatten
+          'instance_methods',
+          'Object.constants',
+          'Kernel.methods',
+        ].map { |cmd| context_eval(cmd) }
       end
-    end
+      
+      def context_of(o)
+        [ context_methods(o), context_constants(o) ]
+      end
 
-    private
+      def context_methods(o)
+        context_eval("#{o}.methods").map { |m| "#{o}.#{m}" }
+      end
+
+      def context_constants(o)
+        context_eval("#{o}.constants").map { |c| "#{o}::#{c}" }
+      end
 
       def store_into_memory
         inmemory_storage[id] = self

@@ -83,7 +83,8 @@ module WebConsole
           'global_variables',
           'local_variables',
           'instance_variables',
-          'instance_methods',
+          'class_variables',
+          'methods',
           'Object.constants',
           'Kernel.methods',
         ].map { |cmd| context_eval(cmd) }

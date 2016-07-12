@@ -15,7 +15,6 @@ namespace :test do
     test_result = nil
 
     def need_to_wait?(uri)
-      puts "connect"
       Net::HTTP.start(uri.host, uri.port) { |http| http.get(uri.path) }
     rescue Errno::ECONNREFUSED
       retry if yield
@@ -35,7 +34,7 @@ namespace :test do
 
     task :wait do
       cnt = 0
-      need_to_wait?(URI.join(html_uri, spec_runner)) { puts "retry"; sleep 1; cnt += 1; cnt < 5 }
+      need_to_wait?(URI.join(html_uri, spec_runner)) { sleep 1; cnt += 1; cnt < 5 }
     end
 
     task :spec do

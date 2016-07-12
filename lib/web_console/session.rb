@@ -63,8 +63,8 @@ module WebConsole
     end
 
     # Returns context of the current binding
-    def context(o)
-      ( object_name?(o) ? context_of(o) : global_context ).flatten
+    def context(obj)
+      ( object_name?(obj) ? context_of(obj) : global_context ).flatten
     end
 
     private
@@ -91,15 +91,10 @@ module WebConsole
       end
       
       def context_of(o)
-        [ context_methods(o), context_constants(o) ]
-      end
-
-      def context_methods(o)
-        context_eval("#{o}.methods").map { |m| "#{o}.#{m}" }
-      end
-
-      def context_constants(o)
-        context_eval("#{o}.constants").map { |c| "#{o}::#{c}" }
+        [
+          context_eval("#{o}.methods").map { |m| "#{o}.#{m}" },
+          context_eval("#{o}.constants").map { |c| "#{o}::#{c}" },
+        ]
       end
 
       def store_into_memory

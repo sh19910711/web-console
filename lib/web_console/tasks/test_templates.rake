@@ -6,15 +6,15 @@ namespace :test do
     task all: [ :daemonize, :npm, :rackup, :wait, :spec, :test, :kill, :exit ]
     task serve: [ :npm, :rackup ]
 
-    host = ENV['IP'] || 'localhost'
-    port = ENV['PORT'] || 29292
     work_dir    = Pathname(EXPANDED_CWD).join("test/templates")
     pid_file    = Pathname(Dir.tmpdir).join("web_console.#{SecureRandom.uuid}.pid")
-    html_uri    = URI.parse("http://#{host}:#{port}/html/")
+    html_uri    = URI.parse("http://#{ENV['IP'] || 'localhost'}:#{ENV['PORT'] || 29292}/html/")
     spec_runner = 'spec_runner.html'
     test_runner = 'test_runner.html'
-    rackup_opts = "--host #{host} --port #{html_uri.port}"
+    rackup_opts = "--host #{html_uri.host} --port #{html_uri.port}"
     test_result = nil
+
+    p "html_uri = #{html_uri}"
 
     def need_to_wait?(uri)
       Net::HTTP.start(uri.host, uri.port) { |http| http.get(uri.path) }

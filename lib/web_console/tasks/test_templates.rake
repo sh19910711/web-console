@@ -29,7 +29,7 @@ namespace :test do
     end
 
     task :rackup do
-      Dir.chdir(workdir) { sh "bundle exec rackup #{rackup_opts}" }
+      Dir.chdir(workdir) { system "bundle exec rackup #{rackup_opts}" }
     end
 
     task :wait do

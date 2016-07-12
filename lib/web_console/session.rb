@@ -43,8 +43,8 @@ module WebConsole
     def initialize(bindings)
       @id = SecureRandom.hex(16)
       @bindings = bindings
-      @evaluator = Evaluator.new(bindings.first)
 
+      switch_binding_to 0
       store_into_memory
     end
 
@@ -59,10 +59,43 @@ module WebConsole
     #
     # Returns nothing.
     def switch_binding_to(index)
-      @evaluator = Evaluator.new(@bindings[index.to_i])
+      @evaluator = Evaluator.new(@current_binding = @bindings[index.to_i])
+    end
+
+    # Returns context of the current binding
+    def context(obj)
+      ( object_name?(obj) ? context_of(obj) : global_context ).flatten
     end
 
     private
+
+      def object_name?(s)
+        s.is_a?(String) && !s.empty? && !s.match(/[^a-zA-Z0-9\@\$\.\:]/)
+      end
+
+      def context_eval(cmd)
+        @current_binding.eval(cmd) rescue []
+      end
+
+      def global_context
+        [
+          'global_variables',
+          'local_variables',
+          'instance_variables',
+          'instance_methods',
+          'class_variables',
+          'methods',
+          'Object.constants',
+          'Kernel.methods',
+        ].map { |cmd| context_eval(cmd) }
+      end
+      
+      def context_of(o)
+        [
+          context_eval("#{o}.methods").map { |m| "#{o}.#{m}" },
+          context_eval("#{o}.constants").map { |c| "#{o}::#{c}" },
+        ]
+      end
 
       def store_into_memory
         inmemory_storage[id] = self

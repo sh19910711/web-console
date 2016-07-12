@@ -126,7 +126,7 @@ Autocomplete.prototype.finish = function() {
   if (this.left <= this.current && this.current < this.right) {
     if (this.onFinishCallback) this.onFinishCallback(this.words[this.current]);
     this.removeView();
-    return this.confirmed = this.words[this.current];
+    this.confirmed = this.words[this.current];
   } else {
     this.cancel();
   }
@@ -496,26 +496,33 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete instanceof Autocomplete) {
-    if (ev.keyCode === 9) { // TAB
-      if (ev.shiftKey) {
-        this.autocomplete.back();
-      } else {
-        this.autocomplete.next();
+    function check(self) {
+      if (ev.keyCode === 9) { // TAB
+        if (ev.shiftKey) {
+          self.autocomplete.back();
+        } else {
+          self.autocomplete.next();
+        }
+        return true;
+      } else if (ev.keyCode === 13) { // Enter
+        self.autocomplete.finish();
+        return true;
+      } else if (ev.keyCode == 27) { // ESC
+        self.autocomplete.cancel();
+        return true;
       }
-    } else if (ev.keyCode === 13) { // Enter
-      this.autocomplete.finish();
+    }
+    if (check(this)) {
       ev.preventDefault();
       ev.stopPropagation();
       return;
-    } else if (ev.keyCode == 27) { // ESC
-      this.autocomplete.cancel();
     }
   }
 
   switch (ev.keyCode) {
     case 9:
       // Tab
-      if (!this.autocomplete) this.onTabKey();
+      this.onTabKey();
       ev.preventDefault();
       break;
     case 13:
@@ -555,9 +562,7 @@ REPLConsole.prototype.onKeyDown = function(ev) {
     case 8:
       // Delete
       this.deleteAtCurrent();
-      if (this.autocomplete) {
-        this.autocomplete.refine(this.getCurrentWord(), false);
-      }
+      if (this.autocomplete) this.autocomplete.refine(this.getCurrentWord(), false);
       ev.preventDefault();
       break;
     default:
@@ -590,9 +595,7 @@ REPLConsole.prototype.onKeyPress = function(ev) {
   if (ev.ctrlKey || ev.metaKey) { return; }
   var keyCode = ev.keyCode || ev.which;
   this.insertAtCurrent(String.fromCharCode(keyCode));
-  if (this.autocomplete) {
-    this.autocomplete.refine(this.getCurrentWord(), true);
-  }
+  if (this.autocomplete) this.autocomplete.refine(this.getCurrentWord(), true);
   ev.stopPropagation();
   ev.preventDefault();
 };

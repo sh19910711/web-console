@@ -8,7 +8,7 @@ namespace :test do
 
     workdir    = Pathname(EXPANDED_CWD).join("test/templates")
     pid_file    = Pathname(Dir.tmpdir).join("web_console.#{SecureRandom.uuid}.pid")
-    html_uri    = URI.parse("http://#{ENV['IP'] || 'localhost'}:#{ENV['PORT'] || 29292}/html/")
+    html_uri    = URI.parse("http://#{ENV['IP'] || '127.0.0.1'}:#{ENV['PORT'] || 29292}/html/")
     spec_runner = 'spec_runner.html'
     test_runner = 'test_runner.html'
     rackup_opts = "--host #{html_uri.host} --port #{html_uri.port}"

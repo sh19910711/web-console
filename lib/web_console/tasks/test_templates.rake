@@ -10,7 +10,7 @@ namespace :test do
     port = ENV['PORT'] || 29292
     work_dir    = Pathname(EXPANDED_CWD).join("test/templates")
     pid_file    = Pathname(Dir.tmpdir).join("web_console.#{SecureRandom.uuid}.pid")
-    html_uri    = URI.parse("http://localhost:#{port}/html/")
+    html_uri    = URI.parse("http://#{host}:#{port}/html/")
     spec_runner = 'spec_runner.html'
     test_runner = 'test_runner.html'
     rackup_opts = "--host #{host} --port #{html_uri.port}"
@@ -37,7 +37,6 @@ namespace :test do
     task :wait do
       cnt = 0
       need_to_wait?(URI.join(html_uri, spec_runner)) { sleep 1; cnt += 1; cnt < 5 }
-      need_to_wait?(URI.join(html_uri, test_runner)) { sleep 1; cnt += 1; cnt < 5 }
     end
 
     task :spec do

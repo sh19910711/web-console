@@ -27,7 +27,7 @@ module WebConsole
 
         status, headers, body = call_app(env)
 
-        if session = Session.from(Thread.current) and acceptable_content_type?(headers)
+        if session = Session.from(Thread.current) and acceptable_content_type?(headers) and not request.xhr?
           response = Response.new(body, status, headers)
           template = Template.new(env, session)
 

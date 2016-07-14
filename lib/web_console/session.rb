@@ -63,39 +63,11 @@ module WebConsole
     end
 
     # Returns context of the current binding
-    def context(obj)
-      ( object_name?(obj) ? context_of(obj) : global_context ).flatten
+    def context(objpath)
+      Context.new(@current_binding).of(objpath)
     end
 
     private
-
-      def object_name?(s)
-        s.is_a?(String) && !s.empty? && !s.match(/[^a-zA-Z0-9\@\$\.\:]/)
-      end
-
-      def context_eval(cmd)
-        @current_binding.eval(cmd) rescue []
-      end
-
-      def global_context
-        [
-          'global_variables',
-          'local_variables',
-          'instance_variables',
-          'instance_methods',
-          'class_variables',
-          'methods',
-          'Object.constants',
-          'Kernel.methods',
-        ].map { |cmd| context_eval(cmd) }
-      end
-      
-      def context_of(o)
-        [
-          context_eval("#{o}.methods").map { |m| "#{o}.#{m}" },
-          context_eval("#{o}.constants").map { |c| "#{o}::#{c}" },
-        ]
-      end
 
       def store_into_memory
         inmemory_storage[id] = self

@@ -74,6 +74,25 @@ Autocomplete.prototype.onFinished = function(callback) {
   if (this.confirmed) callback(this.confirmed);
 };
 
+Autocomplete.prototype.onKeyDown = function(ev) {
+  switch (ev.keyCode) {
+    case 9: // Tab
+      if (ev.shiftKey) {
+        this.back();
+      } else {
+        this.next();
+      }
+      return true;
+    case 13: // Enter
+      this.finish();
+      return true;
+    case 27: // Esc
+      this.cancel();
+      return true;
+  }
+  return false;
+};
+
 Autocomplete.prototype.refine = function(prefix, inc) {
   var self = this;
 
@@ -498,23 +517,7 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete) {
-    function check(self) {
-      if (ev.keyCode === 9) { // TAB
-        if (ev.shiftKey) {
-          self.autocomplete.back();
-        } else {
-          self.autocomplete.next();
-        }
-        return true;
-      } else if (ev.keyCode === 13) { // Enter
-        self.autocomplete.finish();
-        return true;
-      } else if (ev.keyCode == 27) { // ESC
-        self.autocomplete.cancel();
-        return true;
-      }
-    }
-    if (check(this)) {
+    if (this.autocomplete.onKeyDown(ev)) {
       ev.preventDefault();
       ev.stopPropagation();
       return;

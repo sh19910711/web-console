@@ -37,6 +37,9 @@ module WebConsole
     end
 
     initializer 'web_console.mount_point' do
+      if root = Rails.application.config.relative_url_root
+        Middleware.mount_point = File.join(root, Middleware.mount_point)
+      end
       if mount_point = config.web_console.mount_point
         Middleware.mount_point = mount_point.chomp('/')
       end

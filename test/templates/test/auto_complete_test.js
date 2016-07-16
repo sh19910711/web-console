@@ -53,10 +53,8 @@ suite('Autocomplete', function() {
     this.inc('some');
     this.dec('');
 
-    assertRange(this, 0, this.ac.words.length - 1);
+    assertRange(this, 0, this.ac.words.length);
   });
-
-  // private helpers
 
   function assertRange(self, left, right, hiddenCnt) {
     assert.equal(left, self.ac.left, 'left');

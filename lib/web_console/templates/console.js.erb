@@ -413,7 +413,7 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
 };
 
 REPLConsole.prototype.setInput = function(input, caretPos) {
-  if (typeof input === 'undefined') return; // keep value if input is undefined
+  if (input == null) return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
   this.renderInput();

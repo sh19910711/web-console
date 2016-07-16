@@ -64,7 +64,7 @@ module WebConsole
 
     # Returns context of the current binding
     def context(objpath)
-      Context.new(@current_binding).of(objpath)
+      Context.new(@current_binding).extract(objpath)
     end
 
     private

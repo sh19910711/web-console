@@ -5,9 +5,8 @@ module WebConsole
       @binding = binding
     end
 
-    # Extracts entire objects which can be called by the current session
-    # unless the objpath is present.
-    # Otherwise, it extracts methods and constants of the object by the objpath.
+    # Extracts entire objects which can be called by the current session unless the objpath is present.
+    # Otherwise, it extracts methods and constants of the object specified by the objpath.
     def extract(objpath)
       if objpath.present?
         local(objpath)

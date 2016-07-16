@@ -125,7 +125,7 @@ Autocomplete.prototype.refine = function(prefix, inc) {
     self.left = moveRight(self.left, self.right);
     self.right = moveLeft(self.left, self.right);
   } else {
-    self.left = moveLeft(0, self.left);
+    self.left = moveLeft(-1, self.left);
     self.right = moveRight(self.right, self.words.length);
   }
 

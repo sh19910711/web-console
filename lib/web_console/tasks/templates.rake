@@ -20,8 +20,15 @@ namespace :templates do
     rackup += " -D --pid #{pid}"
   end
 
-  task :npm do
+  task :npm => [ :phantomjs ] do
     Dir.chdir(workdir) { system 'npm install --silent' }
+  end
+
+  task :phantomjs do
+    unless system("which #{browser} >/dev/null")
+      browser = './node_modules/.bin/phantomjs'
+      Dir.chdir(workdir) { system("test -f #{browser} || npm install --silent phantomjs-prebuilt") }
+    end
   end
 
   task :rackup do
@@ -31,11 +38,6 @@ namespace :templates do
   task :wait do
     cnt = 0
     need_to_wait?(runner) { sleep 1; cnt += 1; cnt < 5 }
-  end
-
-  task :phantomjs do
-    browser = './node_modules/.bin/phantomjs'
-    Dir.chdir(workdir) { system("test -f #{browser} || npm install --silent phantomjs-prebuilt") }
   end
 
   task :mocha do

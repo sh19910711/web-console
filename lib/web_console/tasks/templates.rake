@@ -41,7 +41,7 @@ namespace :templates do
   end
 
   task :mocha do
-    Dir.chdir(workdir) { result = system("#{browser} ./node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js #{runner} dot") }
+    Dir.chdir(workdir) { result = system("#{browser} node_modules/mocha-phantomjs-core/mocha-phantomjs-core.js #{runner} dot") }
   end
 
   task :kill do

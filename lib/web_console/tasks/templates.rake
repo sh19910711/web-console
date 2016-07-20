@@ -33,7 +33,7 @@ namespace :templates do
   end
 
   task :mocha do
-    Dir.chdir(workdir) { result = system("./node_modules/.bin/mocha-phantomjs #{runner}") }
+    Dir.chdir(workdir) { result = system("./node_modules/.bin/mocha-phantomjs -R dot #{runner}") }
   end
 
   task :kill do

@@ -1,4 +1,4 @@
-suite('DOMHelper', function() {
+suite('DOM Helpers', function() {
   test('hasClass() checks if an element contains a class name', function() {
     var div = document.createElement('div');
     assert.notOk(hasClass(div, 'hello'));

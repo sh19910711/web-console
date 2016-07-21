@@ -45,12 +45,22 @@ function CommandStorage() {
 }
 
 function Autocomplete(words, prefix) {
-  this.words = words.concat(); // to clone object
-  this.words.sort(); // by alphabetically order
+  this.words = betterWords(words);
   this.current = -1;
   this.left = 0; // [left, right)
   this.right = words.length;
   this.confirmed = false;
+
+  function betterWords(words) {
+    var sorted = words.concat(); // to clone object
+    sorted.sort(); // by alphabetically order
+    var better = [];
+    var prev;
+    for (var i = 0; i < sorted.length; ++i) {
+      if (prev !== sorted[i]) better.push(prev = sorted[i]);
+    }
+    return better;
+  }
 
   function createKeyword(label) {
     var el = document.createElement('span');
@@ -78,6 +88,7 @@ Autocomplete.prototype.onKeyDown = function(ev) {
   var self = this;
 
   function move(nextCurrent) {
+    if (! self.words.length) return;
     if (0 <= self.current && self.current < self.words.length) removeClass(self.view.children[self.current], 'selected');
     addClass(self.view.children[nextCurrent], 'selected');
     self.current = nextCurrent;

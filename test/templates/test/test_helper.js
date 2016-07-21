@@ -8,17 +8,23 @@
   }
 
   var TestHelper = {
+    KEY_TAB: 9,
+    KEY_ENTER: 13,
+
     triggerEvent: function(el, eventName) {
       var event = document.createEvent("MouseEvents");
       event.initEvent(eventName, true, true); // type, bubbles, cancelable
       el.dispatchEvent(event);
     },
+
     keyDown: function(keyCode) {
       return new FakeKeyEvent(keyCode);
     },
+
     randomString: function() {
       Math.random().toString(36).substring(2);
     },
+
     prepareStageElement: function() {
       before(function() {
         this.stageElement = document.createElement("div");

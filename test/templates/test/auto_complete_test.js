@@ -4,8 +4,16 @@ suite('Autocomplete', function() {
     this.refine = function(prefix) { this.ac.refine(prefix); };
   });
 
+  test('does not nothing if the word list is empty', function() {
+    var ac = new Autocomplete([]);
+    assert.doesNotThrow(function() {
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_ENTER));
+    });
+  });
+
   test('removes duplications', function() {
-    var ac = new Autocomplete(['a', 'b', 'b', 'c']);
+    var ac = new Autocomplete(['b', 'a', 'b', 'c']);
     assert.deepEqual(['a', 'b', 'c'], ac.words);
   });
 

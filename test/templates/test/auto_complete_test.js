@@ -4,6 +4,11 @@ suite('Autocomplete', function() {
     this.refine = function(prefix) { this.ac.refine(prefix); };
   });
 
+  test('removes duplications', function() {
+    var ac = new Autocomplete(['b', 'a', 'b', 'c']);
+    assert.deepEqual(['a', 'b', 'c'], ac.words);
+  });
+
   test('empty string', function() {
     this.refine('');
 

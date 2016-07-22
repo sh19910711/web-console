@@ -45,22 +45,11 @@ function CommandStorage() {
 }
 
 function Autocomplete(words, prefix) {
-  this.words = betterWords(words);
+  this.words = words;
   this.current = -1;
   this.left = 0; // [left, right)
   this.right = words.length;
   this.confirmed = false;
-
-  function betterWords(words) {
-    var sorted = words.concat(); // to clone object
-    sorted.sort(); // by alphabetically order
-    var better = [];
-    var prev;
-    for (var i = 0; i < sorted.length; ++i) {
-      if (prev !== sorted[i]) better.push(prev = sorted[i]);
-    }
-    return better;
-  }
 
   function createKeyword(label) {
     var el = document.createElement('span');

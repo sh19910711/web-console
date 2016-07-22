@@ -12,11 +12,6 @@ suite('Autocomplete', function() {
     });
   });
 
-  test('removes duplications', function() {
-    var ac = new Autocomplete(['b', 'a', 'b', 'c']);
-    assert.deepEqual(['a', 'b', 'c'], ac.words);
-  });
-
   test('empty string', function() {
     this.refine('');
 

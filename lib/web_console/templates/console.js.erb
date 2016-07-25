@@ -55,6 +55,7 @@ function Autocomplete(words, prefix) {
     var el = document.createElement('span');
     el.innerText = label;
     addClass(el, 'keyword');
+    addClass(el, 'soft-hidden');
     return el;
   }
 
@@ -80,7 +81,7 @@ Autocomplete.prototype.onKeyDown = function(ev) {
     if (! self.words.length) return;
     if (0 <= self.current && self.current < self.words.length) removeClass(self.view.children[self.current], 'selected');
     addClass(self.view.children[nextCurrent], 'selected');
-    self.current = nextCurrent;
+    self.updateCurrent(nextCurrent);
   }
 
   switch (ev.keyCode) {
@@ -100,6 +101,18 @@ Autocomplete.prototype.onKeyDown = function(ev) {
   }
 
   return false;
+};
+
+Autocomplete.prototype.updateCurrent = function(next) {
+  if (!this.words.length) return;
+  if (this.current >= 0) addClass(this.view.children[this.current], 'soft-hidden');
+  var now = next;
+  if (next < 0) now = 0;
+  for (var i = 0; i < 5; ++i) {
+    removeClass(this.view.children[now], 'soft-hidden');
+    now = now + 1 >= this.right ? this.left : now + 1;
+  }
+  this.current = next;
 };
 
 Autocomplete.prototype.refine = function(prefix) {
@@ -141,13 +154,13 @@ Autocomplete.prototype.refine = function(prefix) {
   }
 
   if (self.current < self.left) {
-    self.current = self.left - 1;
+    self.updateCurrent(self.left - 1);
   } else if (self.current > self.right) {
-    self.current = self.right;
+    self.updateCurrent(self.right);
   }
 
   if (self.left + 1 >= self.right) {
-    self.current = self.left;
+    self.updateCurrent(self.left);
     self.finish();
   }
 };

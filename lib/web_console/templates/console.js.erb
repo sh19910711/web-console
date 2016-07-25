@@ -105,12 +105,18 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 
 Autocomplete.prototype.updateCurrent = function(next) {
   if (!this.words.length) return;
-  if (this.current >= 0) addClass(this.view.children[this.current], 'soft-hidden');
-  var now = next;
-  if (next < 0) now = 0;
-  for (var i = 0; i < 5; ++i) {
+  if (this.current == this.right - 1 && next == this.left) {
+    var now = this.right - 1;
+    for (var i = 0; i < 5 && now >= this.left; ++i, --now) {
+      addClass(this.view.children[now], 'soft-hidden');
+    }
+  }
+  if (this.current >= this.left && this.current + 5 < this.right) {
+    addClass(this.view.children[this.current], 'soft-hidden');
+  }
+  var now = next < 0 ? 0 : next;
+  for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
     removeClass(this.view.children[now], 'soft-hidden');
-    now = now + 1 >= this.right ? this.left : now + 1;
   }
   this.current = next;
 };

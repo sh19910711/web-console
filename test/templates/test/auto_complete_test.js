@@ -4,40 +4,56 @@ suite('Autocomplete', function() {
     this.refine = function(prefix) { this.ac.refine(prefix); };
   });
 
-  test('shows only five elements around the current element', function() {
+  test('shows only five elements after the current element', function() {
     var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
 
     // A B C D E ...
     assertNotClass(ac, 0, 5, 'soft-hidden');
     assertClass(ac, 5, ac.words.length, 'soft-hidden');
 
-    // A B C D E ...
+    // A: A B C D E ...
     ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
     assertNotClass(ac, 0, 5, 'soft-hidden');
     assertClass(ac, 5, ac.words.length, 'soft-hidden');
 
-    // B C D E F ...
+    // B: B C D E F ...
     ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
     assertClass(ac, 0, 1, 'soft-hidden');
     assertNotClass(ac, 1, 6, 'soft-hidden');
     assertClass(ac, 6, ac.words.length, 'soft-hidden');
 
-    // D E F G H
-    for (var i = 0; i < 5; ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+    // A: A B C D E ... (shift)
+    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
+    assert.equal(0, ac.current);
+    assertNotClass(ac, 0, 5, 'soft-hidden');
+    assertClass(ac, 5, ac.words.length, 'soft-hidden');
+  });
+
+  test('keeps to show the last five elements', function() {
+    var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
+
+    // G: D E F G H
+    for (var i = 0; i <= ac.words.indexOf('G'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
     assert.equal(6, ac.current);
     assertClass(ac, 0, 3, 'soft-hidden');
     assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
 
-    // D E F G H
+    // H: D E F G H (keep last five elements)
     ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
     assert.equal(7, ac.current);
     assertClass(ac, 0, 3, 'soft-hidden');
     assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
 
-    // A B C D E ...
+    // A: A B C D E ...
     ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
     assertNotClass(ac, 0, 5, 'soft-hidden');
     assertClass(ac, 5, ac.words.length, 'soft-hidden');
+
+    // H: D E F G H (shift)
+    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
+    assert.equal(7, ac.current);
+    assertClass(ac, 0, 3, 'soft-hidden');
+    assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
   });
 
   test('does nothing if the word list is empty', function() {

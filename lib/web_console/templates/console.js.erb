@@ -110,13 +110,28 @@ Autocomplete.prototype.updateCurrent = function(next) {
     for (var i = 0; i < 5 && now >= this.left; ++i, --now) {
       addClass(this.view.children[now], 'soft-hidden');
     }
-  }
-  if (this.current >= this.left && this.current + 5 < this.right) {
-    addClass(this.view.children[this.current], 'soft-hidden');
-  }
-  var now = next < 0 ? 0 : next;
-  for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
-    removeClass(this.view.children[now], 'soft-hidden');
+    var now = this.left;
+    for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
+      removeClass(this.view.children[now], 'soft-hidden');
+    }
+  } else if (this.current == this.left && next == this.right - 1) {
+    var now = this.left;
+    for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
+      addClass(this.view.children[now], 'soft-hidden');
+    }
+    var now = this.right - 5 < this.left ? this.left : this.right - 5;
+    for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
+      removeClass(this.view.children[now], 'soft-hidden');
+    }
+  } else {
+    if (this.current >= this.left && this.current + 5 < this.right) {
+      addClass(this.view.children[this.current], 'soft-hidden');
+      addClass(this.view.children[this.current+4], 'soft-hidden');
+    }
+    var now = next < 0 ? 0 : next;
+    for (var i = 0; i < 5 && now < this.right; ++i, ++now) {
+      removeClass(this.view.children[now], 'soft-hidden');
+    }
   }
   this.current = next;
 };

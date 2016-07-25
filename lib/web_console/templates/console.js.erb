@@ -106,32 +106,23 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 Autocomplete.prototype.updateCurrent = function(next) {
   var self = this;
 
-  function iterate(now, func) {
-    for (var i = 0; i < 5 && now < self.right; ++i, ++now) {
+  function iterate(diff, now, func) {
+    for (var i = 0; i < 5 && now < self.right; ++i, now += diff) {
       func(self.view.children[now], 'soft-hidden');
-    }
-  }
-
-  function iterateBack(now, func) {
-    for (var i = 0; i < 5 && now >= self.left; ++i, --now) {
-      addClass(self.view.children[now], 'soft-hidden');
     }
   }
 
   if (!this.words.length) return;
 
   if (this.current == this.right - 1 && next == this.left) {
-    iterateBack(this.right - 1, addClass);
-    iterate(this.left, removeClass);
+    iterate(-1, this.right - 1, addClass);
+    iterate(+1, this.left, removeClass);
   } else if (this.current == this.left && next == this.right - 1) {
-    iterate(this.left, addClass);
-    iterate(this.right - 5 < this.left ? this.left : this.right - 5, removeClass);
+    iterate(+1, this.left, addClass);
+    iterate(+1, this.right - 5 < this.left ? this.left : this.right - 5, removeClass);
   } else {
-    if (this.current >= this.left && this.current + 5 < this.right) {
-      addClass(this.view.children[this.current], 'soft-hidden');
-      addClass(this.view.children[this.current+4], 'soft-hidden');
-    }
-    iterate(next < 0 ? 0 : next, removeClass);
+    if (this.current >= this.left && this.current + 5 < this.right) iterate(+1, this.current, addClass);
+    iterate(+1, next < 0 ? 0 : next, removeClass);
   }
   this.current = next;
 };

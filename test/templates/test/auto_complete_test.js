@@ -1,61 +1,4 @@
 suite('Autocomplete', function() {
-  setup(function() {
-    this.ac = new Autocomplete(['other', 'other2', 'something', 'somewhat', 'somewhere', 'test']);
-    this.refine = function(prefix) { this.ac.refine(prefix); };
-  });
-
-  test('shows only five elements after the current element', function() {
-    var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
-
-    // A B C D E ...
-    assertNotClass(ac, 0, 5, 'soft-hidden');
-    assertClass(ac, 5, ac.words.length, 'soft-hidden');
-
-    // A: A B C D E ...
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-    assertNotClass(ac, 0, 5, 'soft-hidden');
-    assertClass(ac, 5, ac.words.length, 'soft-hidden');
-
-    // B: B C D E F ...
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-    assertClass(ac, 0, 1, 'soft-hidden');
-    assertNotClass(ac, 1, 6, 'soft-hidden');
-    assertClass(ac, 6, ac.words.length, 'soft-hidden');
-
-    // A: A B C D E ... (shift)
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
-    assert.equal(0, ac.current);
-    assertNotClass(ac, 0, 5, 'soft-hidden');
-    assertClass(ac, 5, ac.words.length, 'soft-hidden');
-  });
-
-  test('keeps to show the last five elements', function() {
-    var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
-
-    // G: D E F G H
-    for (var i = 0; i <= ac.words.indexOf('G'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-    assert.equal(6, ac.current);
-    assertClass(ac, 0, 3, 'soft-hidden');
-    assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
-
-    // H: D E F G H (keep last five elements)
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-    assert.equal(7, ac.current);
-    assertClass(ac, 0, 3, 'soft-hidden');
-    assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
-
-    // A: A B C D E ...
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-    assertNotClass(ac, 0, 5, 'soft-hidden');
-    assertClass(ac, 5, ac.words.length, 'soft-hidden');
-
-    // H: D E F G H (shift)
-    ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
-    assert.equal(7, ac.current);
-    assertClass(ac, 0, 3, 'soft-hidden');
-    assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
-  });
-
   test('does nothing if the word list is empty', function() {
     var ac = new Autocomplete([]);
     assert.doesNotThrow(function() {
@@ -64,47 +7,123 @@ suite('Autocomplete', function() {
     });
   });
 
-  test('empty string', function() {
-    this.refine('');
+  suite('Trimming', function() {
+    test('shows only five elements after the current element', function() {
+      var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
 
-    assert(!this.ac.confirmed);
-    assertRange(this, 0, this.ac.words.length, 0);
+      // A B C D E ...
+      assert.equal(-1, ac.current);
+      assertNotClass(ac, 0, 5, 'soft-hidden');
+      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+
+      // A: A B C D E ...
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertNotClass(ac, 0, 5, 'soft-hidden');
+      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+
+      // B: B C D E F ...
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertClass(ac, 0, 1, 'soft-hidden');
+      assertNotClass(ac, 1, 6, 'soft-hidden');
+      assertClass(ac, 6, ac.words.length, 'soft-hidden');
+
+      // A: A B C D E ... (shift)
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
+      assert.equal(0, ac.current);
+      assertNotClass(ac, 0, 5, 'soft-hidden');
+      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+    });
+
+    test('keeps to show the last five elements', function() {
+      var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
+
+      // G: D E F G H
+      for (var i = 0; i <= ac.words.indexOf('G'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assert.equal(6, ac.current);
+      assertClass(ac, 0, 3, 'soft-hidden');
+      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+
+      // H: D E F G H (keep last five elements)
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assert.equal(7, ac.current);
+      assertClass(ac, 0, 3, 'soft-hidden');
+      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+
+      // A: A B C D E ...
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertNotClass(ac, 0, 5, 'soft-hidden');
+      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+
+      // H: D E F G H (shift)
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
+      assert.equal(7, ac.current);
+      assertClass(ac, 0, 3, 'soft-hidden');
+      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+    });
+
+    test('shows five elements if prefix is passed', function() {
+      var ac = new Autocomplete(['A', 'B1', 'B2', 'B3', 'C'], 'B');
+      assert.equal(0, ac.current);
+      assertClass(ac, 0, 1, 'soft-hidden');
+      assertNotClass(ac, 1, 4, 'soft-hidden');
+      assertClass(ac, 4, ac.words.length, 'soft-hidden');
+
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assert.equal(1, ac.current);
+      assertClass(ac, 0, 1, 'soft-hidden');
+      assertNotClass(ac, 1, 4, 'soft-hidden');
+      assertClass(ac, 4, ac.words.length, 'soft-hidden');
+    });
   });
 
-  test('some', function() {
-    this.refine('some');
+  suite('Refinements', function() {
+    setup(function() {
+      this.ac = new Autocomplete(['other', 'other2', 'something', 'somewhat', 'somewhere', 'test']);
+      this.refine = function(prefix) { this.ac.refine(prefix); };
+    });
 
-    assert(!this.ac.confirmed);
-    assertRange(this, 2, this.ac.words.length - 1, 3);
-  });
+    test('empty string', function() {
+      this.refine('');
 
-  test('confirmable', function() {
-    this.refine('somet');
+      assert(!this.ac.confirmed);
+      assertRange(this, 0, this.ac.words.length, 0);
+    });
 
-    assert.equal(this.ac.confirmed, 'something');
-    assertRange(this, 2, 3);
-  });
+    test('some', function() {
+      this.refine('some');
 
-  test('decrement', function() {
-    this.refine('o');
-    this.refine('');
+      assert(!this.ac.confirmed);
+      assertRange(this, 2, this.ac.words.length - 1, 3);
+    });
 
-    assertRange(this, 0, this.ac.words.length, 0);
-  });
+    test('confirmable', function() {
+      this.refine('somet');
 
-  test('other => empty => some', function() {
-    this.refine('other');
-    this.refine('');
-    this.refine('some');
+      assert.equal(this.ac.confirmed, 'something');
+      assertRange(this, 2, 3);
+    });
 
-    assertRange(this, 2, this.ac.words.length - 1, 3);
-  });
+    test('decrement', function() {
+      this.refine('o');
+      this.refine('');
 
-  test('some => empty', function() {
-    this.refine('some');
-    this.refine('');
+      assertRange(this, 0, this.ac.words.length, 0);
+    });
 
-    assertRange(this, 0, this.ac.words.length);
+    test('other => empty => some', function() {
+      this.refine('other');
+      this.refine('');
+      this.refine('some');
+
+      assertRange(this, 2, this.ac.words.length - 1, 3);
+    });
+
+    test('some => empty', function() {
+      this.refine('some');
+      this.refine('');
+
+      assertRange(this, 0, this.ac.words.length);
+    });
   });
 
   function assertClass(ac, left, right, className) {

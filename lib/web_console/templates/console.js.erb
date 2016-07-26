@@ -118,7 +118,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var num = 5;
   var toggleClass = needToTrim ? addClass : removeClass;
 
-  if (this.right - this.left + 1 > num) {
+  if (this.right - this.left > num) {
     (this.left < from ? removeClass : addClass)(this.prefix, 'trimmed');
     (from + num < this.right? removeClass : addClass)(this.suffix, 'trimmed');
   } else {

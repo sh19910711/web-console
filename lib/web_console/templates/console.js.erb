@@ -117,15 +117,17 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var num = 5;
   var func = needToTrim ? addClass : removeClass;
 
-  if (from > this.left) {
-    removeClass(this.trimmedPrefix, 'trimmed');
-  } else {
-    addClass(this.trimmedPrefix, 'trimmed');
-  }
-  if (from + num < this.right) {
-    removeClass(this.trimmedSuffix, 'trimmed');
-  } else {
-    addClass(this.trimmedSuffix, 'trimmed');
+  if (this.words.length > num) {
+    if (from > this.left) {
+      removeClass(this.trimmedPrefix, 'trimmed');
+    } else {
+      addClass(this.trimmedPrefix, 'trimmed');
+    }
+    if (from + num < this.right) {
+      removeClass(this.trimmedSuffix, 'trimmed');
+    } else {
+      addClass(this.trimmedSuffix, 'trimmed');
+    }
   }
 
   if (from < this.left) {

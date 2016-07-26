@@ -10,53 +10,53 @@ suite('Autocomplete', function() {
   suite('Trimming', function() {
     test('prefix and suffix stands for that the list includes trimmed elements', function() {
       var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
-      assert.equal(ac.trimmedPrefix, ac.view.children[0]);
-      assert.equal(ac.trimmedPrefix.innerText, ac.view.children[0].innerText);
-      assert.equal(ac.trimmedSuffix, ac.view.children[ac.words.length + 1]);
-      assert.equal(ac.trimmedSuffix.innerText, ac.view.children[ac.words.length + 1].innerText);
-      assertTrimmed(ac.trimmedPrefix);
-      assertNotTrimmed(ac.trimmedSuffix);
+      assert.equal(ac.prefix, ac.view.children[0]);
+      assert.equal(ac.prefix.innerText, ac.view.children[0].innerText);
+      assert.equal(ac.suffix, ac.view.children[ac.words.length + 1]);
+      assert.equal(ac.suffix.innerText, ac.view.children[ac.words.length + 1].innerText);
+      assertTrimmed(ac.prefix);
+      assertNotTrimmed(ac.suffix);
 
       // A B C D E ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertTrimmed(ac.trimmedPrefix);
-      assertNotTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertNotTrimmed(ac.suffix);
 
       // ... B C D E F ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertNotTrimmed(ac.trimmedPrefix);
-      assertNotTrimmed(ac.trimmedSuffix);
+      assertNotTrimmed(ac.prefix);
+      assertNotTrimmed(ac.suffix);
 
       // A: A B C D E ... (shift)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
-      assertTrimmed(ac.trimmedPrefix);
-      assertNotTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertNotTrimmed(ac.suffix);
 
       // ... D E F G H
       for (var i = 0; i <= ac.words.indexOf('D'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertNotTrimmed(ac.trimmedPrefix);
-      assertTrimmed(ac.trimmedSuffix);
+      assertNotTrimmed(ac.prefix);
+      assertTrimmed(ac.suffix);
     });
 
     test('prefix and suffix are always trimmed if the list has few items', function() {
       var ac = new Autocomplete(['A', 'B', 'C']);
-      assertTrimmed(ac.trimmedPrefix);
-      assertTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertTrimmed(ac.suffix);
 
       // A
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertTrimmed(ac.trimmedPrefix);
-      assertTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertTrimmed(ac.suffix);
 
       // B
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertTrimmed(ac.trimmedPrefix);
-      assertTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertTrimmed(ac.suffix);
 
       // C
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertTrimmed(ac.trimmedPrefix);
-      assertTrimmed(ac.trimmedSuffix);
+      assertTrimmed(ac.prefix);
+      assertTrimmed(ac.suffix);
     });
 
     test('shows only five elements after the current element', function() {

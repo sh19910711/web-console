@@ -8,6 +8,11 @@ suite('Autocomplete', function() {
   });
 
   suite('Trimming', function() {
+    test('the last element stands for the list is trimmed', function() {
+      var ac = new Autocomplete(['A', 'B', 'C']);
+      assert.equal('...', ac.view.children[ac.words.length].innerText);
+    });
+
     test('shows only five elements after the current element', function() {
       var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
 
@@ -156,10 +161,10 @@ suite('Autocomplete', function() {
   }
 
   function assertCut(ac) {
-    assert.notOk(hasClass(ac.view.children[ac.words.length - 1], 'trimmed'));
+    assert.notOk(hasClass(ac.view.children[ac.words.length], 'trimmed'));
   }
 
   function assertNotCut(ac) {
-    assert.ok(hasClass(ac.view.children[ac.words.length - 1], 'trimmed'));
+    assert.ok(hasClass(ac.view.children[ac.words.length], 'trimmed'));
   }
 });

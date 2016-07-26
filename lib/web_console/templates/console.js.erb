@@ -115,7 +115,6 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 Autocomplete.prototype.trim = function(from, needToTrim) {
   var self = this;
   var num = 5;
-  var toggleClass = needToTrim ? addClass : removeClass;
 
   if (this.right - this.left > num) {
     (this.left < from ? removeClass : addClass)(this.prefix, 'trimmed');
@@ -131,6 +130,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
     }
   }
 
+  var toggleClass = needToTrim ? addClass : removeClass;
   if (from < this.left) {
     iterate(this.left);
   } else if (from + num - 1 >= this.right) {

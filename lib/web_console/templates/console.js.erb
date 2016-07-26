@@ -51,7 +51,7 @@ function Autocomplete(words, prefix) {
   this.right = words.length;
   this.confirmed = false;
 
-  function createKeyword(label) {
+  function createSpan(label) {
     var el = document.createElement('span');
     el.innerText = label;
     return el;
@@ -61,10 +61,11 @@ function Autocomplete(words, prefix) {
   addClass(this.view, 'console-message');
   addClass(this.view, 'auto-complete');
   for (var key in this.words) {
-    this.view.appendChild(createKeyword(this.words[key]));
+    this.view.appendChild(createSpan(this.words[key]));
   }
+  this.view.appendChild(createSpan('...'));
   addClass(this.view.children, 'keyword');
-  addClass(this.view.children, 'soft-hidden');
+  addClass(this.view.children, 'trimmed');
 
   this.refine(prefix || '');
 }
@@ -81,8 +82,8 @@ Autocomplete.prototype.onKeyDown = function(ev) {
     if (! self.words.length) return;
     if (0 <= self.current && self.current < self.words.length) removeClass(self.view.children[self.current], 'selected');
     addClass(self.view.children[nextCurrent], 'selected');
-    self.trim(self.current, addClass);
-    self.trim(nextCurrent, removeClass);
+    self.trim(self.current, true);
+    self.trim(nextCurrent, false);
     self.current = nextCurrent;
   }
 
@@ -105,18 +106,27 @@ Autocomplete.prototype.onKeyDown = function(ev) {
   return false;
 };
 
-Autocomplete.prototype.trim = function(from, func) {
+Autocomplete.prototype.trim = function(from, needToTrim) {
+  var num = 5;
+  var func = needToTrim ? addClass : removeClass;
+
+  if (from + num < this.right) {
+    removeClass(this.view.children[this.words.length], 'trimmed');
+  } else {
+    addClass(this.view.children[this.words.length], 'trimmed');
+  }
+
   if (from < this.left) {
-    for (var i = 0, x = this.left; i < 5 && x < this.right; ++i, ++x) {
-      func(this.view.children[x], 'soft-hidden');
+    for (var i = 0, x = this.left; i < num && x < this.right; ++i, ++x) {
+      func(this.view.children[x], 'trimmed');
     }
-  } else if (from + 4 >= this.right) {
-    for (var i = 0, x = this.right - 5; i < 5 && x < this.right; ++i, ++x) {
-      if (this.left <= x) func(this.view.children[x], 'soft-hidden');
+  } else if (from + num - 1 >= this.right) {
+    for (var i = 0, x = this.right - num; i < num && x < this.right; ++i, ++x) {
+      if (this.left <= x) func(this.view.children[x], 'trimmed');
     }
   } else {
-    for (var i = 0, x = from; i < 5 && x < this.right; ++i, ++x) {
-      func(this.view.children[x], 'soft-hidden');
+    for (var i = 0, x = from; i < num && x < this.right; ++i, ++x) {
+      func(this.view.children[x], 'trimmed');
     }
   }
 };
@@ -151,7 +161,7 @@ Autocomplete.prototype.refine = function(prefix) {
     return r;
   }
 
-  self.trim(self.current, addClass);
+  self.trim(self.current, true);
   if (inc) {
     self.left = moveRight(self.left, self.right);
     self.right = moveLeft(self.left, self.right);
@@ -162,7 +172,7 @@ Autocomplete.prototype.refine = function(prefix) {
   if (this.current < this.left || this.current >= this.right) {
     this.current = this.left - 1;
   }
-  self.trim(this.current, removeClass);
+  self.trim(this.current, false);
 
   if (self.left + 1 >= self.right) {
     self.current = self.left;

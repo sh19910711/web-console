@@ -114,37 +114,34 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 };
 
 Autocomplete.prototype.trim = function(from, needToTrim) {
+  var self = this;
   var num = 5;
-  var func = needToTrim ? addClass : removeClass;
+  var toggleClass = needToTrim ? addClass : removeClass;
+
+  function toggleEnds(el, l, r) {
+    return l < r ? removeClass(el, 'trimmed') : addClass(el, 'trimmed');
+  }
+
+  function iterate(x) {
+    for (var i = 0; i < num; ++i, ++x) if (self.left <= x && x < self.right) {
+      toggleClass(self.itemView(x), 'trimmed');
+    }
+  }
 
   if (this.right - this.left + 1 > num) {
-    if (from > this.left) {
-      removeClass(this.prefix, 'trimmed');
-    } else {
-      addClass(this.prefix, 'trimmed');
-    }
-    if (from + num < this.right) {
-      removeClass(this.suffix, 'trimmed');
-    } else {
-      addClass(this.suffix, 'trimmed');
-    }
+    toggleEnds(this.prefix, this.left, from);
+    toggleEnds(this.suffix, from + num, this.right);
   } else {
     addClass(this.prefix, 'trimmed');
     addClass(this.suffix, 'trimmed');
   }
 
   if (from < this.left) {
-    for (var i = 0, x = this.left; i < num && x < this.right; ++i, ++x) {
-      func(this.itemView(x), 'trimmed');
-    }
+    iterate(this.left);
   } else if (from + num - 1 >= this.right) {
-    for (var i = 0, x = this.right - num; i < num && x < this.right; ++i, ++x) {
-      if (this.left <= x) func(this.itemView(x), 'trimmed');
-    }
+    iterate(this.right - num);
   } else {
-    for (var i = 0, x = from; i < num && x < this.right; ++i, ++x) {
-      func(this.itemView(x), 'trimmed');
-    }
+    iterate(from);
   }
 };
 

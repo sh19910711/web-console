@@ -117,7 +117,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var num = 5;
   var func = needToTrim ? addClass : removeClass;
 
-  if (this.words.length > num) {
+  if (this.right - this.left + 1 > num) {
     if (from > this.left) {
       removeClass(this.prefix, 'trimmed');
     } else {
@@ -128,6 +128,9 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
     } else {
       addClass(this.suffix, 'trimmed');
     }
+  } else {
+    addClass(this.prefix, 'trimmed');
+    addClass(this.suffix, 'trimmed');
   }
 
   if (from < this.left) {

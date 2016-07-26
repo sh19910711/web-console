@@ -72,7 +72,7 @@ function Autocomplete(words, prefix) {
   this.refine(prefix || '');
 }
 
-Autocomplete.prototype.itemView = function(x) {
+Autocomplete.prototype.item = function(x) {
   return this.view.children[x+1];
 };
 
@@ -86,8 +86,8 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 
   function move(nextCurrent) {
     if (! self.words.length) return;
-    if (0 <= self.current && self.current < self.words.length) removeClass(self.itemView(self.current), 'selected');
-    addClass(self.itemView(nextCurrent), 'selected');
+    if (0 <= self.current && self.current < self.words.length) removeClass(self.item(self.current), 'selected');
+    addClass(self.item(nextCurrent), 'selected');
     self.trim(self.current, true);
     self.trim(nextCurrent, false);
     self.current = nextCurrent;
@@ -126,7 +126,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 
   function iterate(x) {
     for (var i = 0; i < num; ++i, ++x) if (self.left <= x && x < self.right) {
-      toggleClass(self.itemView(x), 'trimmed');
+      toggleClass(self.item(x), 'trimmed');
     }
   }
 
@@ -156,7 +156,7 @@ Autocomplete.prototype.refine = function(prefix) {
 
   function moveRight(l, r) {
     while (l < r && inc !== startsWith(self.words[l], prefix)) {
-      toggle(self.itemView(l));
+      toggle(self.item(l));
       ++ l;
     }
     return l;
@@ -164,7 +164,7 @@ Autocomplete.prototype.refine = function(prefix) {
 
   function moveLeft(l, r) {
     while (l < r - 1 && inc !== startsWith(self.words[r - 1], prefix)) {
-      toggle(self.itemView(r - 1));
+      toggle(self.item(r - 1));
       -- r;
     }
     return r;

@@ -179,13 +179,13 @@ suite('Autocomplete', function() {
 
   function assertClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.ok(hasClass(ac.itemView(i), className), i + '-th element shuold have ' + className);
+      assert.ok(hasClass(ac.item(i), className), i + '-th element shuold have ' + className);
     }
   }
 
   function assertNotClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.notOk(hasClass(ac.itemView(i), className), i + '-th element should not have ' + className);
+      assert.notOk(hasClass(ac.item(i), className), i + '-th element should not have ' + className);
     }
   }
 

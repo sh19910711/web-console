@@ -50,6 +50,8 @@ function Autocomplete(words, prefix) {
   this.left = 0; // [left, right)
   this.right = words.length;
   this.confirmed = false;
+  this.prefix = createSpan('...');
+  this.suffix = createSpan('...');
 
   function createSpan(label) {
     var el = document.createElement('span');
@@ -57,18 +59,15 @@ function Autocomplete(words, prefix) {
     return el;
   }
 
-  this.prefix = createSpan('...');
-  this.suffix = createSpan('...');
   this.view = document.createElement('pre');
-  addClass(this.view, 'console-message');
-  addClass(this.view, 'auto-complete');
+  addClass(this.view, 'auto-complete console-message');
+
   this.view.appendChild(this.prefix);
   for (var key in this.words) {
     this.view.appendChild(createSpan(this.words[key]));
   }
   this.view.appendChild(this.suffix);
-  addClass(this.view.children, 'keyword');
-  addClass(this.view.children, 'trimmed');
+  addClass(this.view.children, 'trimmed keyword');
 
   this.refine(prefix || '');
 }

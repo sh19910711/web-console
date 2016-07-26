@@ -57,18 +57,25 @@ function Autocomplete(words, prefix) {
     return el;
   }
 
+  this.trimmedPrefix = createSpan('...');
+  this.trimmedSuffix = createSpan('...');
   this.view = document.createElement('pre');
   addClass(this.view, 'console-message');
   addClass(this.view, 'auto-complete');
+  this.view.appendChild(this.trimmedPrefix);
   for (var key in this.words) {
     this.view.appendChild(createSpan(this.words[key]));
   }
-  this.view.appendChild(createSpan('...'));
+  this.view.appendChild(this.trimmedSuffix);
   addClass(this.view.children, 'keyword');
   addClass(this.view.children, 'trimmed');
 
   this.refine(prefix || '');
 }
+
+Autocomplete.prototype.itemView = function(x) {
+  return this.view.children[x+1];
+};
 
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
@@ -80,8 +87,8 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 
   function move(nextCurrent) {
     if (! self.words.length) return;
-    if (0 <= self.current && self.current < self.words.length) removeClass(self.view.children[self.current], 'selected');
-    addClass(self.view.children[nextCurrent], 'selected');
+    if (0 <= self.current && self.current < self.words.length) removeClass(self.itemView(self.current), 'selected');
+    addClass(self.itemView(nextCurrent), 'selected');
     self.trim(self.current, true);
     self.trim(nextCurrent, false);
     self.current = nextCurrent;
@@ -111,22 +118,22 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var func = needToTrim ? addClass : removeClass;
 
   if (from + num < this.right) {
-    removeClass(this.view.children[this.words.length], 'trimmed');
+    removeClass(this.trimmedSuffix, 'trimmed');
   } else {
-    addClass(this.view.children[this.words.length], 'trimmed');
+    addClass(this.trimmedSuffix, 'trimmed');
   }
 
   if (from < this.left) {
     for (var i = 0, x = this.left; i < num && x < this.right; ++i, ++x) {
-      func(this.view.children[x], 'trimmed');
+      func(this.itemView(x), 'trimmed');
     }
   } else if (from + num - 1 >= this.right) {
     for (var i = 0, x = this.right - num; i < num && x < this.right; ++i, ++x) {
-      if (this.left <= x) func(this.view.children[x], 'trimmed');
+      if (this.left <= x) func(this.itemView(x), 'trimmed');
     }
   } else {
     for (var i = 0, x = from; i < num && x < this.right; ++i, ++x) {
-      func(this.view.children[x], 'trimmed');
+      func(this.itemView(x), 'trimmed');
     }
   }
 };
@@ -147,7 +154,7 @@ Autocomplete.prototype.refine = function(prefix) {
 
   function moveRight(l, r) {
     while (l < r && inc !== startsWith(self.words[l], prefix)) {
-      toggle(self.view.children[l]);
+      toggle(self.itemView(l));
       ++ l;
     }
     return l;
@@ -155,7 +162,7 @@ Autocomplete.prototype.refine = function(prefix) {
 
   function moveLeft(l, r) {
     while (l < r - 1 && inc !== startsWith(self.words[r - 1], prefix)) {
-      toggle(self.view.children[r - 1]);
+      toggle(self.itemView(r - 1));
       -- r;
     }
     return r;

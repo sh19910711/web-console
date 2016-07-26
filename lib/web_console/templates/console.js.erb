@@ -57,16 +57,16 @@ function Autocomplete(words, prefix) {
     return el;
   }
 
-  this.trimmedPrefix = createSpan('...');
-  this.trimmedSuffix = createSpan('...');
+  this.prefix = createSpan('...');
+  this.suffix = createSpan('...');
   this.view = document.createElement('pre');
   addClass(this.view, 'console-message');
   addClass(this.view, 'auto-complete');
-  this.view.appendChild(this.trimmedPrefix);
+  this.view.appendChild(this.prefix);
   for (var key in this.words) {
     this.view.appendChild(createSpan(this.words[key]));
   }
-  this.view.appendChild(this.trimmedSuffix);
+  this.view.appendChild(this.suffix);
   addClass(this.view.children, 'keyword');
   addClass(this.view.children, 'trimmed');
 
@@ -119,14 +119,14 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 
   if (this.words.length > num) {
     if (from > this.left) {
-      removeClass(this.trimmedPrefix, 'trimmed');
+      removeClass(this.prefix, 'trimmed');
     } else {
-      addClass(this.trimmedPrefix, 'trimmed');
+      addClass(this.prefix, 'trimmed');
     }
     if (from + num < this.right) {
-      removeClass(this.trimmedSuffix, 'trimmed');
+      removeClass(this.suffix, 'trimmed');
     } else {
-      addClass(this.trimmedSuffix, 'trimmed');
+      addClass(this.suffix, 'trimmed');
     }
   }
 

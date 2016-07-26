@@ -13,25 +13,29 @@ suite('Autocomplete', function() {
 
       // A B C D E ...
       assert.equal(-1, ac.current);
-      assertNotClass(ac, 0, 5, 'soft-hidden');
-      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+      assertNotClass(ac, 0, 5, 'trimmed');
+      assertClass(ac, 5, ac.words.length, 'trimmed');
+      assertCut(ac);
 
       // A: A B C D E ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertNotClass(ac, 0, 5, 'soft-hidden');
-      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+      assertNotClass(ac, 0, 5, 'trimmed');
+      assertClass(ac, 5, ac.words.length, 'trimmed');
+      assertCut(ac);
 
       // B: B C D E F ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertClass(ac, 0, 1, 'soft-hidden');
-      assertNotClass(ac, 1, 6, 'soft-hidden');
-      assertClass(ac, 6, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 1, 'trimmed');
+      assertNotClass(ac, 1, 6, 'trimmed');
+      assertClass(ac, 6, ac.words.length, 'trimmed');
+      assertCut(ac);
 
       // A: A B C D E ... (shift)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
       assert.equal(0, ac.current);
-      assertNotClass(ac, 0, 5, 'soft-hidden');
-      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+      assertNotClass(ac, 0, 5, 'trimmed');
+      assertClass(ac, 5, ac.words.length, 'trimmed');
+      assertCut(ac);
     });
 
     test('keeps to show the last five elements', function() {
@@ -40,39 +44,46 @@ suite('Autocomplete', function() {
       // G: D E F G H
       for (var i = 0; i <= ac.words.indexOf('G'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(6, ac.current);
-      assertClass(ac, 0, 3, 'soft-hidden');
-      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 3, 'trimmed');
+      assertNotClass(ac, 3, ac.words.length, 'trimmed');
+      assertNotCut(ac);
 
       // H: D E F G H (keep last five elements)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(7, ac.current);
-      assertClass(ac, 0, 3, 'soft-hidden');
-      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 3, 'trimmed');
+      assertNotClass(ac, 3, ac.words.length, 'trimmed');
+      assertNotCut(ac);
 
       // A: A B C D E ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
-      assertNotClass(ac, 0, 5, 'soft-hidden');
-      assertClass(ac, 5, ac.words.length, 'soft-hidden');
+      assertNotClass(ac, 0, 5, 'trimmed');
+      assertClass(ac, 5, ac.words.length, 'trimmed');
+      assertCut(ac);
 
       // H: D E F G H (shift)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
       assert.equal(7, ac.current);
-      assertClass(ac, 0, 3, 'soft-hidden');
-      assertNotClass(ac, 3, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 3, 'trimmed');
+      assertNotClass(ac, 3, ac.words.length, 'trimmed');
+      assertNotCut(ac);
+
     });
 
     test('shows five elements if prefix is passed', function() {
       var ac = new Autocomplete(['A', 'B1', 'B2', 'B3', 'C'], 'B');
       assert.equal(0, ac.current);
-      assertClass(ac, 0, 1, 'soft-hidden');
-      assertNotClass(ac, 1, 4, 'soft-hidden');
-      assertClass(ac, 4, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 1, 'trimmed');
+      assertNotClass(ac, 1, 4, 'trimmed');
+      assertClass(ac, 4, ac.words.length, 'trimmed');
+      assertNotCut(ac);
 
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(1, ac.current);
-      assertClass(ac, 0, 1, 'soft-hidden');
-      assertNotClass(ac, 1, 4, 'soft-hidden');
-      assertClass(ac, 4, ac.words.length, 'soft-hidden');
+      assertClass(ac, 0, 1, 'trimmed');
+      assertNotClass(ac, 1, 4, 'trimmed');
+      assertClass(ac, 4, ac.words.length, 'trimmed');
+      assertNotCut(ac);
     });
   });
 
@@ -142,5 +153,13 @@ suite('Autocomplete', function() {
     assert.equal(left, self.ac.left, 'left');
     assert.equal(right, self.ac.right, 'right');
     if (hiddenCnt) assert.equal(hiddenCnt, self.ac.view.getElementsByClassName('hidden').length, 'hiddenCnt');
+  }
+
+  function assertCut(ac) {
+    assert.notOk(hasClass(ac.view.children[ac.words.length - 1], 'trimmed'));
+  }
+
+  function assertNotCut(ac) {
+    assert.ok(hasClass(ac.view.children[ac.words.length - 1], 'trimmed'));
   }
 });

@@ -8,9 +8,34 @@ suite('Autocomplete', function() {
   });
 
   suite('Trimming', function() {
-    test('the last element stands for the list is trimmed', function() {
-      var ac = new Autocomplete(['A', 'B', 'C']);
-      assert.equal('...', ac.view.children[ac.words.length].innerText);
+    test('the first and last element stands that the list includes trimmed elements', function() {
+      var ac = new Autocomplete(['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H']);
+      assert.equal(ac.trimmedPrefix, ac.view.children[0]);
+      assert.equal(ac.trimmedPrefix.innerText, ac.view.children[0].innerText);
+      assert.equal(ac.trimmedSuffix, ac.view.children[ac.words.length + 1]);
+      assert.equal(ac.trimmedSuffix.innerText, ac.view.children[ac.words.length + 1].innerText);
+      assertTrimmed(ac.trimmedPrefix);
+      assertNotTrimmed(ac.trimmedSuffix);
+
+      // A B C D E ...
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertTrimmed(ac.trimmedPrefix);
+      assertNotTrimmed(ac.trimmedSuffix);
+
+      // ... B C D E F ...
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertNotTrimmed(ac.trimmedPrefix);
+      assertNotTrimmed(ac.trimmedSuffix);
+
+      // A: A B C D E ... (shift)
+      ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
+      assertTrimmed(ac.trimmedPrefix);
+      assertNotTrimmed(ac.trimmedSuffix);
+
+      // ... D E F G H
+      for (var i = 0; i <= ac.words.indexOf('D'); ++i) ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
+      assertNotTrimmed(ac.trimmedPrefix);
+      assertTrimmed(ac.trimmedSuffix);
     });
 
     test('shows only five elements after the current element', function() {
@@ -20,27 +45,23 @@ suite('Autocomplete', function() {
       assert.equal(-1, ac.current);
       assertNotClass(ac, 0, 5, 'trimmed');
       assertClass(ac, 5, ac.words.length, 'trimmed');
-      assertCut(ac);
 
       // A: A B C D E ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assertNotClass(ac, 0, 5, 'trimmed');
       assertClass(ac, 5, ac.words.length, 'trimmed');
-      assertCut(ac);
 
       // B: B C D E F ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assertClass(ac, 0, 1, 'trimmed');
       assertNotClass(ac, 1, 6, 'trimmed');
       assertClass(ac, 6, ac.words.length, 'trimmed');
-      assertCut(ac);
 
       // A: A B C D E ... (shift)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
       assert.equal(0, ac.current);
       assertNotClass(ac, 0, 5, 'trimmed');
       assertClass(ac, 5, ac.words.length, 'trimmed');
-      assertCut(ac);
     });
 
     test('keeps to show the last five elements', function() {
@@ -51,28 +72,23 @@ suite('Autocomplete', function() {
       assert.equal(6, ac.current);
       assertClass(ac, 0, 3, 'trimmed');
       assertNotClass(ac, 3, ac.words.length, 'trimmed');
-      assertNotCut(ac);
 
       // H: D E F G H (keep last five elements)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(7, ac.current);
       assertClass(ac, 0, 3, 'trimmed');
       assertNotClass(ac, 3, ac.words.length, 'trimmed');
-      assertNotCut(ac);
 
       // A: A B C D E ...
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assertNotClass(ac, 0, 5, 'trimmed');
       assertClass(ac, 5, ac.words.length, 'trimmed');
-      assertCut(ac);
 
       // H: D E F G H (shift)
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB, { shiftKey: true }));
       assert.equal(7, ac.current);
       assertClass(ac, 0, 3, 'trimmed');
       assertNotClass(ac, 3, ac.words.length, 'trimmed');
-      assertNotCut(ac);
-
     });
 
     test('shows five elements if prefix is passed', function() {
@@ -81,14 +97,12 @@ suite('Autocomplete', function() {
       assertClass(ac, 0, 1, 'trimmed');
       assertNotClass(ac, 1, 4, 'trimmed');
       assertClass(ac, 4, ac.words.length, 'trimmed');
-      assertNotCut(ac);
 
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(1, ac.current);
       assertClass(ac, 0, 1, 'trimmed');
       assertNotClass(ac, 1, 4, 'trimmed');
       assertClass(ac, 4, ac.words.length, 'trimmed');
-      assertNotCut(ac);
     });
   });
 
@@ -144,13 +158,13 @@ suite('Autocomplete', function() {
 
   function assertClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.ok(hasClass(ac.view.children[i], className), i + '-th element shuold have ' + className);
+      assert.ok(hasClass(ac.itemView(i), className), i + '-th element shuold have ' + className);
     }
   }
 
   function assertNotClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.notOk(hasClass(ac.view.children[i], className), i + '-th element should not have ' + className);
+      assert.notOk(hasClass(ac.itemView(i), className), i + '-th element should not have ' + className);
     }
   }
 
@@ -160,11 +174,11 @@ suite('Autocomplete', function() {
     if (hiddenCnt) assert.equal(hiddenCnt, self.ac.view.getElementsByClassName('hidden').length, 'hiddenCnt');
   }
 
-  function assertCut(ac) {
-    assert.notOk(hasClass(ac.view.children[ac.words.length], 'trimmed'));
+  function assertTrimmed(el) {
+    assert.ok(hasClass(el, 'trimmed'));
   }
 
-  function assertNotCut(ac) {
-    assert.ok(hasClass(ac.view.children[ac.words.length], 'trimmed'));
+  function assertNotTrimmed(el) {
+    assert.notOk(hasClass(el, 'trimmed'));
   }
 });

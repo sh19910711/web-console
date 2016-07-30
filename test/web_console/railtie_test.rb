@@ -59,13 +59,13 @@ module WebConsole
       end
     end
 
-    test 'config.mount_point is prior than config.relative_url_root' do
+    test 'config.mount_point can be customized with config.relative_url_root' do
       new_uninitialized_app do |app|
         app.config.web_console.mount_point = '/customized/path'
         app.config.relative_url_root = '/relative/path'
         app.initialize!
 
-        assert_equal '/customized/path', Middleware.mount_point
+        assert_equal '/relative/path/customized/path', Middleware.mount_point
       end
     end
 

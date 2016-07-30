@@ -50,7 +50,7 @@ module WebConsole
       end
     end
 
-    test 'config.mount_point supports relative_url_root' do
+    test 'config.mount_point supports the relative url root' do
       new_uninitialized_app do |app|
         app.config.relative_url_root = '/relative/path'
         app.initialize!
@@ -59,7 +59,7 @@ module WebConsole
       end
     end
 
-    test 'config.mount_point can be customized with config.relative_url_root' do
+    test 'config.mount_point inserts after the relative url root' do
       new_uninitialized_app do |app|
         app.config.web_console.mount_point = '/customized/path'
         app.config.relative_url_root = '/relative/path'

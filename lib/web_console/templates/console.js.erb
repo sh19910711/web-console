@@ -472,8 +472,20 @@ REPLConsole.prototype.renderInput = function() {
   // Clear the current input.
   removeAllChildren(this.promptDisplay);
 
-  var promptCursor = document.createElement('span');
-  promptCursor.className = "console-cursor";
+  function createSpan(s, className) {
+    var span = document.createElement('span');
+    if (className) addClass(span, className);
+    if (s) span.appendChild(document.createTextNode(s));
+    return span;
+  }
+
+  function createHint() {
+    var hint = document.createElement('span');
+    hint.className = 'hint';
+    hint.innerText = 'hello';
+    return hint;
+  }
+
   var before, current, after;
 
   if (this._caretPos < 0) {
@@ -490,8 +502,7 @@ REPLConsole.prototype.renderInput = function() {
   }
 
   this.promptDisplay.appendChild(document.createTextNode(before));
-  promptCursor.appendChild(document.createTextNode(current));
-  this.promptDisplay.appendChild(promptCursor);
+  this.promptDisplay.appendChild(this.hint ? createSpan(this.hint, 'console-hint') : createSpan(current, 'console-cursor'));
   this.promptDisplay.appendChild(document.createTextNode(after));
 };
 

@@ -483,13 +483,6 @@ REPLConsole.prototype.renderInput = function() {
     return span;
   }
 
-  function createHint() {
-    var hint = document.createElement('span');
-    hint.className = 'hint';
-    hint.innerText = 'hello';
-    return hint;
-  }
-
   var before, current, after;
 
   if (this._caretPos < 0) {

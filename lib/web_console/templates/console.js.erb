@@ -76,6 +76,10 @@ Autocomplete.prototype.item = function(x) {
   return this.view.children[x+1];
 };
 
+Autocomplete.prototype.currentWord = function() {
+  return this.left <= this.current && this.current < this.right && this.words[this.current];
+}
+
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
   if (this.confirmed) callback(this.confirmed);
@@ -473,9 +477,8 @@ REPLConsole.prototype.renderInput = function() {
   // Clear the current input.
   removeAllChildren(this.promptDisplay);
 
-  var promptCursor = document.createElement('span');
-  promptCursor.className = "console-cursor";
   var before, current, after;
+  var center = document.createElement('span');
 
   if (this._caretPos < 0) {
     before = this._input;
@@ -491,9 +494,12 @@ REPLConsole.prototype.renderInput = function() {
   }
 
   this.promptDisplay.appendChild(document.createTextNode(before));
-  promptCursor.appendChild(document.createTextNode(current));
-  this.promptDisplay.appendChild(promptCursor);
+  this.promptDisplay.appendChild(center);
   this.promptDisplay.appendChild(document.createTextNode(after));
+
+  var hint = this.autocomplete && !this.autocomplete.confirmed && this.autocomplete.currentWord();
+  addClass(center, hint ? 'console-hint' : 'console-cursor');
+  center.appendChild(document.createTextNode(hint ? hint.substr(this._input.length) : current));
 };
 
 REPLConsole.prototype.writeOutput = function(output) {
@@ -551,6 +557,7 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete && this.autocomplete.onKeyDown(ev)) {
+    this.renderInput();
     ev.preventDefault();
     ev.stopPropagation();
     return;

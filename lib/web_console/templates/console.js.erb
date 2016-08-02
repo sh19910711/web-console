@@ -502,7 +502,11 @@ REPLConsole.prototype.renderInput = function() {
 
   this.promptDisplay.appendChild(document.createTextNode(before));
   var hint = this.autocomplete && !this.autocomplete.confirmed && this.autocomplete.currentWord();
-  this.promptDisplay.appendChild(hint ? createSpan(hint.substr(this._input.length), 'console-hint') : createSpan(current, 'console-cursor'));
+  if (hint) {
+    this.promptDisplay.appendChild(createSpan(hint.substr(this._input.length), 'console-hint'));
+  } else {
+    this.promptDisplay.appendChild(createSpan(current, 'console-cursor'));
+  }
   this.promptDisplay.appendChild(document.createTextNode(after));
 };
 

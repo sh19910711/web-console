@@ -145,7 +145,6 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 };
 
 Autocomplete.prototype.refine = function(prefix) {
-  if (this.confirmed) return;
   var inc = !this.prev || (prefix.length >= this.prev.length);
   this.prev = prefix;
   var self = this;
@@ -455,7 +454,7 @@ REPLConsole.prototype.setInput = function(input, caretPos) {
   if (input == null) return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
-  if (this.autocomplete) this.autocomplete.refine(input);
+  if (this.autocomplete && !this.autocomplete.confirmed) this.autocomplete.refine(input);
   this.renderInput();
 };
 

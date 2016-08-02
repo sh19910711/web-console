@@ -76,6 +76,10 @@ Autocomplete.prototype.item = function(x) {
   return this.view.children[x+1];
 };
 
+Autocomplete.prototype.currentWord = function() {
+  return this.left <= this.current && this.current < this.right && this.words[this.current];
+}
+
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
   if (this.confirmed) callback(this.confirmed);
@@ -473,8 +477,13 @@ REPLConsole.prototype.renderInput = function() {
   // Clear the current input.
   removeAllChildren(this.promptDisplay);
 
-  var promptCursor = document.createElement('span');
-  promptCursor.className = "console-cursor";
+  function createSpan(s, className) {
+    var span = document.createElement('span');
+    addClass(span, className);
+    span.appendChild(document.createTextNode(s));
+    return span;
+  }
+
   var before, current, after;
 
   if (this._caretPos < 0) {
@@ -491,8 +500,12 @@ REPLConsole.prototype.renderInput = function() {
   }
 
   this.promptDisplay.appendChild(document.createTextNode(before));
-  promptCursor.appendChild(document.createTextNode(current));
-  this.promptDisplay.appendChild(promptCursor);
+  var hint = this.autocomplete && !this.autocomplete.confirmed && this.autocomplete.currentWord();
+  if (hint) {
+    this.promptDisplay.appendChild(createSpan(hint.substr(this._input.length), 'console-hint'));
+  } else {
+    this.promptDisplay.appendChild(createSpan(current, 'console-cursor'));
+  }
   this.promptDisplay.appendChild(document.createTextNode(after));
 };
 
@@ -551,6 +564,7 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete && this.autocomplete.onKeyDown(ev)) {
+    this.renderInput();
     ev.preventDefault();
     ev.stopPropagation();
     return;

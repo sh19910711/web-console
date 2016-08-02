@@ -145,6 +145,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 };
 
 Autocomplete.prototype.refine = function(prefix) {
+  if (this.confirmed) return;
   var inc = !this.prev || (prefix.length >= this.prev.length);
   this.prev = prefix;
   var self = this;
@@ -195,9 +196,9 @@ Autocomplete.prototype.refine = function(prefix) {
 
 Autocomplete.prototype.finish = function() {
   if (this.left <= this.current && this.current < this.right) {
-    if (this.onFinishedCallback) this.onFinishedCallback(this.words[this.current]);
-    this.removeView();
     this.confirmed = this.words[this.current];
+    if (this.onFinishedCallback) this.onFinishedCallback(this.confirmed);
+    this.removeView();
   } else {
     this.cancel();
   }

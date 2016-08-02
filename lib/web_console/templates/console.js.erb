@@ -76,13 +76,13 @@ Autocomplete.prototype.item = function(x) {
   return this.view.children[x+1];
 };
 
+Autocomplete.prototype.currentWord = function() {
+  return this.left <= this.current && this.current < this.right && this.words[this.current];
+}
+
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
   if (this.confirmed) callback(this.confirmed);
-};
-
-Autocomplete.prototype.getCurrent = function() {
-  return this.left <= this.current && this.current < this.right && this.words[this.current];
 };
 
 Autocomplete.prototype.onKeyDown = function(ev) {
@@ -454,6 +454,7 @@ REPLConsole.prototype.setInput = function(input, caretPos) {
   if (input == null) return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
+  if (this.autocomplete) this.autocomplete.refine(input);
   this.renderInput();
 };
 
@@ -499,7 +500,8 @@ REPLConsole.prototype.renderInput = function() {
   }
 
   this.promptDisplay.appendChild(document.createTextNode(before));
-  this.promptDisplay.appendChild(this.hint ? createSpan(this.hint.substr(this._input.length), 'console-hint') : createSpan(current, 'console-cursor'));
+  var hint = this.autocomplete && this.autocomplete.currentWord();
+  this.promptDisplay.appendChild(hint ? createSpan(hint.substr(this._input.length), 'console-hint') : createSpan(current, 'console-cursor'));
   this.promptDisplay.appendChild(document.createTextNode(after));
 };
 
@@ -541,8 +543,6 @@ REPLConsole.prototype.onTabKey = function() {
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self.inner.appendChild(self.autocomplete.view);
     self.autocomplete.onFinished(function(word) {
-      self.hint = null;
-      self.renderInput();
       self.swapCurrentWord(word);
       self.autocomplete = false;
     });
@@ -560,7 +560,6 @@ REPLConsole.prototype.onNavigateHistory = function(offset) {
  */
 REPLConsole.prototype.onKeyDown = function(ev) {
   if (this.autocomplete && this.autocomplete.onKeyDown(ev)) {
-    this.hint = this.autocomplete.getCurrent();
     this.renderInput();
     ev.preventDefault();
     ev.stopPropagation();
@@ -610,7 +609,6 @@ REPLConsole.prototype.onKeyDown = function(ev) {
     case 8:
       // Delete
       this.deleteAtCurrent();
-      if (this.autocomplete) this.autocomplete.refine(this.getCurrentWord());
       ev.preventDefault();
       break;
     default:
@@ -643,7 +641,6 @@ REPLConsole.prototype.onKeyPress = function(ev) {
   if (ev.ctrlKey || ev.metaKey) { return; }
   var keyCode = ev.keyCode || ev.which;
   this.insertAtCurrent(String.fromCharCode(keyCode));
-  if (this.autocomplete) this.autocomplete.refine(this.getCurrentWord());
   ev.stopPropagation();
   ev.preventDefault();
 };

@@ -18,8 +18,7 @@ module WebConsole
 
       GLOBAL_OBJECTS = [
         'instance_variables',
-        'local_variables',
-        'methods',
+        [ 'local_variables', 'methods' ],
         'class_variables',
         'Object.constants',
         'global_variables'
@@ -36,8 +35,8 @@ module WebConsole
         ].flatten
       end
 
-      def eval(cmd)
-        @binding.eval(cmd) rescue []
+      def eval(cmd_or_cmds)
+        Array(cmd_or_cmds).map { |cmd| @binding.eval(cmd) rescue [] }.flatten.sort
       end
   end
 end

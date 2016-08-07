@@ -203,6 +203,7 @@ Autocomplete.prototype.refine = function(prefix) {
   removeAllChildren(this.elements);
   var items = this.words.slice(this.left, this.right);
   for (var i = 0; i < items.length; ++i) {
+    items[i] = items[i].concat()
     var t = items[i][0];
     items[i][0] = items[i][1];
     items[i][1] = t;

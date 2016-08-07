@@ -201,8 +201,15 @@ Autocomplete.prototype.refine = function(prefix) {
 
   this.current = -1;
   removeAllChildren(this.elements);
-  for (var i = this.left; i < this.right; ++i) {
-    this.elements.appendChild(this.words[i][2]);
+  var items = this.words.slice(this.left, this.right);
+  for (var i = 0; i < items.length; ++i) {
+    var t = items[i][0];
+    items[i][0] = items[i][1];
+    items[i][1] = t;
+  }
+  items.sort();
+  for (var i = 0; i < items.length; ++i) {
+    this.elements.appendChild(items[i][2]);
   }
   addClass(this.elements.children, 'trimmed keyword');
 

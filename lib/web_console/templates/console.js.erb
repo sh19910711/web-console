@@ -99,7 +99,7 @@ Autocomplete.prototype.onKeyDown = function(ev) {
 
   function move(nextCurrent) {
     if (! self.words.length) return;
-    if (0 <= self.current && self.current < self.elements.children.length) removeClass(self.item(self.current), 'selected');
+    if (0 <= self.current && self.current < self.words.length) removeClass(self.item(self.current), 'selected');
     addClass(self.item(nextCurrent), 'selected');
     self.trim(self.current, true);
     self.trim(nextCurrent, false);

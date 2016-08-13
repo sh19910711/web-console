@@ -91,7 +91,7 @@ Autocomplete.prototype.item = function(x) {
 
 Autocomplete.prototype.selectedWord = function() {
   return 0 <= this.current && this.current < this.elements.children.length && this.elements.children[this.current].innerText;
-}
+};
 
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;

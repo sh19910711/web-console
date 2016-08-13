@@ -60,7 +60,7 @@ function Autocomplete(_words, prefix) {
         res[i][j] = {
           word: words[i][j],
           priority: i,
-          element: null
+          element: createSpan(words[i][j])
         };
       }
     }
@@ -81,7 +81,6 @@ function Autocomplete(_words, prefix) {
   addClass(this.view, 'auto-complete console-message');
   addClass(this.prefix, 'trimmed keyword');
   addClass(this.suffix, 'trimmed keyword');
-  for (var i = 0; i < this.words.length; ++i) this.words[i].element = createSpan(this.words[i].word);
 
   this.refine(prefix || '');
 }
@@ -217,6 +216,8 @@ Autocomplete.prototype.refine = function(prefix) {
     self.updateCurrent(-1);
   }
 
+  self.buildElements();
+
   if (self.left + 1 >= self.right) {
     self.current = 0;
     self.finish();
@@ -224,7 +225,6 @@ Autocomplete.prototype.refine = function(prefix) {
     self.cancel();
   }
 
-  self.buildElements();
   this.current = -1;
   this.trim(0, false);
 };

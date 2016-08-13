@@ -103,12 +103,12 @@ suite('Autocomplete', function() {
     test('handles five elements with prefix', function() {
       var ac = new Autocomplete([['A', 'B1', 'B2', 'B3', 'C']], 'B');
       assert.equal(-1, ac.current);
-      assert.equal(3, ac.elements.children.length);
+      assert.equal(3, ac.elements.length);
       assertNotClass(ac, 0, 3, 'trimmed');
 
       ac.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
       assert.equal(0, ac.current);
-      assert.equal(3, ac.elements.children.length);
+      assert.equal(3, ac.elements.length);
       assertNotClass(ac, 0, 3, 'trimmed');
     });
   });
@@ -130,7 +130,7 @@ suite('Autocomplete', function() {
       this.refine('some');
 
       assert(!this.ac.confirmed);
-      assert.equal(3, this.ac.elements.children.length);
+      assert.equal(3, this.ac.elements.length);
     });
 
     test('confirmable', function() {
@@ -152,7 +152,8 @@ suite('Autocomplete', function() {
       this.refine('');
       this.refine('some');
 
-      assert.equal(3, this.ac.elements.children.length);
+      console.log(this.ac.elements);
+      assert.equal(3, this.ac.elements.length);
     });
 
     test('some => empty', function() {
@@ -175,13 +176,13 @@ suite('Autocomplete', function() {
 
   function assertClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.ok(hasClass(ac.item(i), className), i + '-th element shuold have ' + className);
+      assert.ok(hasClass(ac.elements[i], className), i + '-th element shuold have ' + className);
     }
   }
 
   function assertNotClass(ac, left, right, className) {
     for (var i = left; i < right; ++i) {
-      assert.notOk(hasClass(ac.item(i), className), i + '-th element should not have ' + className);
+      assert.notOk(hasClass(ac.elements[i], className), i + '-th element should not have ' + className);
     }
   }
 

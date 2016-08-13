@@ -497,30 +497,45 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
   this.setInput(this._input, -1);
 };
 
-REPLConsole.prototype.getSuggestion = function(suggested) {
+REPLConsole.prototype.getSuggestion = function(keyword) {
   function showMatchingWord(context) {
-    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, suggested.length) == suggested) {
+    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
       var matching = context[i];
       if (matching === suggested) return;
       var hint = self.promptDisplay.childNodes[1];
       hint.className = 'console-hint';
-      hint.innerText = matching.substr(suggested.length) + ' <TAB>';
-      setTimeout(function() { // clear hinting after timeout in three seconds
-        self.renderInput();
-      }, 3000);
+      hint.innerText = matching.substr(keyword.length) + ' <TAB>';
+      if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
+      self.suggestTimeout = setTimeout(function() { self.renderInput() }, 1500); // clear hinting information after timeout in 1.5 seconds
       return;
     }
   }
 
+  function getContext() {
+    var s = keyword;
+    var methodOp = s.lastIndexOf('.');
+    var moduleOp = s.lastIndexOf('::');
+    var x = methodOp > moduleOp ? methodOp : moduleOp;
+    return x !== -1 ? s.substr(0, x) : '';
+  }
+
+  function flatten(notFlattened) {
+    var res = Array.prototype.concat.apply([], notFlattened);
+    res.sort();
+    return res;
+  }
+
   var self = this;
-  if (this.prevSuggested !== suggested) {
-    this.prevSuggested = suggested;
-    this.contextRequest(suggested, function(err, res) {
+  var suggested = getContext();
+  if (keyword.length - suggested.length < 3) return;
+  if (self.lastSuggested !== suggested) {
+    self.lastSuggested = suggested;
+    self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
-      showMatchingWord(this.prevContext = Array.prototype.concat.apply([], res['context']));
+      showMatchingWord(self.lastContext = flatten(res['context']));
     });
-  } else if (this.prevContext) {
-    showMatchingWord(this.prevContext);
+  } else if (self.lastContext) {
+    showMatchingWord(self.lastContext);
   }
 };
 
@@ -528,12 +543,9 @@ REPLConsole.prototype.setInput = function(input, caretPos) {
   if (input == null) return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
-  if (this.autocomplete && !this.autocomplete.confirmed) {
-    this.autocomplete.refine(this.getCurrentWord());
-  } else if (this.getCurrentWord().length >= 3) {
-    this.getSuggestion(this.getCurrentWord());
-  }
+  if (this.autocomplete && !this.autocomplete.confirmed) this.autocomplete.refine(this.getCurrentWord());
   this.renderInput();
+  if (!this.autocomplete && this.getCurrentWord().length >= 3) this.getSuggestion(this.getCurrentWord());
 };
 
 /**

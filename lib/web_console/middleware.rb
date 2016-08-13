@@ -105,8 +105,8 @@ module WebConsole
         json_response_with_session(id, request) do |session|
           if input = request.params[:input]
             { output: session.eval(input) }
-          elsif context = request.params[:context]
-            { context: session.context(context) }
+          elsif input = request.params[:context]
+            { context: session.context(input) }
           end
         end
       end

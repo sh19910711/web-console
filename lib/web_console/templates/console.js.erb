@@ -45,22 +45,26 @@ function CommandStorage() {
 }
 
 function Autocomplete(words, prefix) {
-  this.words = pretty(words);
+  this.words = flatten(words);
+  this.words.sort(function(a, b) { return a.word == b.word ? 0 : (a.word < b.word ? -1 : 1); });
   this.current = -1;
   this.left = 0; // [left, right)
   this.right = this.words.length;
   this.confirmed = false;
 
-  function pretty(words) {
-    var res = words.concat();
-    for (var i = 0; i < res.length; ++i) {
-      for (var j = 0; j < res[i].length; ++j) {
-        res[i][j] = [res[i][j], i, null]; // it stands for [ <item>, <priority>, <DOM> ]
+  function flatten(words) {
+    var res = new Array(words.length);
+    for (var i = 0; i < words.length; ++i) {
+      res[i] = new Array(words[i].length);
+      for (var j = 0; j < words[i].length; ++j) {
+        res[i][j] = {
+          word: words[i][j],
+          priority: i,
+          element: null
+        };
       }
     }
-    var res = Array.prototype.concat.apply([], words);
-    res.sort();
-    return res;
+    return Array.prototype.concat.apply([], res);
   }
 
   function createSpan(label) {
@@ -76,14 +80,10 @@ function Autocomplete(words, prefix) {
   addClass(this.view, 'auto-complete console-message');
   addClass(this.prefix, 'trimmed keyword');
   addClass(this.suffix, 'trimmed keyword');
-  for (var x in this.words) this.words[x][2] = createSpan(this.getWord(x));
+  for (var x in this.words) this.words[x].element = createSpan(this.words[x].word);
 
   this.refine(prefix || '');
 }
-
-Autocomplete.prototype.getWord = function(x) {
-  return this.words[x][0];
-};
 
 Autocomplete.prototype.item = function(x) {
   return this.elements.children[x];
@@ -93,9 +93,22 @@ Autocomplete.prototype.selectedWord = function() {
   return 0 <= this.current && this.current < this.elements.children.length && this.elements.children[this.current].innerText;
 };
 
+Autocomplete.prototype.showAll = function() {
+  this.current = -1;
+  this.left = 0;
+  this.right = this.words.length;
+  var words = this.words.concat();
+  words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
+  for (var i = 0; i < words.length; ++i) {
+    this.elements.appendChild(words[i].element);
+    words[i].element.className = 'keyword trimmed';
+  }
+  this.trim(0, false);
+};
+
 Autocomplete.prototype.updateCurrent = function(next) {
   if (0 <= this.current && this.current < this.elements.children.length) removeClass(this.elements.children[this.current], 'selected');
-  if (0 <= next && next < this.elements.children.length) addClass(this.elements.children[next], 'selected');
+  if (next != -1) addClass(this.elements.children[next], 'selected');
   this.trim(this.current, true);
   this.trim(next, false);
   this.current = next;
@@ -155,10 +168,6 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 };
 
 Autocomplete.prototype.refine = function(prefix) {
-  var inc = !this.prev || (prefix.length >= this.prev.length);
-  this.prev = prefix;
-  var self = this;
-
   function remove(parent, child) {
     if (parent == child.parentNode) {
       removeClass(child, 'selected');
@@ -175,20 +184,26 @@ Autocomplete.prototype.refine = function(prefix) {
   }
 
   function moveRight(l, r) {
-    while (l < r && inc !== startsWith(self.getWord(l), prefix)) {
-      toggle(self.words[l][2]);
+    while (l < r && inc !== startsWith(self.words[l].word, prefix)) {
+      toggle(self.words[l].element);
       ++ l;
     }
     return l;
   }
 
   function moveLeft(l, r) {
-    while (l < r - 1 && inc !== startsWith(self.getWord(r - 1), prefix)) {
-      toggle(self.words[r - 1][2]);
+    while (l < r - 1 && inc !== startsWith(self.words[r-1].word, prefix)) {
+      toggle(self.words[r - 1].element);
       -- r;
     }
     return r;
   }
+
+  if (prefix == '') return this.showAll();
+
+  var inc = !this.prev || (prefix.length >= this.prev.length);
+  this.prev = prefix;
+  var self = this;
 
   self.trim(self.current, true);
 
@@ -199,36 +214,30 @@ Autocomplete.prototype.refine = function(prefix) {
     self.left = moveLeft(-1, self.left);
     self.right = moveRight(self.right, self.words.length);
   }
-  if (self.current < 0 || self.current >= self.right) {
-    self.updateCurrent(0);
+  if (self.current != -1 && self.current < 0 || self.current >= self.right) {
+    self.updateCurrent(-1);
   }
 
   if (self.left + 1 >= self.right) {
-    self.updateCurrent(0);
+    self.current = 0;
     self.finish();
   } else if (self.left == self.right) {
     self.cancel();
   }
 
-  self.sortByPriority();
-  self.trim(this.current, false);
+  self.buildElements();
+  this.current = -1;
+  this.trim(0, false);
 };
 
-Autocomplete.prototype.sortByPriority = function() {
-  this.updateCurrent(-1);
+Autocomplete.prototype.buildElements = function(a, b) {
+  var words = this.words.slice(this.left, this.right);
+  words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
   removeAllChildren(this.elements);
-  var items = this.words.slice(this.left, this.right);
-  for (var i = 0; i < items.length; ++i) {
-    items[i] = items[i].concat()
-    var t = items[i][0];
-    items[i][0] = items[i][1];
-    items[i][1] = t;
+  for (var i = 0; i < words.length; ++i) {
+    this.elements.appendChild(words[i].element);
+    words[i].element.className = 'trimmed keyword';
   }
-  items.sort();
-  for (var i = 0; i < items.length; ++i) {
-    this.elements.appendChild(items[i][2]);
-  }
-  addClass(this.elements.children, 'trimmed keyword');
 };
 
 Autocomplete.prototype.finish = function() {

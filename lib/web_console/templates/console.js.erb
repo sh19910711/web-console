@@ -103,27 +103,29 @@ Autocomplete.prototype.showAll = function() {
   this.trim(0, false);
 };
 
-Autocomplete.prototype.updateCurrent = function(next) {
-  if (0 <= this.current && this.current < this.elements.length) removeClass(this.elements[this.current], 'selected');
-  if (next != -1) addClass(this.elements[next], 'selected');
-  this.trim(this.current, true);
-  this.trim(next, false);
-  this.current = next;
-};
-
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
   if (this.confirmed || this.canceled) callback(this.confirmed);
 };
 
 Autocomplete.prototype.onKeyDown = function(ev) {
+  var self = this;
   if (!this.elements.length) return;
+
+  function move(next) {
+    if (0 <= self.current && self.current < self.elements.length) removeClass(self.elements[self.current], 'selected');
+    if (next != -1) addClass(self.elements[next], 'selected');
+    self.trim(self.current, true);
+    self.trim(next, false);
+    self.current = next;
+  };
+
   switch (ev.keyCode) {
     case 9: // Tab
       if (ev.shiftKey) { // move back
-        this.updateCurrent(this.current - 1 < 0 ? this.elements.length - 1 : this.current - 1);
+        move(this.current - 1 < 0 ? this.elements.length - 1 : this.current - 1);
       } else { // move next
-        this.updateCurrent(this.current + 1 >= this.elements.length ? 0 : this.current + 1);
+        move(this.current + 1 >= this.elements.length ? 0 : this.current + 1);
       }
       return true;
     case 13: // Enter
@@ -168,7 +170,6 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 Autocomplete.prototype.refine = function(prefix) {
   function remove(parent, child) {
     if (parent == child.parentNode) {
-      removeClass(child, 'selected');
       parent.removeChild(child);
     }
   }
@@ -212,8 +213,8 @@ Autocomplete.prototype.refine = function(prefix) {
     self.left = moveLeft(-1, self.left);
     self.right = moveRight(self.right, self.words.length);
   }
-  if (self.current != -1 && self.current < 0 || self.current >= self.right) {
-    self.updateCurrent(-1);
+  if (self.current < 0 || self.current >= self.right) {
+    self.current = -1;
   }
 
   self.buildElements();

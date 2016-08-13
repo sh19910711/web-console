@@ -80,7 +80,7 @@ function Autocomplete(words, prefix) {
   addClass(this.view, 'auto-complete console-message');
   addClass(this.prefix, 'trimmed keyword');
   addClass(this.suffix, 'trimmed keyword');
-  for (var x in this.words) this.words[x].element = createSpan(this.words[x].word);
+  for (var i = 0; i < this.words.length; ++i) this.words[i].element = createSpan(this.words[i].word);
 
   this.refine(prefix || '');
 }

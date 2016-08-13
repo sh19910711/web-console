@@ -501,7 +501,7 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
   function showMatchingWord(context) {
     for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
       var matching = context[i];
-      if (matching === suggested) return;
+      if (matching === keyword) return;
       var hint = self.promptDisplay.childNodes[1];
       hint.className = 'console-hint';
       hint.innerText = matching.substr(keyword.length) + ' <TAB>';
@@ -593,7 +593,6 @@ REPLConsole.prototype.renderInput = function() {
 };
 
 REPLConsole.prototype.writeOutput = function(output) {
-  if (this.autocomplete) return;
   var consoleMessage = document.createElement('pre');
   consoleMessage.className = "console-message";
   consoleMessage.innerHTML = escapeHTML(output);
@@ -603,7 +602,6 @@ REPLConsole.prototype.writeOutput = function(output) {
 };
 
 REPLConsole.prototype.writeError = function(output) {
-  if (this.autocomplete) return;
   var consoleMessage = this.writeOutput(output);
   addClass(consoleMessage, "error-message");
   return consoleMessage;

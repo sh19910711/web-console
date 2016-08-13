@@ -44,8 +44,8 @@ function CommandStorage() {
   }
 }
 
-function Autocomplete(words, prefix) {
-  this.words = flatten(words);
+function Autocomplete(_words, prefix) {
+  this.words = flatten(_words);
   this.words.sort(function(a, b) { return a.word == b.word ? 0 : (a.word < b.word ? -1 : 1); });
   this.current = -1;
   this.left = 0; // [left, right)
@@ -86,15 +86,12 @@ function Autocomplete(words, prefix) {
   this.refine(prefix || '');
 }
 
-Autocomplete.prototype.item = function(x) {
-  return this.elements[x];
-};
-
 Autocomplete.prototype.selectedWord = function() {
   return 0 <= this.current && this.current < this.elements.length && this.elements[this.current].innerText;
 };
 
 Autocomplete.prototype.showAll = function() {
+  this.prev = '';
   this.current = -1;
   this.left = 0;
   this.right = this.words.length;
@@ -121,6 +118,7 @@ Autocomplete.prototype.onFinished = function(callback) {
 };
 
 Autocomplete.prototype.onKeyDown = function(ev) {
+  if (!this.elements.length) return;
   switch (ev.keyCode) {
     case 9: // Tab
       if (ev.shiftKey) { // move back
@@ -154,7 +152,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 
   function iterate(x) {
     for (var i = 0; i < num; ++i, ++x) if (0 <= x && x < self.elements.length) {
-      toggleClass(self.item(x), 'trimmed');
+      toggleClass(self.elements[x], 'trimmed');
     }
   }
 
@@ -194,7 +192,7 @@ Autocomplete.prototype.refine = function(prefix) {
 
   function moveLeft(l, r) {
     while (l < r - 1 && inc !== startsWith(self.words[r-1].word, prefix)) {
-      toggle(self.words[r - 1].element);
+      toggle(self.words[r-1].element);
       -- r;
     }
     return r;

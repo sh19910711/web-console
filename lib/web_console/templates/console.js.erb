@@ -486,9 +486,8 @@ REPLConsole.prototype.setInput = function(input, caretPos) {
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
   if (this.autocomplete && !this.autocomplete.confirmed) {
-    this.autocomplete.refine(input);
+    this.autocomplete.refine(this.getCurrentWord());
   } else if (this.getCurrentWord().length >= 3) {
-    console.log('suggest', this.getCurrentWord());
   }
   this.renderInput();
 };

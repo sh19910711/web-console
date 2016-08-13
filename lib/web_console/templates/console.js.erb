@@ -228,16 +228,15 @@ Autocomplete.prototype.finish = function() {
   if (0 <= this.current && this.current < this.elements.length) {
     this.confirmed = this.elements[this.current].innerText;
     if (this.onFinishedCallback) this.onFinishedCallback(this.confirmed);
-    this.removeView();
   } else {
     this.cancel();
   }
+  this.removeView();
 };
 
 Autocomplete.prototype.cancel = function() {
-  if (this.onFinishedCallback) this.onFinishedCallback();
   this.canceled = true;
-  this.removeView();
+  if (this.onFinishedCallback) this.onFinishedCallback();
 };
 
 Autocomplete.prototype.removeView = function() {

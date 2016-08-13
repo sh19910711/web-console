@@ -75,7 +75,8 @@ function Autocomplete(words, prefix) {
 
   this.view = document.createElement('pre');
   this.view.appendChild(this.prefix = createSpan('...'));
-  this.view.appendChild(this.elements = document.createElement('span'));
+  this.view.appendChild(this.stage = document.createElement('span'));
+  this.elements = this.stage.children;
   this.view.appendChild(this.suffix = createSpan('...'));
   addClass(this.view, 'auto-complete console-message');
   addClass(this.prefix, 'trimmed keyword');
@@ -86,11 +87,11 @@ function Autocomplete(words, prefix) {
 }
 
 Autocomplete.prototype.item = function(x) {
-  return this.elements.children[x];
+  return this.elements[x];
 };
 
 Autocomplete.prototype.selectedWord = function() {
-  return 0 <= this.current && this.current < this.elements.children.length && this.elements.children[this.current].innerText;
+  return 0 <= this.current && this.current < this.elements.length && this.elements[this.current].innerText;
 };
 
 Autocomplete.prototype.showAll = function() {
@@ -100,15 +101,15 @@ Autocomplete.prototype.showAll = function() {
   var words = this.words.concat();
   words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
   for (var i = 0; i < words.length; ++i) {
-    this.elements.appendChild(words[i].element);
+    this.stage.appendChild(words[i].element);
     words[i].element.className = 'keyword trimmed';
   }
   this.trim(0, false);
 };
 
 Autocomplete.prototype.updateCurrent = function(next) {
-  if (0 <= this.current && this.current < this.elements.children.length) removeClass(this.elements.children[this.current], 'selected');
-  if (next != -1) addClass(this.elements.children[next], 'selected');
+  if (0 <= this.current && this.current < this.elements.length) removeClass(this.elements[this.current], 'selected');
+  if (next != -1) addClass(this.elements[next], 'selected');
   this.trim(this.current, true);
   this.trim(next, false);
   this.current = next;
@@ -123,9 +124,9 @@ Autocomplete.prototype.onKeyDown = function(ev) {
   switch (ev.keyCode) {
     case 9: // Tab
       if (ev.shiftKey) { // move back
-        this.updateCurrent(this.current - 1 < 0 ? this.elements.children.length - 1 : this.current - 1);
+        this.updateCurrent(this.current - 1 < 0 ? this.elements.length - 1 : this.current - 1);
       } else { // move next
-        this.updateCurrent(this.current + 1 >= this.elements.children.length ? 0 : this.current + 1);
+        this.updateCurrent(this.current + 1 >= this.elements.length ? 0 : this.current + 1);
       }
       return true;
     case 13: // Enter
@@ -143,16 +144,16 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var self = this;
   var num = 5;
 
-  if (this.elements.children.length > num) {
+  if (this.elements.length > num) {
     (0 < from ? removeClass : addClass)(this.prefix, 'trimmed');
-    (from + num < this.elements.children.length ? removeClass : addClass)(this.suffix, 'trimmed');
+    (from + num < this.elements.length ? removeClass : addClass)(this.suffix, 'trimmed');
   } else {
     addClass(this.prefix, 'trimmed');
     addClass(this.suffix, 'trimmed');
   }
 
   function iterate(x) {
-    for (var i = 0; i < num; ++i, ++x) if (0 <= x && x < self.elements.children.length) {
+    for (var i = 0; i < num; ++i, ++x) if (0 <= x && x < self.elements.length) {
       toggleClass(self.item(x), 'trimmed');
     }
   }
@@ -160,8 +161,8 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
   var toggleClass = needToTrim ? addClass : removeClass;
   if (from < 0) {
     iterate(0);
-  } else if (from + num - 1 >= this.elements.children.length) {
-    iterate(this.elements.children.length - num);
+  } else if (from + num - 1 >= this.elements.length) {
+    iterate(this.elements.length - num);
   } else {
     iterate(from);
   }
@@ -176,7 +177,7 @@ Autocomplete.prototype.refine = function(prefix) {
   }
 
   function toggle(el) {
-    return inc ? remove(self.elements, el) : self.elements.appendChild(el);
+    return inc ? remove(self.stage, el) : self.stage.appendChild(el);
   }
 
   function startsWith(str, prefix) {
@@ -235,14 +236,14 @@ Autocomplete.prototype.buildElements = function(a, b) {
   words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
   removeAllChildren(this.elements);
   for (var i = 0; i < words.length; ++i) {
-    this.elements.appendChild(words[i].element);
+    this.stage.appendChild(words[i].element);
     words[i].element.className = 'trimmed keyword';
   }
 };
 
 Autocomplete.prototype.finish = function() {
-  if (0 <= this.current && this.current < this.elements.children.length) {
-    this.confirmed = this.elements.children[this.current].innerText;
+  if (0 <= this.current && this.current < this.elements.length) {
+    this.confirmed = this.elements[this.current].innerText;
     if (this.onFinishedCallback) this.onFinishedCallback(this.confirmed);
     this.removeView();
   } else {

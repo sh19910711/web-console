@@ -86,15 +86,7 @@ function Autocomplete(_words, prefix) {
 }
 
 Autocomplete.prototype.selectedWord = function() {
-  return 0 <= this.current && this.current < this.elements.length && this.elements[this.current].innerText;
-};
-
-Autocomplete.prototype.selectedWord = function() {
   return this.elements[this.current] && this.elements[this.current].innerText;
-};
-
-Autocomplete.prototype.selectedWord = function() {
-  return 0 <= this.current && this.current < this.elements.children.length && this.elements.children[this.current].innerText;
 };
 
 Autocomplete.prototype.onFinished = function(callback) {

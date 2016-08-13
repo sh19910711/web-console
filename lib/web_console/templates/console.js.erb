@@ -53,6 +53,13 @@ function Autocomplete(_words, prefix) {
   this.right = this.words.length;
   this.confirmed = false;
 
+  function createSpan(label, className) {
+    var el = document.createElement('span');
+    addClass(el, className);
+    el.innerText = label;
+    return el;
+  }
+
   function flatten(words) {
     var res = new Array(words.length);
     for (var i = 0, ind = 0; i < words.length; ++i) {
@@ -66,13 +73,6 @@ function Autocomplete(_words, prefix) {
       }
     }
     return Array.prototype.concat.apply([], res);
-  }
-
-  function createSpan(label, className) {
-    var el = document.createElement('span');
-    addClass(el, className);
-    el.innerText = label;
-    return el;
   }
 
   this.view = document.createElement('pre');

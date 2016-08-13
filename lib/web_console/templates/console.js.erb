@@ -93,29 +93,26 @@ Autocomplete.prototype.selectedWord = function() {
   return 0 <= this.current && this.current < this.elements.children.length && this.elements.children[this.current].innerText;
 };
 
+Autocomplete.prototype.updateCurrent = function(next) {
+  if (0 <= this.current && this.current < this.elements.children.length) removeClass(this.elements.children[this.current], 'selected');
+  if (0 <= next && next < this.elements.children.length) addClass(this.elements.children[next], 'selected');
+  this.trim(this.current, true);
+  this.trim(next, false);
+  this.current = next;
+};
+
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
   if (this.confirmed || this.canceled) callback(this.confirmed);
 };
 
 Autocomplete.prototype.onKeyDown = function(ev) {
-  var self = this;
-
-  function move(nextCurrent) {
-    if (! self.words.length) return;
-    if (0 <= self.current && self.current < self.words.length) removeClass(self.item(self.current), 'selected');
-    addClass(self.item(nextCurrent), 'selected');
-    self.trim(self.current, true);
-    self.trim(nextCurrent, false);
-    self.current = nextCurrent;
-  }
-
   switch (ev.keyCode) {
     case 9: // Tab
       if (ev.shiftKey) { // move back
-        move(self.current - 1 < 0 ? self.elements.children.length - 1 : self.current - 1);
+        this.updateCurrent(this.current - 1 < 0 ? this.elements.children.length - 1 : this.current - 1);
       } else { // move next
-        move(self.current + 1 >= self.elements.children.length ? 0 : self.current + 1);
+        this.updateCurrent(this.current + 1 >= this.elements.children.length ? 0 : this.current + 1);
       }
       return true;
     case 13: // Enter
@@ -163,7 +160,10 @@ Autocomplete.prototype.refine = function(prefix) {
   var self = this;
 
   function remove(parent, child) {
-    if (parent == child.parentNode) parent.removeChild(child);
+    if (parent == child.parentNode) {
+      removeClass(child, 'selected');
+      parent.removeChild(child);
+    }
   }
 
   function toggle(el) {
@@ -200,11 +200,11 @@ Autocomplete.prototype.refine = function(prefix) {
     self.right = moveRight(self.right, self.words.length);
   }
   if (self.current < 0 || self.current >= self.right) {
-    self.current = 0;
+    self.updateCurrent(0);
   }
 
   if (self.left + 1 >= self.right) {
-    this.current = 0;
+    self.updateCurrent(0);
     self.finish();
   } else if (self.left == self.right) {
     self.cancel();
@@ -215,7 +215,7 @@ Autocomplete.prototype.refine = function(prefix) {
 };
 
 Autocomplete.prototype.sortByPriority = function() {
-  this.current = -1;
+  this.updateCurrent(-1);
   removeAllChildren(this.elements);
   var items = this.words.slice(this.left, this.right);
   for (var i = 0; i < items.length; ++i) {

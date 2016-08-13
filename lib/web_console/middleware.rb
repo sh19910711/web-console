@@ -103,10 +103,10 @@ module WebConsole
 
       def update_repl_session(id, request)
         json_response_with_session(id, request) do |session|
-          if request.params[:input]
-            { output: session.eval(request.params[:input]) }
-          else
-            { context: session.context(request.params[:context]) }
+          if input = request.params[:input]
+            { output: session.eval(input) }
+          elsif context = request.params[:context]
+            { context: session.context(context) }
           end
         end
       end

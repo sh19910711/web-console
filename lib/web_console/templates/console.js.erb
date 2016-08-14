@@ -496,12 +496,6 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     }
   }
 
-  function flatten(notFlattened) {
-    var res = Array.prototype.concat.apply([], notFlattened);
-    res.sort();
-    return res;
-  }
-
   var self = this;
   var suggested = getContext(keyword);
   if (keyword.length - suggested.length < 3) return;
@@ -509,7 +503,9 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     self.lastSuggested = suggested;
     self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
-      show(find(self.lastContext = flatten(res['context'])));
+      var c = Array.prototype.concat.apply([], res['context']);
+      c.sort();
+      show(find(self.lastContext = c));
     });
   } else if (self.lastContext) {
     show(find(self.lastContext));

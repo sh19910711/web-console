@@ -178,12 +178,12 @@ Autocomplete.prototype.refine = function(prefix) {
     return r;
   }
 
+  var self = this;
   var inc = !this.prev || (prefix.length >= this.prev.length);
   this.prev = prefix;
-  var self = this;
+  self.trim(self.current, true); // reset trimming
 
-  self.trim(self.current, true);
-
+  // Refine the range of words having same prefix.
   if (inc) {
     self.left = moveRight(self.left, self.right);
     self.right = moveLeft(self.left, self.right);
@@ -192,15 +192,15 @@ Autocomplete.prototype.refine = function(prefix) {
     self.right = moveRight(self.right, self.words.length);
   }
 
-  self.buildElements();
-
-  if (self.left + 1 >= self.right) {
-    self.current = 0;
-    self.finish();
-  } else if (self.left == self.right) {
-    self.cancel();
+  // Render elements with sorting by scope groups.
+  var words = this.words.slice(this.left, this.right);
+  words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
+  removeAllChildren(this.elements);
+  for (var i = 0; i < words.length; ++i) {
+    this.stage.appendChild(words[i].element);
   }
 
+  // Keep a previous selected element if the refined range has it.
   if (this.lastSelected && this.left <= this.lastSelected.dataset.index && this.lastSelected.dataset.index < this.right) {
     this.current = Array.prototype.indexOf.call(this.elements, this.lastSelected);
     this.trim(this.current, false);
@@ -212,14 +212,13 @@ Autocomplete.prototype.refine = function(prefix) {
     this.current = -1;
     this.trim(0, false);
   }
-};
 
-Autocomplete.prototype.buildElements = function(a, b) {
-  var words = this.words.slice(this.left, this.right);
-  words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
-  removeAllChildren(this.elements);
-  for (var i = 0; i < words.length; ++i) {
-    this.stage.appendChild(words[i].element);
+  // Finish auto-completion.
+  if (self.left + 1 == self.right) {
+    self.current = 0;
+    self.finish();
+  } else if (self.left == self.right) {
+    self.cancel();
   }
 };
 

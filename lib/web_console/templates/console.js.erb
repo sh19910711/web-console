@@ -271,16 +271,8 @@ REPLConsole.prototype.getSessionUrl = function(path) {
 };
 
 REPLConsole.prototype.contextRequest = function(keyword, callback) {
-  function getContext() {
-    var s = keyword;
-    var methodOp = s.lastIndexOf('.');
-    var moduleOp = s.lastIndexOf('::');
-    var x = methodOp > moduleOp ? methodOp : moduleOp;
-    return x !== -1 ? s.substr(0, x) : '';
-  }
-
   var self = this;
-  var params = 'context=' + getContext();
+  var params = 'context=' + getContext(keyword);
 
   putRequest(self.getSessionUrl(), params, function(xhr) {
     if (xhr.status == 200) {
@@ -486,7 +478,7 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
 };
 
 REPLConsole.prototype.getSuggestion = function(keyword) {
-  function showMatchingWord(context) {
+  function find(context) {
     for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
       var matching = context[i];
       if (matching === keyword) return;
@@ -499,14 +491,6 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     }
   }
 
-  function getContext() {
-    var s = keyword;
-    var methodOp = s.lastIndexOf('.');
-    var moduleOp = s.lastIndexOf('::');
-    var x = methodOp > moduleOp ? methodOp : moduleOp;
-    return x !== -1 ? s.substr(0, x) : '';
-  }
-
   function flatten(notFlattened) {
     var res = Array.prototype.concat.apply([], notFlattened);
     res.sort();
@@ -514,16 +498,16 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
   }
 
   var self = this;
-  var suggested = getContext();
+  var suggested = getContext(keyword);
   if (keyword.length - suggested.length < 3) return;
   if (self.lastSuggested !== suggested) {
     self.lastSuggested = suggested;
     self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
-      showMatchingWord(self.lastContext = flatten(res['context']));
+      find(self.lastContext = flatten(res['context']));
     });
   } else if (self.lastContext) {
-    showMatchingWord(self.lastContext);
+    find(self.lastContext);
   }
 };
 
@@ -881,4 +865,12 @@ if (typeof exports === 'object') {
   exports.REPLConsole = REPLConsole;
 } else {
   window.REPLConsole = REPLConsole;
+}
+
+// Split string by module operators of ruby
+function getContext(s) {
+  var methodOp = s.lastIndexOf('.');
+  var moduleOp = s.lastIndexOf('::');
+  var x = methodOp > moduleOp ? methodOp : moduleOp;
+  return x !== -1 ? s.substr(0, x) : '';
 }

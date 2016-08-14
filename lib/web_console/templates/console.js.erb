@@ -508,7 +508,7 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     self.lastSuggested = suggested;
     self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
-      var c = Array.prototype.concat.apply([], res['context']);
+      var c = flatten(res['context']);
       c.sort();
       show(find(self.lastContext = c));
     });

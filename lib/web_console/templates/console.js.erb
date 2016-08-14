@@ -183,7 +183,7 @@ Autocomplete.prototype.refine = function(prefix) {
   this.prev = prefix;
   self.trim(self.current, true); // reset trimming
 
-  // Refine the range of words having same prefix.
+  // Refine the range of words having same prefix
   if (inc) {
     self.left = moveRight(self.left, self.right);
     self.right = moveLeft(self.left, self.right);
@@ -192,7 +192,7 @@ Autocomplete.prototype.refine = function(prefix) {
     self.right = moveRight(self.right, self.words.length);
   }
 
-  // Render elements with sorting by scope groups.
+  // Render elements with sorting by scope groups
   var words = this.words.slice(this.left, this.right);
   words.sort(function(a, b) { return a.priority == b.priority ? (a.word < b.word ? -1 : 1) : (a.priority < b.priority ? -1 : 1); });
   removeAllChildren(this.elements);
@@ -200,15 +200,13 @@ Autocomplete.prototype.refine = function(prefix) {
     this.stage.appendChild(words[i].element);
   }
 
-  // Keep a previous selected element if the refined range has it.
+  // Keep a previous selected element if the refined range includes the element
   if (this.lastSelected && this.left <= this.lastSelected.dataset.index && this.lastSelected.dataset.index < this.right) {
     this.current = Array.prototype.indexOf.call(this.elements, this.lastSelected);
     this.trim(this.current, false);
   } else {
-    if (this.lastSelected) {
-      removeClass(this.lastSelected, 'selected');
-      this.lastSelected = null;
-    }
+    if (this.lastSelected) removeClass(this.lastSelected, 'selected');
+    this.lastSelected = null;
     this.current = -1;
     this.trim(0, false);
   }

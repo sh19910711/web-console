@@ -91,7 +91,7 @@ Autocomplete.prototype.getSelectedWord = function() {
 
 Autocomplete.prototype.onFinished = function(callback) {
   this.onFinishedCallback = callback;
-  if (this.confirmed || this.canceled) callback(this.confirmed);
+  if (this.confirmed) callback(this.confirmed);
 };
 
 Autocomplete.prototype.onKeyDown = function(ev) {
@@ -232,7 +232,6 @@ Autocomplete.prototype.finish = function() {
 };
 
 Autocomplete.prototype.cancel = function() {
-  this.canceled = true;
   if (this.onFinishedCallback) this.onFinishedCallback();
   this.removeView();
 };

@@ -45,7 +45,7 @@ function CommandStorage() {
 }
 
 function Autocomplete(_words, prefix) {
-  this.words = sort(convert(_words));
+  this.words = prepareWords(_words);
   this.current = -1;
   this.left = 0; // [left, right)
   this.right = this.words.length;
@@ -58,7 +58,7 @@ function Autocomplete(_words, prefix) {
     return el;
   }
 
-  function convert(words) {
+  function prepareWords(words) {
     var res = new Array(words.length);
     for (var i = 0, ind = 0; i < words.length; ++i) {
       res[i] = new Array(words[i].length);
@@ -70,11 +70,7 @@ function Autocomplete(_words, prefix) {
         };
       }
     }
-    return res;
-  }
-
-  function sort(words) {
-    var res = flatten(words);
+    res = flatten(res);
     res.sort(function(a, b) { return a.word == b.word ? 0 : (a.word < b.word ? -1 : 1); });
     for (var i = 0; i < res.length; ++i) res[i].element.dataset.index = i;
     return res;

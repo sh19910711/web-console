@@ -478,16 +478,21 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
 };
 
 REPLConsole.prototype.getSuggestion = function(keyword) {
+  function show(found) {
+    if (!found) return;
+    var hint = self.promptDisplay.childNodes[1];
+    hint.className = 'console-hint';
+    hint.innerText = found.substr(keyword.length) + ' <TAB>';
+
+    // clear hinting information after timeout in a few time 
+    if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
+    self.suggestTimeout = setTimeout(function() { self.renderInput() }, 1500); 
+  }
+
   function find(context) {
     for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
-      var matching = context[i];
-      if (matching === keyword) return;
-      var hint = self.promptDisplay.childNodes[1];
-      hint.className = 'console-hint';
-      hint.innerText = matching.substr(keyword.length) + ' <TAB>';
-      if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
-      self.suggestTimeout = setTimeout(function() { self.renderInput() }, 1500); // clear hinting information after timeout in 1.5 seconds
-      return;
+      if (context[i] === keyword) return;
+      return context[i];
     }
   }
 
@@ -504,10 +509,10 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     self.lastSuggested = suggested;
     self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
-      find(self.lastContext = flatten(res['context']));
+      show(find(self.lastContext = flatten(res['context'])));
     });
   } else if (self.lastContext) {
-    find(self.lastContext);
+    show(find(self.lastContext));
   }
 };
 

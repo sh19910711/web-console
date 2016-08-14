@@ -169,18 +169,12 @@ Autocomplete.prototype.refine = function(prefix) {
   }
 
   function moveRight(l, r) {
-    while (l < r && inc !== startsWith(self.words[l].word, prefix)) {
-      toggle(self.words[l].element);
-      ++ l;
-    }
+    while (l < r && inc !== startsWith(self.words[l].word, prefix)) toggle(self.words[l++].element);
     return l;
   }
 
   function moveLeft(l, r) {
-    while (l < r - 1 && inc !== startsWith(self.words[r-1].word, prefix)) {
-      toggle(self.words[r-1].element);
-      -- r;
-    }
+    while (l < r - 1 && inc !== startsWith(self.words[r-1].word, prefix)) toggle(self.words[--r].element);
     return r;
   }
 

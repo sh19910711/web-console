@@ -628,7 +628,7 @@ REPLConsole.prototype.onTabKey = function() {
     self.autocomplete = new Autocomplete(obj['context'], self.getCurrentWord());
     self.inner.appendChild(self.autocomplete.view);
     self.autocomplete.onFinished(function(word) {
-      if (word) self.swapCurrentWord(word);
+      self.swapCurrentWord(word);
       self.autocomplete = false;
     });
     self.scrollToBottom();

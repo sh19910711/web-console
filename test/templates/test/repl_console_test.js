@@ -150,7 +150,7 @@ suite('REPLCosnole', function() {
         });
         self.console.onKeyDown(TestHelper.keyDown(TestHelper.KEY_TAB));
         self.console.onKeyDown(TestHelper.keyDown(TestHelper.KEY_ENTER));
-      }, 10);
+      }, 100);
     });
   });
 

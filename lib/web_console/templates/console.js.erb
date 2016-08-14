@@ -45,9 +45,7 @@ function CommandStorage() {
 }
 
 function Autocomplete(_words, prefix) {
-  this.words = flatten(_words);
-  this.words.sort(function(a, b) { return a.word == b.word ? 0 : (a.word < b.word ? -1 : 1); });
-  for (var i = 0; i < this.words.length; ++i) this.words[i].element.dataset.index = i;
+  this.words = sort(convert(_words));
   this.current = -1;
   this.left = 0; // [left, right)
   this.right = this.words.length;
@@ -60,7 +58,7 @@ function Autocomplete(_words, prefix) {
     return el;
   }
 
-  function flatten(words) {
+  function convert(words) {
     var res = new Array(words.length);
     for (var i = 0, ind = 0; i < words.length; ++i) {
       res[i] = new Array(words[i].length);
@@ -72,7 +70,14 @@ function Autocomplete(_words, prefix) {
         };
       }
     }
-    return Array.prototype.concat.apply([], res);
+    return res;
+  }
+
+  function sort(words) {
+    var res = flatten(words);
+    res.sort(function(a, b) { return a.word == b.word ? 0 : (a.word < b.word ? -1 : 1); });
+    for (var i = 0; i < res.length; ++i) res[i].element.dataset.index = i;
+    return res;
   }
 
   this.view = document.createElement('pre');
@@ -874,4 +879,8 @@ function getContext(s) {
   var moduleOp = s.lastIndexOf('::');
   var x = methodOp > moduleOp ? methodOp : moduleOp;
   return x !== -1 ? s.substr(0, x) : '';
+}
+
+function flatten(arrays) {
+  return Array.prototype.concat.apply([], arrays);
 }

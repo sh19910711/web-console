@@ -98,13 +98,13 @@ Autocomplete.prototype.onKeyDown = function(ev) {
   var self = this;
   if (!this.elements.length) return;
 
-  function move(next) {
+  function move(nextCurrent) {
     if (self.lastSelected) removeClass(self.lastSelected, 'selected');
-    addClass(self.lastSelected = self.elements[next], 'selected');
+    addClass(self.lastSelected = self.elements[nextCurrent], 'selected');
     self.trim(self.current, true);
-    self.trim(next, false);
-    self.current = next;
-  };
+    self.trim(nextCurrent, false);
+    self.current = nextCurrent;
+  }
 
   switch (ev.keyCode) {
     case 9: // Tab

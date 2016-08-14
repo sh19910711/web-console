@@ -157,9 +157,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 
 Autocomplete.prototype.refine = function(prefix) {
   function remove(parent, child) {
-    if (parent == child.parentNode) {
-      parent.removeChild(child);
-    }
+    if (parent == child.parentNode) parent.removeChild(child);
   }
 
   function toggle(el) {

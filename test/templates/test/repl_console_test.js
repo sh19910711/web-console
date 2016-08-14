@@ -153,4 +153,15 @@ suite('REPLCosnole', function() {
       }, 100);
     });
   });
+
+  suite('Suggest Mode', function() {
+    test('shows first matched word in current context', function(done) {
+      var c = this.console;
+      c.setInput('some');
+      setTimeout(function() {
+        assert.equal('something <TAB>', c.promptDisplay.innerText);
+        done();
+      }, 100);
+    });
+  });
 });

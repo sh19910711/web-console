@@ -161,7 +161,7 @@ suite('REPLCosnole', function() {
       setTimeout(function() {
         assert.equal('something <TAB>', c.promptDisplay.innerText);
         done();
-      }, 10);
+      }, 100);
     });
   });
 });

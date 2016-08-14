@@ -156,6 +156,10 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 };
 
 Autocomplete.prototype.refine = function(prefix) {
+  var inc = !this.prev || (prefix.length >= this.prev.length);
+  this.prev = prefix;
+  var self = this;
+
   function remove(parent, child) {
     if (parent == child.parentNode) parent.removeChild(child);
   }
@@ -178,9 +182,6 @@ Autocomplete.prototype.refine = function(prefix) {
     return r;
   }
 
-  var self = this;
-  var inc = !this.prev || (prefix.length >= this.prev.length);
-  this.prev = prefix;
   self.trim(self.current, true); // reset trimming
 
   // Refine the range of words having same prefix

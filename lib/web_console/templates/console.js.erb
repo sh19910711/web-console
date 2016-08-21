@@ -488,7 +488,7 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     if (!found) return;
     var hint = self.promptDisplay.childNodes[1];
     hint.className = 'console-hint';
-    hint.innerText = found.substr(keyword.length) + ' <TAB>';
+    hint.innerText = found.substr(self.lastKeyword.length) + ' <TAB>';
 
     // clear hinting information after timeout in a few time 
     if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
@@ -496,13 +496,15 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
   }
 
   function find(context) {
-    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
-      if (context[i] === keyword) return;
+    var k = self.lastKeyword;
+    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, k.length) === k) {
+      if (context[i] === k) return;
       return context[i];
     }
   }
 
   var self = this;
+  self.lastKeyword = keyword;
   var suggested = getContext(keyword);
   if (keyword.length - suggested.length < 3) return;
   if (self.lastSuggested !== suggested) {

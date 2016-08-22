@@ -415,6 +415,7 @@ REPLConsole.prototype.install = function(container) {
   this.outer = consoleOuter;
   this.inner = findChild(this.outer, 'console-inner');
   this.clipboard = findChild(container, 'clipboard');
+  this.suggestWait = 1500;
   this.newPromptBox();
   this.insertCss();
 
@@ -488,33 +489,36 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     if (!found) return;
     var hint = self.promptDisplay.childNodes[1];
     hint.className = 'console-hint';
-    hint.innerText = found.substr(keyword.length) + ' <TAB>';
+    hint.innerText = found.substr(self.suggestKeyword.length) + ' <TAB>';
 
     // clear hinting information after timeout in a few time 
     if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
-    self.suggestTimeout = setTimeout(function() { self.renderInput() }, 1500); 
+    self.suggestTimeout = setTimeout(function() { self.renderInput() }, self.suggestWait);
   }
 
   function find(context) {
-    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, keyword.length) === keyword) {
-      if (context[i] === keyword) return;
+    var k = self.suggestKeyword;
+    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, k.length) === k) {
+      if (context[i] === k) return;
       return context[i];
     }
   }
 
   var self = this;
-  var suggested = getContext(keyword);
-  if (keyword.length - suggested.length < 3) return;
-  if (self.lastSuggested !== suggested) {
-    self.lastSuggested = suggested;
+  self.suggestKeyword = keyword;
+  var input = getContext(keyword);
+
+  if (keyword.length - input.length < 3) return;
+  if (self.suggestInput !== input) {
+    self.suggestInput = input;
     self.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
       var c = flatten(res['context']);
       c.sort();
-      show(find(self.lastContext = c));
+      show(find(self.suggestContext = c));
     });
-  } else if (self.lastContext) {
-    show(find(self.lastContext));
+  } else if (self.suggestContext) {
+    show(find(self.suggestContext));
   }
 };
 

@@ -158,9 +158,25 @@ suite('REPLCosnole', function() {
     test('shows first matched word in current context', function(done) {
       var c = this.console;
       c.setInput('some');
+
       setTimeout(function() {
         assert.equal('something <TAB>', c.promptDisplay.innerText);
         done();
+      }, 100);
+    });
+
+    test('hides automatically in a few seconds', function(done) {
+      var c = this.console;
+      c.suggestWait = 200;
+      c.setInput('some');
+
+      assert.equal('some\u00A0', c.promptDisplay.innerText);
+      setTimeout(function() {
+        assert.equal('something <TAB>', c.promptDisplay.innerText);
+        setTimeout(function() {
+          assert.equal('some\u00A0', c.promptDisplay.innerText);
+          done();
+        }, 200);
       }, 100);
     });
   });

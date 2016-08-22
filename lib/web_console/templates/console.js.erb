@@ -415,6 +415,7 @@ REPLConsole.prototype.install = function(container) {
   this.outer = consoleOuter;
   this.inner = findChild(this.outer, 'console-inner');
   this.clipboard = findChild(container, 'clipboard');
+  this.suggestWait = 1500;
   this.newPromptBox();
   this.insertCss();
 
@@ -492,7 +493,7 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
 
     // clear hinting information after timeout in a few time 
     if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
-    self.suggestTimeout = setTimeout(function() { self.renderInput() }, 1500); 
+    self.suggestTimeout = setTimeout(function() { self.renderInput() }, self.suggestWait);
   }
 
   function find(context) {

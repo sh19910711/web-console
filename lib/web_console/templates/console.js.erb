@@ -165,6 +165,7 @@ Autocomplete.prototype.trim = function(from, needToTrim) {
 };
 
 Autocomplete.prototype.refine = function(prefix) {
+  if (this.confirmed) return;
   var inc = !this.prev || (prefix.length >= this.prev.length);
   this.prev = prefix;
   var self = this;
@@ -526,7 +527,7 @@ REPLConsole.prototype.setInput = function(input, caretPos) {
   if (input == null) return; // keep value if input is undefined
   this._caretPos = caretPos === undefined ? input.length : caretPos;
   this._input = input;
-  if (this.autocomplete && !this.autocomplete.confirmed) this.autocomplete.refine(this.getCurrentWord());
+  if (this.autocomplete) this.autocomplete.refine(this.getCurrentWord());
   this.renderInput();
   if (!this.autocomplete && input.length == this._caretPos) this.getSuggestion(this.getCurrentWord());
 };
@@ -570,7 +571,7 @@ REPLConsole.prototype.renderInput = function() {
   this.promptDisplay.appendChild(center);
   this.promptDisplay.appendChild(document.createTextNode(after));
 
-  var hint = this.autocomplete && !this.autocomplete.confirmed && this.autocomplete.getSelectedWord();
+  var hint = this.autocomplete && this.autocomplete.getSelectedWord();
   addClass(center, hint ? 'console-hint' : 'console-cursor');
   center.appendChild(document.createTextNode(hint ? hint.substr(this.getCurrentWord().length) : current));
 };

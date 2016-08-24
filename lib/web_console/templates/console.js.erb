@@ -490,7 +490,7 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     if (!found) return;
     var hint = self.promptDisplay.childNodes[1];
     hint.className = 'console-hint';
-    hint.innerText = found.substr(self.suggestKeyword.length) + ' <TAB>';
+    hint.innerText = found.substr(self.suggestKeyword.length);
 
     // clear hinting information after timeout in a few time 
     if (self.suggestTimeout) clearTimeout(self.suggestTimeout);

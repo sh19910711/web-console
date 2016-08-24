@@ -485,12 +485,19 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
   this.setInput(this._input, -1);
 };
 
+/*
 REPLConsole.prototype.getSuggestion = function(keyword) {
+};
+*/
+
+function Autosuggest(keyword, onTabKey, onTimeout) {
+  var self = this;
+
   function show(found) {
     if (!found) return;
     var hint = self.promptDisplay.childNodes[1];
     hint.className = 'console-hint';
-    hint.innerText = found.substr(self.suggestKeyword.length);
+    hint.innerText = found.substr(self.keyword.length);
 
     // clear hinting information after timeout in a few time 
     if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
@@ -498,30 +505,32 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
   }
 
   function find(context) {
-    var k = self.suggestKeyword;
+    var k = self.keyword;
     for (var i = 0; i < context.length; ++i) if (context[i].substr(0, k.length) === k) {
       if (context[i] === k) return;
       return context[i];
     }
   }
 
-  var self = this;
-  self.suggestKeyword = keyword;
+  this.keyword = keyword;
+  this.onTabKey = onTabKey;
+  this.onTimeout = onTimeout;
   var input = getContext(keyword);
 
   if (keyword.length - input.length < 3) return;
-  if (self.suggestInput !== input) {
-    self.suggestInput = input;
-    self.contextRequest(keyword, function(err, res) {
+
+  if (this.input !== input) {
+    this.input = input;
+    this.contextRequest(keyword, function(err, res) {
       if (err) throw new Error(err);
       var c = flatten(res['context']);
       c.sort();
-      show(find(self.suggestContext = c));
+      show(find(this.context = c));
     });
-  } else if (self.suggestContext) {
-    show(find(self.suggestContext));
+  } else if (this.context) {
+    show(find(this.context));
   }
-};
+}
 
 REPLConsole.prototype.setInput = function(input, caretPos) {
   if (input == null) return; // keep value if input is undefined

@@ -486,25 +486,6 @@ REPLConsole.prototype.removeCaretFromPrompt = function() {
 };
 
 REPLConsole.prototype.getSuggestion = function(keyword) {
-  function show(found) {
-    if (!found) return;
-    var hint = self.promptDisplay.childNodes[1];
-    hint.className = 'console-hint';
-    hint.innerText = found.substr(self.suggestKeyword.length);
-
-    // clear hinting information after timeout in a few time 
-    if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
-    self.suggestTimeout = setTimeout(function() { self.renderInput() }, self.suggestWait);
-  }
-
-  function find(context) {
-    var k = self.suggestKeyword;
-    for (var i = 0; i < context.length; ++i) if (context[i].substr(0, k.length) === k) {
-      if (context[i] === k) return;
-      return context[i];
-    }
-  }
-
   var self = this;
   self.suggestKeyword = keyword;
   var input = getContext(keyword);
@@ -520,6 +501,30 @@ REPLConsole.prototype.getSuggestion = function(keyword) {
     });
   } else if (self.suggestContext) {
     show(find(self.suggestContext));
+  }
+};
+
+function Autosuggest(keyword) {
+  this.keyword = keyword;
+  if (keyword.length - input.length < 3) return;
+}
+
+Autosuggest.prototype.show = function(found) {
+  if (!found) return;
+  var hint = self.promptDisplay.childNodes[1];
+  hint.className = 'console-hint';
+  hint.innerText = found.substr(self.suggestKeyword.length);
+
+  // clear hinting information after timeout in a few time 
+  if (self.suggestTimeout) clearTimeout(self.suggestTimeout);
+  self.suggestTimeout = setTimeout(function() { self.renderInput() }, self.suggestWait);
+};
+
+Autosuggest.prototype.find = function(context) {
+  var k = self.suggestKeyword;
+  for (var i = 0; i < context.length; ++i) if (context[i].substr(0, k.length) === k) {
+    if (context[i] === k) return;
+    return context[i];
   }
 };
 
